@@ -1,0 +1,43 @@
+@import "main.less";
+
+
+
+@colors: black, red, green, yellow, blue, magenta, cyan, white; // [3, 4] + [0, 1, 2, 3, 4, 5, 6, 7]
+each(@colors, {
+  .for-@{value} {
+    color: @value;
+  }
+  .back-@{value} {
+    background: @value;
+  }
+});
+
+@styles: 700, 100; // 1, 2
+each(@styles, {
+  .sty-@{value} {
+    font-weight: @value;
+  }
+});
+
+@keyframes blink {
+  0% { color: initial; }
+  50% { color: transparent; }
+  100% { color: initial; }
+}
+.blink { // 5
+  animation: blink 1s step-end 0s infinite;
+}
+
+.cross { // 9
+  text-decoration: line-through;
+}
+
+.under { // 4
+  border-bottom: 2px solid currentColor;
+}
+
+.ita { // 3
+  font-style: italic;
+}
+
+// обрамленный, окруженный, надчеркнутый

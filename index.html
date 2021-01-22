@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create your logger</title>
+
+    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/formatting.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/tabs.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/terminal.css"/>
+</head>
+<body>
+    <div id="base">
+        <div id="header">
+            <div id="tab-links">
+                <button class="tab-link" id="file-tab" name="file-content">File</button>
+                <button class="tab-link" id="style-tab" name="style-content">Style</button>
+                <button class="tab-link" id="preview-tab" name="preview-content">Preview</button>
+                <button class="tab-link" id="code-tab" name="code-content">Code</button>
+            </div>
+            <div id="tab-contents">
+                <div class="tab-content" id="file-content">
+                    <button class="tile">Save</button>
+                    <div class="tile">
+                        <label for="colors">Load from file...</label>
+                        <input id="file" type="file">
+                    </div>
+                </div>
+                <div class="tab-content" id="style-content">
+                    <div class="tile">
+                        <label for="colors">Choose color...</label>
+                        <select id="colors"></select>
+                    </div>
+                    <div class="tile">
+                        <input type="radio">Dim</input>
+                        <input type="radio">Normal</input>
+                        <input type="radio">Bright</input>
+                    </div>
+                    <div class="tile">
+                        <input type="checkbox">Under</input>
+                        <input type="checkbox">Cross</input>
+                    </div>
+                    <div class="tile">
+                        <input type="checkbox">Italic</input>
+                        <input type="checkbox">Blinking</input>
+                    </div>
+                    <button class="tile" id="apply">Apply</button>
+                </div>
+                <div class="tab-content" id="preview-content"></div>
+                <div class="tab-content" id="code-content"></div>
+            </div>
+        </div>
+        <div id="terminal">
+            <div class="line">
+                <div class="line-number">1</div>
+                <div class="line-content">
+                    <span class="back-cyan under">Click&nbsp;</span>
+                    <span class="back-yellow for-blue blink">"+"&nbsp;</span>
+                    <span class="for-green ita sty-100">to&nbsp;</span>
+                    <span class="back-red cross">add&nbsp;</span>
+                    <span class="sty-700">lines!</span>
+                </div>
+            </div>
+            <div class="line">
+                <div class="line-number" id="line-adder">+</div>
+            </div>
+        </div>
+        <div id="footer">
+
+        </div>
+    </div>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/preparator.js"></script>
+    <script src="scripts/misc.js"></script>
+    <script src="scripts/tabs.js"></script>
+    <script src="scripts/terminal.js"></script>
+</body>
+</html>

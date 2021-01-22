@@ -1,0 +1,36 @@
+@import "main.less";
+
+
+
+#terminal {
+  .holder();
+  height: 55%;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.line {
+  .holder();
+  flex-direction: row;
+  height: 1rem;
+  width: 100%;
+  margin: 0 0 .5rem;
+}
+
+.line-number {
+  .holder();
+  width: 5%;
+  cursor: pointer;
+}
+
+.line-content {
+  .holder();
+  width: 95%;
+}
+
+
+
+:not([class~=chosen])+[class~=line-content] {
+  user-select: none;
+  background: aqua;
+}
