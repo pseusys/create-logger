@@ -70,7 +70,7 @@ function change(format: Formatting): void {
     let parent: HTMLElement;
 
     if (firstElem.isSameNode(lastElem)) {
-        parent = firstElem.parentElement as HTMLElement;
+        parent = firstElem.parentElement;
         const finalOffset = range.endOffset - range.startOffset;
         if (!isCuttingStart(range.startOffset, firstElem)) splitAt(firstElem, parent, range.startOffset);
         if (!isCuttingEnd(finalOffset, lastElem)) splitAt(lastElem, parent, finalOffset, range);
