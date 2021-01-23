@@ -44,7 +44,7 @@ enum FormattingType {
     THICKNESS = 'sty',
     BLINKING = 'blink',
     CROSSED = 'cross',
-    UNDERCROSSED = 'under',
+    UNDERLINED = 'under',
     ITALIC = 'ita'
 }
 
@@ -53,12 +53,13 @@ interface Formatting {
     value: string | boolean;
 }
 
-function changeClass(elem: Element, cls: string, val: string): void {
-    for (const cls of elem.classList) if (cls.startsWith(cls)) {
-        elem.classList.replace(cls, val);
+function changeClass(elem: Element, name: string, val: string): void {
+    const new_name = name + '-' + val;
+    for (const cls of elem.classList) if (cls.startsWith(name)) {
+        elem.classList.replace(cls, new_name);
         return;
     }
-    elem.classList.add(val);
+    elem.classList.add(new_name);
 }
 
 function change(format: Formatting): void {
@@ -98,8 +99,8 @@ function change(format: Formatting): void {
             case FormattingType.CROSSED:
                 child.classList.toggle(FormattingType.CROSSED, format.value as boolean);
                 break;
-            case FormattingType.UNDERCROSSED:
-                child.classList.toggle(FormattingType.UNDERCROSSED, format.value as boolean);
+            case FormattingType.UNDERLINED:
+                child.classList.toggle(FormattingType.UNDERLINED, format.value as boolean);
                 break;
             case FormattingType.ITALIC:
                 child.classList.toggle(FormattingType.ITALIC, format.value as boolean);

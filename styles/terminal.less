@@ -26,11 +26,18 @@
 .line-content {
   .holder();
   width: 95%;
+  flex-grow: 1;
 }
 
 
 
 :not([class~=chosen])+[class~=line-content] {
   user-select: none;
-  background: aqua;
+  // background: aqua;
+}
+
+
+
+[contenteditable] {
+  outline: 0 solid transparent;
 }

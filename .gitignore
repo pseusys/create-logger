@@ -1,10 +1,5 @@
 # Project exclude paths
 /node_modules/
-/scripts/misc.js
-/scripts/misc.js.map
-/scripts/preparator.js
-/scripts/preparator.js.map
-/scripts/tabs.js
-/scripts/tabs.js.map
-/scripts/terminal.js
-/scripts/terminal.js.map
+/*.js
+/*.css
+/*.map

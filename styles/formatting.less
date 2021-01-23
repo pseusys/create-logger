@@ -12,7 +12,7 @@ each(@colors, {
   }
 });
 
-@styles: 700, 100; // 1, 2
+@styles: 700, 400, 100; // 1, 2
 each(@styles, {
   .sty-@{value} {
     font-weight: @value;
@@ -20,9 +20,7 @@ each(@styles, {
 });
 
 @keyframes blink {
-  0% { color: initial; }
   50% { color: transparent; }
-  100% { color: initial; }
 }
 .blink { // 5
   animation: blink 1s step-end 0s infinite;

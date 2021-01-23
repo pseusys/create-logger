@@ -4,7 +4,7 @@
 
 #tab-links {
   .holder();
-  height: 20%;
+  height: 40%;
   border-bottom: 1px solid #ccc;
 }
 
@@ -29,11 +29,46 @@
 
 #tab-contents {
   .holder();
+  min-height: 60%;
+  padding: .5rem;
 }
 
 .tab-content {
+  .holder();
+  height: 100%;
   display: none;
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-top: none;
+}
+
+#preview-content {
+  height: 0;
+}
+
+
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  + .tile {
+    margin-left: .5rem;
+  }
+}
+
+.gr {
+  .holder();
+  flex-direction: row;
+}
+
+.gr-in {
+  .holder();
+  flex-direction: column;
+  + .gr-in {
+    margin-top: .5rem;
+  }
+}
+
+
+
+input[type='radio'] + label {
+  position: relative;
 }
