@@ -65,10 +65,12 @@ export function multiplePrefix (pref) {
 function generateClassCodes () {
     const codes = {};
     for (const prefix in PREFIXES) {
-        if ((prefix === 'for') || (prefix === 'back')) for (const color in COLORS)
-            codes[prefix + SEPARATOR + color] = PREFIXES[prefix] + COLORS[color];
-        else if (prefix === 'sty') for (const styles in STYLES)
-            codes[prefix + SEPARATOR + styles] = PREFIXES[prefix] + STYLES[styles];
+        if ((prefix === 'for') || (prefix === 'back'))
+            for (const color in COLORS)
+                codes[prefix + SEPARATOR + color] = PREFIXES[prefix] + COLORS[color];
+        else if (prefix === 'sty')
+            for (const styles in STYLES)
+                codes[prefix + SEPARATOR + styles] = PREFIXES[prefix] + STYLES[styles];
         else codes[prefix] = PREFIXES[prefix];
     }
     return codes;
