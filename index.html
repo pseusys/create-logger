@@ -4,11 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create your logger</title>
-
-    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
-    <link rel="stylesheet" type="text/css" href="styles/formatting.css"/>
-    <link rel="stylesheet" type="text/css" href="styles/tabs.css"/>
-    <link rel="stylesheet" type="text/css" href="styles/terminal.css"/>
 </head>
 <body>
     <div id="base">
@@ -63,15 +58,15 @@
                     </div>
                     <div class="tile">
                         <div class="gr">
-                            <input id="thin" class="term-changer" name="sty" value="100" type="radio">
+                            <input id="thin" class="term-changer" name="sty" value="dim" type="radio">
                             <label class="ins" for="thin">Dim</label>
                         </div>
                         <div class="gr">
-                            <input id="normal" class="term-changer" name="sty" value="400" type="radio">
+                            <input id="normal" class="term-changer" name="sty" value="normal" type="radio">
                             <label class="ins" for="normal">Normal</label>
                         </div>
                         <div class="gr">
-                            <input id="bold" class="term-changer" name="sty" value="700" type="radio">
+                            <input id="bold" class="term-changer" name="sty" value="bold" type="radio">
                             <label class="ins" for="bold">Bold</label>
                         </div>
                     </div>
@@ -106,9 +101,9 @@
                 <div class="line-content">
                     <span class="back-cyan under">Click&nbsp;</span>
                     <span class="back-yellow for-blue blink">"+"&nbsp;</span>
-                    <span class="for-green ita sty-100">to&nbsp;</span>
+                    <span class="for-green ita sty-dim">to&nbsp;</span>
                     <span class="back-red cross">add&nbsp;</span>
-                    <span class="sty-700">lines!</span>
+                    <span class="sty-bold">lines!</span>
                 </div>
             </div>
             <div class="line">
@@ -121,11 +116,6 @@
         </div>
     </div>
 
-    <script src="scripts/main.js"></script>
-    <script src="scripts/cutter.js"></script>
-    <script src="scripts/misc.js"></script>
-    <script src="scripts/tabs.js"></script>
-    <script src="scripts/converter.js"></script>
-    <script src="scripts/terminal.js"></script>
+    <script src="docs/all.min.js"></script>
 </body>
 </html>

@@ -1,3 +1,5 @@
+import { multiplePrefix, PREFIXES, SEPARATOR } from "../constants";
+
 function splitAt(element: HTMLElement, parent: HTMLElement, pos: number, postInsertRange?: Range) {
     const clone = element.cloneNode(true) as HTMLElement;
     if (!postInsertRange) {
@@ -38,23 +40,13 @@ function getTargetSpan(node: Node): HTMLElement {
 
 
 
-enum FormattingType {
-    FOR_COLOR = 'for',
-    BACK_COLOR = 'back',
-    THICKNESS = 'sty',
-    BLINKING = 'blink',
-    CROSSED = 'cross',
-    UNDERLINED = 'under',
-    ITALIC = 'ita'
-}
-
 interface Formatting {
-    type: FormattingType;
+    type: string;
     value: string | boolean;
 }
 
 function changeClass(elem: Element, name: string, val: string): void {
-    const new_name = name + '-' + val;
+    const new_name = name + SEPARATOR + val;
     for (const cls of elem.classList) if (cls.startsWith(name)) {
         elem.classList.replace(cls, new_name);
         return;
@@ -62,7 +54,7 @@ function changeClass(elem: Element, name: string, val: string): void {
     elem.classList.add(new_name);
 }
 
-function change(format: Formatting): void {
+export function change(format: Formatting): void {
     const sel = document.getSelection();
     const range = sel.getRangeAt(0);
     const firstElem = getTargetSpan(range.startContainer);
@@ -83,28 +75,10 @@ function change(format: Formatting): void {
     for (const child of parent.children) if (sel.containsNode(child) ||
             isThisStart(child, firstElem, range.startOffset) ||
             isThisEnd(child, lastElem, range.endOffset)) {
-        switch (format.type) {
-            case FormattingType.FOR_COLOR:
-                changeClass(child, FormattingType.FOR_COLOR, format.value as string);
-                break;
-            case FormattingType.BACK_COLOR:
-                changeClass(child, FormattingType.BACK_COLOR, format.value as string);
-                break;
-            case FormattingType.THICKNESS:
-                changeClass(child, FormattingType.THICKNESS, format.value as string);
-                break;
-            case FormattingType.BLINKING:
-                child.classList.toggle(FormattingType.BLINKING, format.value as boolean);
-                break;
-            case FormattingType.CROSSED:
-                child.classList.toggle(FormattingType.CROSSED, format.value as boolean);
-                break;
-            case FormattingType.UNDERLINED:
-                child.classList.toggle(FormattingType.UNDERLINED, format.value as boolean);
-                break;
-            case FormattingType.ITALIC:
-                child.classList.toggle(FormattingType.ITALIC, format.value as boolean);
-                break;
+
+        for (const prefix in PREFIXES) if (format.type == prefix) {
+            if (multiplePrefix(prefix)) changeClass(child, prefix, format.value as string);
+            else child.classList.toggle(prefix, format.value as boolean);
         }
     }
 }

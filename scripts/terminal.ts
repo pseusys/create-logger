@@ -7,7 +7,10 @@ terminal_container.addEventListener('keydown', event => {
 });
 */
 
-const terminal = document.getElementById('terminal');
+import { DEFAULTS, SEPARATOR } from "../constants";
+import { convert, Entry } from "./converter";
+
+export const terminal = document.getElementById('terminal');
 let editable = true;
 let editableHTML: Array<string>;
 
@@ -22,7 +25,7 @@ function disableAndClear() {
     for (const number of line_numbers) number.classList.remove('chosen');
 }
 
-function choose_line (line) {
+export function choose_line (line) {
     const line_number = line.firstElementChild;
     const line_content = line.lastElementChild;
 
@@ -50,7 +53,11 @@ function create_line () {
 
     const line_content = document.createElement('div');
     line_content.classList.add('line-content');
-    line_content.appendChild(document.createElement('span'));
+
+    const new_span = document.createElement('span');
+    for (const key in DEFAULTS) new_span.classList.add(key + SEPARATOR + DEFAULTS[key]);
+
+    line_content.appendChild(new_span);
 
     line.append(line_number, line_content);
     return line;
@@ -74,7 +81,7 @@ function htmlToEntries(children: HTMLCollection): Array<Entry> {
     return entries;
 }
 
-function switchMode(edit: boolean): void {
+export function switchMode(edit: boolean): void {
     const line_contents = document.getElementsByClassName('line-content');
     const line_numbers = document.getElementsByClassName('line-number');
 
@@ -90,7 +97,7 @@ function switchMode(edit: boolean): void {
         document.getElementById('line-adder').parentElement.style.display = 'none';
 
     } else if (!editable && edit) {
-        for (const content of line_contents) content.innerHTML = editableHTML.pop();
+        for (const content of line_contents) content.innerHTML = editableHTML.shift();
         for (const content of line_contents as HTMLCollectionOf<HTMLElement>) content.style.userSelect = '';
         for (const number of line_numbers as HTMLCollectionOf<HTMLElement>) number.style.cursor = '';
         document.getElementById('line-adder').parentElement.style.display = '';

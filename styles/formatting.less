@@ -2,7 +2,7 @@
 
 
 
-@colors: black, red, green, yellow, blue, magenta, cyan, white; // [3, 4] + [0, 1, 2, 3, 4, 5, 6, 7]
+//@colors: black, red, green, yellow, blue, magenta, cyan, white; // [3, 4] + [0, 1, 2, 3, 4, 5, 6, 7]
 each(@colors, {
   .for-@{value} {
     color: @value;
@@ -12,10 +12,10 @@ each(@colors, {
   }
 });
 
-@styles: 700, 400, 100; // 1, 2
+//@styles: 700, 400, 100; // 1, 2
 each(@styles, {
   .sty-@{value} {
-    font-weight: @value;
+    font-weight: @@value;
   }
 });
 

@@ -1,5 +1,10 @@
 # Project exclude paths
 /node_modules/
+
 /*.js
+!webpack.config.ts
+!./const/constants.js
+
 /*.css
+
 /*.map

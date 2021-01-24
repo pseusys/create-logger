@@ -1,6 +1,9 @@
+import { change } from "./cutter";
+import { switchMode } from "./terminal";
+
 let active_tab: string;
 
-function open_tab(tab_link, tab_content) {
+export function open_tab(tab_link, tab_content) {
     const tab_contents = document.getElementsByClassName('tab-content');
     for (const content of tab_contents as HTMLCollectionOf<HTMLElement>) content.style.display = 'none';
 
@@ -40,12 +43,12 @@ function checkAndSubmit(type: string, value: string | boolean): void {
         && ((selectionParent as HTMLElement).classList.contains('line-content')))
         || (selectionParent.parentElement.nodeName == 'SPAN'))
 
-        change({ type: type as FormattingType, value: value });
+        change({ type: type, value: value });
 }
 
 const terminal_changers = document.getElementsByClassName('term-changer') as HTMLCollectionOf<HTMLInputElement>;
 for (const elem of terminal_changers) {
-    elem.addEventListener('change', event => {
+    elem.addEventListener('change', () => {
         if (elem.getAttribute('type') == 'checkbox') {
             checkAndSubmit(elem.getAttribute('name'), elem.checked);
         } else {
