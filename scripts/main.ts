@@ -1,4 +1,4 @@
-import '../styles/index'
+import './imports'
 
 import { open_tab } from "./tabs";
 import { choose_line, terminal } from "./terminal";

@@ -82,36 +82,36 @@ export const CLASS_CODES = generateClassCodes();
 
 // For passing variables to LESS:
 
-function generateLessVars () {
-    const styles = {
-        colors: [],
-        styles: [],
-        bold: "700",
-        normal: "400",
-        dim: "100"
-    };
-    for (const color in COLORS) styles.colors.push(color);
-    for (const style in STYLES) styles.styles.push(style);
-    return styles;
-}
-
-export const LESS_VARS = generateLessVars();
+export const LESS_VARS = {
+    colors: Object.keys(COLORS),
+    styles: Object.keys(STYLES),
+    bold: "700",
+    normal: "400",
+    dim: "100"
+};
 
 
 
 // For passing variables to PUG:
 
-function generatePugVars () {
-    const styles = {
-        colors: [],
-        styles: [],
-        bold: "700",
-        normal: "400",
-        dim: "100"
-    };
-    for (const color in COLORS) styles.colors.push(color);
-    for (const style in STYLES) styles.styles.push(style);
-    return styles;
+interface Param {
+    var: string;
+    name: string;
 }
 
-export const PUG_VARS = generatePugVars();
+function capitalize (arr: Array<string>): Array<Param> {
+    const array = [];
+    for (const str of arr) array.push({ var: str, name: str[0].toUpperCase() + str.substr(1) });
+    return array;
+}
+
+export const PUG_VARS = {
+    prefixes: {
+        "for-color": "for",
+        "back-color": "back",
+        style: "sty",
+        simple: capitalize(["blink", "cross", "under", "ita"])
+    },
+    colors: capitalize(Object.keys(COLORS)),
+    styles: capitalize(Object.keys(STYLES))
+};

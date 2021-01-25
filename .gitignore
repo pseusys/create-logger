@@ -1,5 +1,6 @@
 # Project exclude paths
 /node_modules/
+!./docs
 
 /*.js
 !webpack.config.ts

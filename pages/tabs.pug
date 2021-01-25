@@ -1,0 +1,40 @@
+#tab-links
+    button#file-tab.tab-link(name="file-content") File
+    button#style-tab.tab-link(name="style-content") Style
+    button#preview-tab.tab-link.collapsing(name="preview-content") Preview
+    button#code-tab.tab-link.collapsing(name="code-content") Code
+
+#tab-contents
+    form#file-content.tab-content
+        .tile
+            button#save Save
+            label.ins(for="save") Save as file...
+        .tile
+            input#file(type="file")
+            label.ins(for="file") Load from file...
+
+    form#style-content.tab-content
+        .tile
+            .gr-in
+                select#for-color.term-changer(name=prefixes["for-color"])
+                    each color in colors
+                        option(value=color.var)= color.name
+                label.ins(for="for-color") Front color
+            .gr-in
+                select#back-color.term-changer(name=prefixes["back-color"])
+                    each color in colors
+                        option(value=color.var)= color.name
+                label.ins(for="back-color") Back color
+        .tile
+            each style in styles
+                .gr
+                    input.term-changer(name=prefixes.style id=style.var value=style.var type="radio")
+                    label.ins(for=style.var)= style.name
+        .tile
+            each simplet in prefixes.simple
+                .gr
+                    input.term-changer(name=simplet.var id=simplet.var type="checkbox")
+                    label.ins(for=simplet.var)= simplet.name
+
+    form#preview-content.tab-content
+    form#code-content.tab-content
