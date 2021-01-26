@@ -1,40 +1,81 @@
+- const system_presets = ['error', 'warning', 'info', 'plain'];
+- const user_presets = ['modern', 'beautiful', 'original', 'creative'];
+
 #tab-links
     button#file-tab.tab-link(name="file-content") File
     button#style-tab.tab-link(name="style-content") Style
     button#preview-tab.tab-link.collapsing(name="preview-content") Preview
-    button#code-tab.tab-link.collapsing(name="code-content") Code
+    button#code-tab.tab-link.collapsing(name="code-content") Code &#9660;
 
 #tab-contents
     form#file-content.tab-content
-        .tile
-            button#save Save
-            label.ins(for="save") Save as file...
-        .tile
-            input#file(type="file")
-            label.ins(for="file") Load from file...
+        .tile-set-left
+            .tile
+                button#save(type="button") Save
+                label.ins(for="save") Save as file...
+            .tile
+                input#file(type="file")
+                label.ins(for="file") Load from file...
+
+        .tile-set-center
+        .tile-set-right
+            .tile
+                select#translation
+                    each translation, tag in translations
+                        option(value=tag)= translation
+                label.ins(for="translation") Select translation
 
     form#style-content.tab-content
-        .tile
-            .gr-in
-                select#for-color.term-changer(name=prefixes["for-color"])
-                    each color in colors
-                        option(value=color.var)= color.name
-                label.ins(for="for-color") Front color
-            .gr-in
-                select#back-color.term-changer(name=prefixes["back-color"])
-                    each color in colors
-                        option(value=color.var)= color.name
-                label.ins(for="back-color") Back color
-        .tile
-            each style in styles
-                .gr
-                    input.term-changer(name=prefixes.style id=style.var value=style.var type="radio")
-                    label.ins(for=style.var)= style.name
-        .tile
-            each simplet in prefixes.simple
-                .gr
-                    input.term-changer(name=simplet.var id=simplet.var type="checkbox")
-                    label.ins(for=simplet.var)= simplet.name
+
+        .tile-set-left
+            .tile
+                .gr-in
+                    select#for-color.term-changer(name=prefixes["for-color"])
+                        each color in colors
+                            option(value=color.var)= color.name
+                    label.ins(for="for-color") Front color
+                .gr-in
+                    select#back-color.term-changer(name=prefixes["back-color"])
+                        each color in colors
+                            option(value=color.var)= color.name
+                    label.ins(for="back-color") Back color
+            .tile
+                each style in styles
+                    .gr
+                        input.term-changer(name=prefixes.style id=style.var value=style.var type="radio")
+                        label.ins(for=style.var)= style.name
+            .tile
+                each simplet in prefixes.simple
+                    .gr
+                        input.term-changer(name=simplet.var id=simplet.var type="checkbox")
+                        label.ins(for=simplet.var)= simplet.name
+
+        .tile-set-center
+            .tile
+                each preset in system_presets
+                    .gr
+                        .preset_example(id=preset)= preset
+                        button.preset_button(name=preset type="button") Apply
+            .tile
+                each preset in user_presets
+                    .gr
+                        .preset_example(id=preset)= preset
+                        button.preset_button(name=preset type="button") Apply
+
+        .tile-set-right
+            .tile
+                .gr-in
+                    .gr
+                        input#is_variable(type="checkbox")
+                        label.ins(for="is_variable") Is this a variable?
+                    .gr-in
+                        input#var_name(type="text" placeholder="Variable name")
+                    .gr-in
+                        input#var_type(type="text" list="types_list" placeholder="Variable type")
+                        datalist#types_list
+                            each type in types
+                                option(value=type)
+
 
     form#preview-content.tab-content
     form#code-content.tab-content

@@ -7,7 +7,7 @@ terminal_container.addEventListener('keydown', event => {
 });
 */
 
-import { DEFAULTS, SEPARATOR } from "../constants";
+import { DEFAULTS, SEPARATOR } from "../consts/constants";
 import { convert, Entry } from "./converter";
 
 export const terminal = document.getElementById('terminal');

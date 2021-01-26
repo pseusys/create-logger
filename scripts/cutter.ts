@@ -1,4 +1,4 @@
-import { multiplePrefix, PREFIXES, SEPARATOR } from "../constants";
+import { multiplePrefix, PREFIXES, SEPARATOR } from "../consts/constants";
 
 function splitAt(element: HTMLElement, parent: HTMLElement, pos: number, postInsertRange?: Range) {
     const clone = element.cloneNode(true) as HTMLElement;

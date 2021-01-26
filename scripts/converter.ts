@@ -1,6 +1,6 @@
 import {
     CLASS_CODES, DEFAULTS, ESCAPE_END, ESCAPE_SEPARATOR, ESCAPE_START, ESCAPE_TERMINATE, getPostfix, getPrefix
-} from "../constants";
+} from "../consts/constants";
 
 export interface Entry {
     classes: Array<string>;

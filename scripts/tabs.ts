@@ -49,10 +49,9 @@ function checkAndSubmit(type: string, value: string | boolean): void {
 const terminal_changers = document.getElementsByClassName('term-changer') as HTMLCollectionOf<HTMLInputElement>;
 for (const elem of terminal_changers) {
     elem.addEventListener('change', () => {
-        if (elem.getAttribute('type') == 'checkbox') {
+        if (elem.getAttribute('type') == 'checkbox')
             checkAndSubmit(elem.getAttribute('name'), elem.checked);
-        } else {
+        else
             checkAndSubmit(elem.getAttribute('name'), elem.value);
-        }
     });
 }

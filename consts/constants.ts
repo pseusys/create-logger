@@ -1,3 +1,6 @@
+import { LANGUAGES, TYPES } from "./langs"
+import { LITERALS, TRANSLATIONS } from "./babylon";
+
 export const ESCAPE_START = "\\033[";
 export const ESCAPE_SEPARATOR = ";";
 export const ESCAPE_END = "m";
@@ -113,5 +116,11 @@ export const PUG_VARS = {
         simple: capitalize(["blink", "cross", "under", "ita"])
     },
     colors: capitalize(Object.keys(COLORS)),
-    styles: capitalize(Object.keys(STYLES))
+    styles: capitalize(Object.keys(STYLES)),
+
+    languages: LANGUAGES,
+    types: TYPES,
+
+    literals: LITERALS,
+    translations: TRANSLATIONS
 };

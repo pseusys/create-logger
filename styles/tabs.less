@@ -15,6 +15,7 @@
   cursor: pointer;
   padding: 14px 16px;
   transition: 0.3s;
+  user-select: none;
 }
 
 .tab-link:hover {
@@ -66,6 +67,37 @@
   + .gr-in {
     margin-top: .5rem;
   }
+}
+
+
+
+.tile-set() {
+  display: flex;
+  height: 100%;
+  width: 35%;
+  justify-content: center;
+}
+
+.tile-set-left {
+  .tile-set();
+  justify-content: flex-start;
+}
+
+.tile-set-center {
+  .tile-set();
+  width: 30%;
+}
+
+.tile-set-right {
+  .tile-set();
+  justify-content: flex-end;
+}
+
+
+
+.preset_example {
+  cursor: pointer;
+  user-select: none;
 }
 
 

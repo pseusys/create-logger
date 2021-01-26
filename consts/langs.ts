@@ -1,7 +1,16 @@
-import * as javascript from "./javascript"
+import * as javascript from "../langs/javascript"
 
 export const LANGUAGES = {
     javascript: javascript.construct
+}
+
+export const TYPES = {
+    int: "Integer",
+    float: "Floating point number",
+    char: "Character",
+    string: "String",
+    int_array: "Array of integers",
+    string_array: "Array strings"
 }
 
 
