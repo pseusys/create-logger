@@ -26,8 +26,8 @@ function isThisStart(node: Element, start: HTMLElement, offset: number) {
     return (node.isEqualNode(start)) && (offset != start.innerText.length);
 }
 
-function isThisEnd(node: Element, start: HTMLElement, offset: number) {
-    return (node.isEqualNode(start)) && (offset != 0);
+function isThisEnd(node: Element, end: HTMLElement, offset: number) {
+    return (node.isEqualNode(end)) && (offset != 0);
 }
 
 
