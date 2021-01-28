@@ -42,11 +42,10 @@ const term_changers = document.getElementsByClassName('term-changer') as HTMLCol
 
 for (const elem of term_changers)
     elem.onchange = () => {
+        if (!selection_in_place()) return;
         const name = elem.getAttribute('name');
-        if (elem.getAttribute('type') == 'checkbox')
-            if (selection_in_place()) change({ type: name, value: elem.checked });
-        else
-            if (selection_in_place()) change({ type: name, value: elem.value });
+        if (elem.getAttribute('type') == 'checkbox') change({ type: name, value: elem.checked });
+        else change({ type: name, value: elem.value });
     };
 
 export function drop_term_changers (): void {
@@ -63,9 +62,8 @@ export function set_term_changers (classes: Array<string>): void {
         });
 
         if (term_changer.length == 1) {
-            const changer = term_changer[0] as HTMLInputElement;
-            if (changer.getAttribute('type') == 'checkbox') changer.checked = true;
-            else changer.value = cls.split(SEPARATOR)[1];
+            if (term_changer[0].getAttribute('type') == 'checkbox') term_changer[0].checked = true;
+            else term_changer[0].value = cls.split(SEPARATOR)[1];
         } else term_changer.find((value: HTMLInputElement): boolean => {
             return value.value == cls.split(SEPARATOR)[1];
         }).checked = true;
