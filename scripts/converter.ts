@@ -2,7 +2,7 @@ import { CLASS_CODES, DEFAULTS, getPostfix, getPrefix } from "../consts/constant
 import { areArraysEqual } from "./utils";
 
 export interface Entry {
-    classes: Array<string>;
+    classes: string[];
     value: string;
 }
 
@@ -13,8 +13,8 @@ export const ESCAPE_TERMINATE = "0";
 
 
 
-function classesToStyles(classes: Array<string>): Array<string> {
-    const styles = [];
+function classesToStyles(classes: string[]): string[] {
+    const styles: string[] = [];
     for (const cls of classes) {
         if (DEFAULTS[getPrefix(cls)] == getPostfix(cls)) continue;
         styles.push(CLASS_CODES[cls]);
@@ -22,9 +22,9 @@ function classesToStyles(classes: Array<string>): Array<string> {
     return styles;
 }
 
-export function convert(str: Array<Entry>): string {
+export function convert(str: Entry[]): string {
     let result = "";
-    let previousClasses = [];
+    let previousClasses: string[] = [];
     for (const entry of str) {
         const styles = classesToStyles(entry.classes);
         let interior = "";

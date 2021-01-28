@@ -82,7 +82,7 @@ function htmlToEntries(children: HTMLCollection): Array<Entry> {
     const entries = [];
     for (const child of children) entries.push({
         classes: [...child.classList],
-        value: (child as HTMLElement).innerText
+        value: (child as HTMLElement).textContent
     });
     return entries;
 }

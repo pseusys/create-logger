@@ -25,7 +25,7 @@ document.ondrop = (event) => {
 
 
 
-document.onselectionchange = (event) => {
+document.onselectionchange = () => {
     if (!selection_in_place()) return;
     const classes = getCommonClasses();
     if (classes) set_term_changers(classes);

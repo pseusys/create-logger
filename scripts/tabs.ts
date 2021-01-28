@@ -38,7 +38,7 @@ document.getElementById('tab-links').onclick = (event) => {
 
 
 
-const term_changers = document.getElementsByClassName('term-changer') as HTMLCollectionOf<HTMLInputElement>;
+const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLInputElement[];
 
 for (const elem of term_changers)
     elem.onchange = () => {

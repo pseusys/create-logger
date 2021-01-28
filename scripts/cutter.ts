@@ -1,20 +1,54 @@
 import { multiplePrefix, SEPARATOR } from "../consts/constants";
-import { areArraysEqual } from "./utils";
+import {areArraysEqual, getSameElements} from "./utils";
 
+//TODO: for both elements make null "var_name" and "var_type"
 function splitAt(all: SelectionAll, splitStart: boolean, pos: number, postInsert: boolean = false) {
     const element = splitStart ? all.firstElem : all.lastElem;
     const clone = element.cloneNode(true) as HTMLElement;
     if (!postInsert) {
-        clone.innerText = element.innerText.slice(0, pos);
+        clone.textContent = element.textContent.slice(0, pos);
         all.parent.insertBefore(clone, element);
-        element.innerText = element.innerText.slice(pos);
+        element.textContent = element.textContent.slice(pos);
     } else {
-        clone.innerText = element.innerText.slice(pos);
+        clone.textContent = element.textContent.slice(pos);
         all.parent.insertBefore(clone, element.nextSibling);
-        element.innerText = element.innerText.slice(0, pos);
+        element.textContent = element.textContent.slice(0, pos);
         all.range.setEnd(clone, 0);
         all.lastElem = clone;
     }
+}
+
+//TODO: for both elements make null "var_name" and "var_type"
+function joinAround(range: Range, selected: HTMLElement[]): void {
+    if (selected.length == 0) return;
+
+    const around = [...selected];
+    around.unshift(around[0].previousElementSibling as HTMLElement);
+    around.push(around[around.length - 1].nextElementSibling as HTMLElement);
+
+    around.forEach((value: HTMLElement, index: number): void => {
+        const friend = around[index-1];
+        if (!friend || !value) return;
+        if (areArraysEqual([...value.classList], [...friend.classList])) {
+            const start_offset = range.startOffset;
+            const end_offset = range.endOffset + friend.textContent.length;
+
+            value.textContent = friend.textContent + value.textContent;
+            // Assuming that text node is span's first child.
+            const sus = (elem: Element): void => {
+                if (elem.childNodes.length > 1)
+                    throw new DOMException("Suspicious span children count: " + elem.childNodes);
+            };
+            sus(friend);
+            sus(value);
+
+            if (friend.contains(range.startContainer) || value.contains(range.startContainer))
+                range.setStart(value.firstChild, start_offset);
+            if (friend.contains(range.endContainer) || value.contains(range.endContainer))
+                range.setEnd(value.firstChild, end_offset);
+            friend.remove();
+        }
+    });
 }
 
 
@@ -28,23 +62,18 @@ function getTargetSpan(node: Node): HTMLElement {
 
 
 
-function getSelected (all: SelectionAll, selectPoint = false): Array<HTMLElement> {
-    const selected = [...all.parent.children] as Array<HTMLElement>;
-    for (let i = 0; i < selected.length; i++) {
-        let exclude = false;
-        exclude = exclude || !all.range.intersectsNode(selected[i]);
-        exclude = exclude || ((selected[i].isEqualNode(all.firstElem))
-            && (all.range.startOffset == all.firstElem.innerText.length));
-        exclude = exclude || ((selected[i].isEqualNode(all.lastElem))
-            && (all.range.endOffset == 0));
-        if (exclude) {
-            selected.splice(i, 1);
-            i--;
-        }
-    }
-    if (selectPoint && (all.firstElem == all.lastElem) && (all.range.startOffset == all.range.endOffset))
-        selected.push(all.firstElem);
-    return selected;
+function getSelected (all: SelectionAll, selectPoint = false): HTMLElement[] {
+    const selected = [...all.parent.children].filter((value: HTMLElement): boolean => {
+        let passes = true;
+        passes &&= all.range.intersectsNode(value);
+        passes &&= !((value.isEqualNode(all.firstElem)) && (all.range.startOffset == all.firstElem.textContent.length));
+        passes &&= !((value.isEqualNode(all.lastElem)) && (all.range.endOffset == 0));
+        return passes;
+    });
+    if (selectPoint && (selected.length == 0))
+        if ((all.firstElem == all.lastElem) && (all.range.startOffset == all.range.endOffset))
+            selected.push(all.firstElem);
+    return selected as HTMLElement[];
 }
 
 interface SelectionAll {
@@ -80,10 +109,10 @@ function changeClass(elem: Element, name: string, val: string): void {
 
 export function change(format: Formatting): void {
     const cuttingStart = (offset: number, start: HTMLElement): boolean => {
-        return (offset == 0) || (offset == start.innerText.length);
+        return (offset == 0) || (offset == start.textContent.length);
     };
     const cuttingEnd = (offset: number, end: HTMLElement): boolean => {
-        return (offset == 0) || (offset == end.innerText.length)
+        return (offset == 0) || (offset == end.textContent.length)
     };
     const all = parseSelection();
 
@@ -96,22 +125,25 @@ export function change(format: Formatting): void {
         if (!cuttingEnd(all.range.endOffset, all.lastElem)) splitAt(all, false, all.range.endOffset);
     }
 
-    for (const child of getSelected(all))
+    const selected = getSelected(all);
+    for (const child of selected)
         if (multiplePrefix(format.type)) changeClass(child, format.type, format.value as string);
         else child.classList.toggle(format.type, format.value as boolean);
+
+    joinAround(all.range, selected);
 }
 
 
 
-export function getCommonClasses(single?: Element): Array<string> | null {
+export function getCommonClasses(single?: Element): string[] | null {
     if (single) return [...single.classList];
     else {
         const multiple = getSelected(parseSelection(), true);
         if (multiple.length == 0) return null;
-        const classes = [...multiple[0].classList];
-        if (multiple.every((value: HTMLElement): boolean => {
-            return areArraysEqual(classes, [...value.classList]);
-        })) return classes;
-        else return null;
+        let classes = [...multiple[0].classList];
+        for (const elem of multiple) classes = getSameElements(classes, [...elem.classList]);
+        return classes;
     }
 }
+
+//TODO: revise, knowing that text node is the first spans node
