@@ -1,5 +1,6 @@
 import { change } from "./cutter";
-import { switchMode } from "./terminal";
+import { selection_in_place, switchMode } from "./terminal";
+import { SEPARATOR } from "../consts/constants";
 
 let active_tab: string;
 
@@ -16,7 +17,7 @@ export function open_tab(tab_link, tab_content) {
     active_tab = tab_content;
 }
 
-document.getElementById('tab-links').addEventListener('click', event => {
+document.getElementById('tab-links').onclick = (event) => {
     const target = event.target as HTMLElement;
     if (target.classList.contains('tab-link')) {
         const tab_contents = document.getElementById('tab-contents');
@@ -33,25 +34,40 @@ document.getElementById('tab-links').addEventListener('click', event => {
             switchMode(true);
         }
     }
-});
+};
 
 
 
-function checkAndSubmit(type: string, value: string | boolean): void {
-    const selectionParent = document.getSelection().getRangeAt(0).commonAncestorContainer;
-    if (((selectionParent.nodeType == Node.ELEMENT_NODE)
-        && ((selectionParent as HTMLElement).classList.contains('line-content')))
-        || (selectionParent.parentElement.nodeName == 'SPAN'))
+const term_changers = document.getElementsByClassName('term-changer') as HTMLCollectionOf<HTMLInputElement>;
 
-        change({ type: type, value: value });
+for (const elem of term_changers)
+    elem.onchange = () => {
+        const name = elem.getAttribute('name');
+        if (elem.getAttribute('type') == 'checkbox')
+            if (selection_in_place()) change({ type: name, value: elem.checked });
+        else
+            if (selection_in_place()) change({ type: name, value: elem.value });
+    };
+
+export function drop_term_changers (): void {
+    (document.getElementById('style-content') as HTMLFormElement).reset();
 }
 
-const terminal_changers = document.getElementsByClassName('term-changer') as HTMLCollectionOf<HTMLInputElement>;
-for (const elem of terminal_changers) {
-    elem.addEventListener('change', () => {
-        if (elem.getAttribute('type') == 'checkbox')
-            checkAndSubmit(elem.getAttribute('name'), elem.checked);
-        else
-            checkAndSubmit(elem.getAttribute('name'), elem.value);
-    });
+export function set_term_changers (classes: Array<string>): void {
+    drop_term_changers();
+
+    for (const cls of classes) {
+        const term_changer = [...term_changers].filter((value: HTMLInputElement): boolean => {
+            const name = cls.includes(SEPARATOR) ? cls.split(SEPARATOR)[0] : cls;
+            return value.getAttribute('name') == name;
+        });
+
+        if (term_changer.length == 1) {
+            const changer = term_changer[0] as HTMLInputElement;
+            if (changer.getAttribute('type') == 'checkbox') changer.checked = true;
+            else changer.value = cls.split(SEPARATOR)[1];
+        } else term_changer.find((value: HTMLInputElement): boolean => {
+            return value.value == cls.split(SEPARATOR)[1];
+        }).checked = true;
+    }
 }

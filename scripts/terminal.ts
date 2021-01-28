@@ -25,6 +25,12 @@ function disableAndClear() {
     for (const number of line_numbers) number.classList.remove('chosen');
 }
 
+export function selection_in_place (): boolean {
+    const selectionParent = document.getSelection().getRangeAt(0).commonAncestorContainer;
+    const chosen_line = document.getElementsByClassName('chosen')[0].parentElement;
+    return chosen_line.lastElementChild.contains(selectionParent);
+}
+
 export function choose_line (line) {
     const line_number = line.firstElementChild;
     const line_content = line.lastElementChild;

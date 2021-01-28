@@ -1,13 +1,6 @@
 import { LANGUAGES, TYPES } from "./langs"
 import { LITERALS, TRANSLATIONS } from "./babylon";
 
-export const ESCAPE_START = "\\033[";
-export const ESCAPE_SEPARATOR = ";";
-export const ESCAPE_END = "m";
-export const ESCAPE_TERMINATE = "0";
-
-
-
 export const SEPARATOR = '-';
 
 export const COLORS = {
@@ -35,6 +28,7 @@ export const DEFAULTS = {
 
 
 
+// These below are not exported to PUG or LESS as they are keys for specific classes:
 export const PREFIXES = {
     for: "3",
     back: "4",
@@ -88,35 +82,16 @@ export const CLASS_CODES = generateClassCodes();
 export const LESS_VARS = {
     colors: Object.keys(COLORS),
     styles: Object.keys(STYLES),
-    bold: "700",
-    normal: "400",
-    dim: "100"
+    separator: SEPARATOR
 };
 
 
 
 // For passing variables to PUG:
 
-interface Param {
-    var: string;
-    name: string;
-}
-
-function capitalize (arr: Array<string>): Array<Param> {
-    const array = [];
-    for (const str of arr) array.push({ var: str, name: str[0].toUpperCase() + str.substr(1) });
-    return array;
-}
-
 export const PUG_VARS = {
-    prefixes: {
-        "for-color": "for",
-        "back-color": "back",
-        style: "sty",
-        simple: capitalize(["blink", "cross", "under", "ita"])
-    },
-    colors: capitalize(Object.keys(COLORS)),
-    styles: capitalize(Object.keys(STYLES)),
+    colors: Object.keys(COLORS),
+    styles: Object.keys(STYLES),
 
     languages: LANGUAGES,
     types: TYPES,

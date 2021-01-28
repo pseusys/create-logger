@@ -1,20 +1,22 @@
 @import "main.less";
 
+@bold: 700;
+@normal: 400;
+@dim: 100;
 
-
-//@colors: black, red, green, yellow, blue, magenta, cyan, white; // [3, 4] + [0, 1, 2, 3, 4, 5, 6, 7]
+//@colors: black, red, green, yellow, blue, magenta, cyan, white;
 each(@colors, {
-  .for-@{value} {
+  .for@{separator}@{value} {
     color: @value;
   }
-  .back-@{value} {
+  .back@{separator}@{value} {
     background: @value;
   }
 });
 
-//@styles: bold - 700, normal - 400, dim  - 100; // 1, 2
+//@styles: bold - 700, normal - 400, dim  - 100;
 each(@styles, {
-  .sty-@{value} {
+  .sty@{separator}@{value} {
     font-weight: @@value;
   }
 });
@@ -22,19 +24,19 @@ each(@styles, {
 @keyframes blink {
   50% { color: transparent; }
 }
-.blink { // 5
+.blink {
   animation: blink 1s step-end 0s infinite;
 }
 
-.cross { // 9
+.cross {
   text-decoration: line-through;
 }
 
-.under { // 4
+.under {
   border-bottom: 2px solid currentColor;
 }
 
-.ita { // 3
+.ita {
   font-style: italic;
 }
 
