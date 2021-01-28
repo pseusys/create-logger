@@ -1,5 +1,5 @@
-import { multiplePrefix, SEPARATOR } from "../consts/constants";
-import {areArraysEqual, getSameElements} from "./utils";
+import {DEFAULTS, getPrefix, multiplePrefix, SEPARATOR} from "../consts/constants";
+import { areArraysEqual, getSameElements } from "./utils";
 
 //TODO: for both elements make null "var_name" and "var_type"
 function splitAt(all: SelectionAll, splitStart: boolean, pos: number, postInsert: boolean = false) {
@@ -35,12 +35,8 @@ function joinAround(range: Range, selected: HTMLElement[]): void {
 
             value.textContent = friend.textContent + value.textContent;
             // Assuming that text node is span's first child.
-            const sus = (elem: Element): void => {
-                if (elem.childNodes.length > 1)
-                    throw new DOMException("Suspicious span children count: " + elem.childNodes);
-            };
-            sus(friend);
-            sus(value);
+            if ((friend.childNodes.length != 1) || (value.childNodes.length != 1))
+                throw new DOMException("Suspicious span children count");
 
             if (friend.contains(range.startContainer) || value.contains(range.startContainer))
                 range.setStart(value.firstChild, start_offset);
@@ -138,11 +134,18 @@ export function change(format: Formatting): void {
 export function getCommonClasses(single?: Element): string[] | null {
     if (single) return [...single.classList];
     else {
-        const multiple = getSelected(parseSelection(), true);
+        const multiple = getSelected(parseSelection(), true).map((value): string[] => {
+            const classes = [...value.classList];
+            for (const def in DEFAULTS) {
+                const target = classes.find((val) => { return getPrefix(val) == def; });
+                if (!target) classes.push(def + SEPARATOR + DEFAULTS[def]);
+            }
+            return classes;
+        });
         if (multiple.length == 0) return null;
-        let classes = [...multiple[0].classList];
-        for (const elem of multiple) classes = getSameElements(classes, [...elem.classList]);
-        return classes;
+        return multiple.reduce((prev: string[], value: string[]): string[] => {
+            return getSameElements(prev, value);
+        }, multiple[0]);
     }
 }
 

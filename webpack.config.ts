@@ -13,7 +13,7 @@ const config: webpack.Configuration = {
         extensions: [ '.ts', '.js' ],
     },
     output: {
-        path: path.join(__dirname, './docs/'),
+        path: path.join(__dirname, './build/'),
         filename: "./all.min.js"
     },
     devtool: 'eval-source-map',

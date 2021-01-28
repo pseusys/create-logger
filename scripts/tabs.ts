@@ -1,6 +1,6 @@
 import { change } from "./cutter";
 import { selection_in_place, switchMode } from "./terminal";
-import { SEPARATOR } from "../consts/constants";
+import { getPostfix, getPrefix } from "../consts/constants";
 
 let active_tab: string;
 
@@ -57,15 +57,14 @@ export function set_term_changers (classes: Array<string>): void {
 
     for (const cls of classes) {
         const term_changer = [...term_changers].filter((value: HTMLInputElement): boolean => {
-            const name = cls.includes(SEPARATOR) ? cls.split(SEPARATOR)[0] : cls;
-            return value.getAttribute('name') == name;
+            return value.getAttribute('name') == getPrefix(cls);
         });
 
         if (term_changer.length == 1) {
             if (term_changer[0].getAttribute('type') == 'checkbox') term_changer[0].checked = true;
-            else term_changer[0].value = cls.split(SEPARATOR)[1];
+            else term_changer[0].value = getPostfix(cls);
         } else term_changer.find((value: HTMLInputElement): boolean => {
-            return value.value == cls.split(SEPARATOR)[1];
+            return value.value == getPostfix(cls);
         }).checked = true;
     }
 }

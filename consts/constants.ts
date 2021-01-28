@@ -43,7 +43,7 @@ export const PREFIXES = {
 
 export function getPrefix (cls) {
     if (cls.includes(SEPARATOR)) return cls.split(SEPARATOR)[0];
-    else return "";
+    else return cls;
 }
 
 export function getPostfix (cls) {
