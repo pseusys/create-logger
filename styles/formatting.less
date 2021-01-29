@@ -1,22 +1,18 @@
 @import "main.less";
 
-@bold: 700;
-@normal: 400;
-@dim: 100;
-
 //@colors: black, red, green, yellow, blue, magenta, cyan, white;
 each(@colors, {
-  .for@{separator}@{value} {
+  .for-@{value} {
     color: @value;
   }
-  .back@{separator}@{value} {
+  .back-@{value} {
     background: @value;
   }
 });
 
 //@styles: bold - 700, normal - 400, dim  - 100;
 each(@styles, {
-  .sty@{separator}@{value} {
+  .sty-@{value} {
     font-weight: @@value;
   }
 });

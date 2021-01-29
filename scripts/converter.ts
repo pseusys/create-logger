@@ -13,6 +13,7 @@ export const ESCAPE_TERMINATE = "0";
 
 
 
+//TODO: Reverse for file reading.
 function classesToStyles(classes: string[]): string[] {
     const styles: string[] = [];
     for (const cls of classes) {

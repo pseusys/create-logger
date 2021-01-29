@@ -81,9 +81,12 @@ export const CLASS_CODES = generateClassCodes();
 
 export const LESS_VARS = {
     colors: Object.keys(COLORS),
-    styles: Object.keys(STYLES),
-    separator: SEPARATOR
+    styles: Object.keys(STYLES)
 };
+
+Object.keys(DEFAULTS).forEach((value) => {
+    LESS_VARS["def-" + value] = DEFAULTS[value];
+});
 
 
 

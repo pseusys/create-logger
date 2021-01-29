@@ -1,18 +1,39 @@
-/*
-terminal_container.addEventListener('keydown', event => {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        new_line();
-    }
-});
-*/
-
-import { DEFAULTS, SEPARATOR } from "../consts/constants";
 import { convert, Entry } from "./converter";
+import { reflect_selection } from "./tabs";
 
 export const terminal = document.getElementById('terminal');
-let editable = true;
-let editableHTML: Array<string>;
+export let editable = true;
+let editableHTML: string[];
+
+
+
+terminal.onkeydown = (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        choose_line(create_line(get_chosen_line()));
+    } else if (event.key == 'Backspace') {
+        const selection = document.getSelection();
+        if (selection.isCollapsed) {
+            const range = selection.getRangeAt(0);
+            const chosen_children = get_chosen_line().lastElementChild.children;
+            if ((range.startContainer.textContent == '') && (chosen_children.length == 1)) {
+                if (chosen_children[0].classList.length != 0) {
+                    chosen_children[0].className = '';
+                    reflect_selection();
+                }
+                event.preventDefault();
+            }
+        } else event.preventDefault();
+    } else if (event.key == 'ArrowUp') {
+        event.preventDefault();
+        choose_line(get_chosen_line().previousElementSibling);
+    } else if (event.key == 'ArrowDown') {
+        event.preventDefault();
+        choose_line(get_chosen_line().nextElementSibling);
+    }
+};
+
+
 
 function disableAndClear() {
     const line_contents = document.getElementsByClassName('line-content');
@@ -25,13 +46,9 @@ function disableAndClear() {
     for (const number of line_numbers) number.classList.remove('chosen');
 }
 
-export function selection_in_place (): boolean {
-    const selectionParent = document.getSelection().getRangeAt(0).commonAncestorContainer;
-    const chosen_line = document.getElementsByClassName('chosen')[0].parentElement;
-    return chosen_line.lastElementChild.contains(selectionParent);
-}
-
 export function choose_line (line) {
+    if (!line || !line.classList.contains('line') || (line.children.length != 2)) return;
+
     const line_number = line.firstElementChild;
     const line_content = line.lastElementChild;
 
@@ -49,7 +66,7 @@ export function choose_line (line) {
     sel.addRange(range);
 }
 
-function create_line () {
+function create_line (after: HTMLDivElement = null, before: HTMLDivElement = null): HTMLDivElement {
     const line = document.createElement('div');
     line.classList.add('line');
 
@@ -59,30 +76,29 @@ function create_line () {
 
     const line_content = document.createElement('div');
     line_content.classList.add('line-content');
-
-    const new_span = document.createElement('span');
-    for (const key in DEFAULTS) new_span.classList.add(key + SEPARATOR + DEFAULTS[key]);
-
-    line_content.appendChild(new_span);
+    line_content.appendChild(document.createElement('span'));
 
     line.append(line_number, line_content);
+
+    if (!!after) after.after(line);
+    if (!!before) before.before(line);
     return line;
 }
 
-terminal.addEventListener('click', event => {
+terminal.onclick = (event) => {
     const target = event.target as HTMLElement;
     if (!target.parentElement.classList.contains('line') || !editable) return;
-    if (target.id === 'line-adder') choose_line(terminal.insertBefore(create_line(), target.parentElement));
+    if (target.id === 'line-adder') choose_line(create_line(null, target.parentElement as HTMLDivElement));
     else if (target.classList.contains('line-number')) choose_line(target.parentElement);
-});
+};
 
 
 
-function htmlToEntries(children: HTMLCollection): Array<Entry> {
+function htmlToEntries(children: HTMLCollection): Entry[] {
     const entries = [];
     for (const child of children) entries.push({
         classes: [...child.classList],
-        value: (child as HTMLElement).textContent
+        value: (child as HTMLSpanElement).textContent
     });
     return entries;
 }
@@ -98,16 +114,48 @@ export function switchMode(edit: boolean): void {
             editableHTML.push(content.innerHTML);
             content.innerHTML = convert(htmlToEntries(content.children));
         }
-        for (const content of line_contents as HTMLCollectionOf<HTMLElement>) content.style.userSelect = 'auto';
-        for (const number of line_numbers as HTMLCollectionOf<HTMLElement>) number.style.cursor = 'default';
+        for (const content of line_contents as HTMLCollectionOf<HTMLDivElement>) content.style.userSelect = 'auto';
+        for (const number of line_numbers as HTMLCollectionOf<HTMLDivElement>) number.style.cursor = 'default';
         document.getElementById('line-adder').parentElement.style.display = 'none';
 
     } else if (!editable && edit) {
         for (const content of line_contents) content.innerHTML = editableHTML.shift();
-        for (const content of line_contents as HTMLCollectionOf<HTMLElement>) content.style.userSelect = '';
-        for (const number of line_numbers as HTMLCollectionOf<HTMLElement>) number.style.cursor = '';
+        for (const content of line_contents as HTMLCollectionOf<HTMLDivElement>) content.style.userSelect = '';
+        for (const number of line_numbers as HTMLCollectionOf<HTMLDivElement>) number.style.cursor = '';
         document.getElementById('line-adder').parentElement.style.display = '';
 
     } else if (!editable && !edit) for (const content of line_contents) content.innerHTML = "";
     editable = edit;
+}
+
+
+
+function get_chosen_line (): HTMLDivElement {
+    return document.getElementsByClassName('chosen')[0].parentElement as HTMLDivElement;
+}
+
+export function selection_in_place (): boolean {
+    const selectionParent = document.getSelection().getRangeAt(0).commonAncestorContainer;
+    return get_chosen_line().lastElementChild.contains(selectionParent);
+}
+
+export function find_span_for_place (node: Node): HTMLSpanElement {
+    // If it is a text node - we are in front of our span.
+    // If it is a div - we are in the end of the line.
+    if (node.nodeType == Node.TEXT_NODE) return node.parentElement;
+    if (node.nodeName == 'DIV') return (node as Element).lastElementChild as HTMLSpanElement;
+    if (node.nodeName != 'SPAN') throw new DOMException("Selected wrong element: " + node.nodeName);
+    return node as HTMLSpanElement;
+}
+
+export function get_parent_for_span (span): HTMLDivElement {
+    if ((span.parentElement.nodeName != 'DIV') || (!span.parentElement.isEqualNode(get_chosen_line().lastElementChild)))
+        throw new DOMException("Suspicious span parent: " + span.parentElement);
+    return span.parentElement;
+}
+
+export function get_child_for_span (span) {
+    if (span.childNodes.length != 1)
+        throw new DOMException("Suspicious span children count: " + span.childNodes.length);
+    return span.firstChild;
 }

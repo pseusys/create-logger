@@ -16,12 +16,12 @@ export const TYPES = {
 
 
 export interface Part {
-    classes: Array<string>;
+    classes: string[];
     value: string;
     var_name?: string;
     type?: string;
 }
 
-export function construct (language: string, str: Array<Array<Part>>): string {
+export function construct (language: string, str: Part[][]): string {
     return LANGUAGES[language](str);
 }

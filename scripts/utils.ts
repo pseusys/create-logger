@@ -1,4 +1,4 @@
-export function areArraysEqual<T> (a: Array<T>, b: Array<T>): boolean {
+export function areArraysEqual<T> (a: T[], b: T[]): boolean {
     if (!a || !b) return false;
     if (a.length !== b.length) return false;
     a.sort();
@@ -7,7 +7,7 @@ export function areArraysEqual<T> (a: Array<T>, b: Array<T>): boolean {
     return true;
 }
 
-export function getSameElements<T> (a: Array<T>, b: Array<T>): Array<T> {
+export function getSameElements<T> (a: T[], b: T[]): T[] {
     if (areArraysEqual(a, b)) return a;
     return [...a].filter((value: T): boolean => { return b.includes(value); });
 }

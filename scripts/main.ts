@@ -1,8 +1,7 @@
 import './imports'
 
-import { drop_term_changers, open_tab, set_term_changers } from "./tabs";
-import { choose_line, selection_in_place, terminal } from "./terminal";
-import { getCommonClasses } from "./cutter";
+import { open_tab, reflect_selection } from "./tabs";
+import { choose_line, editable, selection_in_place, terminal } from "./terminal";
 
 
 
@@ -26,10 +25,8 @@ document.ondrop = (event) => {
 
 
 document.onselectionchange = () => {
-    if (!selection_in_place()) return;
-    const classes = getCommonClasses();
-    if (classes) set_term_changers(classes);
-    else drop_term_changers();
+    if (!editable || !selection_in_place()) return;
+    reflect_selection();
 }
 
 
