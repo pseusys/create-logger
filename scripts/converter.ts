@@ -31,9 +31,11 @@ export function convert(str: Entry[]): string {
         let interior = "";
         if (!areArraysEqual(previousClasses, styles)) {
             if (previousClasses.length > 0) interior += ESCAPE_START + ESCAPE_TERMINATE + ESCAPE_END;
-            interior += ESCAPE_START;
-            interior += styles.join(ESCAPE_SEPARATOR);
-            interior += ESCAPE_END;
+            if (styles.length > 0) {
+                interior += ESCAPE_START;
+                interior += styles.join(ESCAPE_SEPARATOR);
+                interior += ESCAPE_END;
+            }
         }
         interior += entry.value;
         result += interior;

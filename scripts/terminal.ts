@@ -1,5 +1,6 @@
 import { convert, Entry } from "./converter";
 import { reflect_selection } from "./tabs";
+import {getFocusOffsetInNode, getRangeStartInNode, setRangeInNode} from "./utils";
 
 export const terminal = document.getElementById('terminal');
 export let editable = true;
@@ -15,7 +16,7 @@ terminal.onkeydown = (event) => {
         const selection = document.getSelection();
         if (selection.isCollapsed) {
             const range = selection.getRangeAt(0);
-            const chosen_children = get_chosen_line().lastElementChild.children;
+            const chosen_children = get_chosen_line_content().children;
             if ((range.startContainer.textContent == '') && (chosen_children.length == 1)) {
                 if (chosen_children[0].classList.length != 0) {
                     chosen_children[0].className = '';
@@ -24,12 +25,13 @@ terminal.onkeydown = (event) => {
                 event.preventDefault();
             }
         } else event.preventDefault();
-    } else if (event.key == 'ArrowUp') {
+    } else if ((event.key == 'ArrowUp') || (event.key == 'ArrowDown')) {
         event.preventDefault();
-        choose_line(get_chosen_line().previousElementSibling);
-    } else if (event.key == 'ArrowDown') {
-        event.preventDefault();
-        choose_line(get_chosen_line().nextElementSibling);
+        const selection = document.getSelection()
+        const chosen = get_chosen_line();
+        const off = selection.rangeCount > 0 ? getFocusOffsetInNode(selection, chosen) : undefined;
+        const target = event.key == 'ArrowUp' ? chosen.previousElementSibling : chosen.nextElementSibling;
+        choose_line(target, off - 1);
     }
 };
 
@@ -46,7 +48,7 @@ function disableAndClear() {
     for (const number of line_numbers) number.classList.remove('chosen');
 }
 
-export function choose_line (line) {
+export function choose_line (line, pos?) {
     if (!line || !line.classList.contains('line') || (line.children.length != 2)) return;
 
     const line_number = line.firstElementChild;
@@ -59,9 +61,8 @@ export function choose_line (line) {
     line_number.classList.add('chosen');
 
     const range = document.createRange();
-    const sel = window.getSelection();
-    range.selectNodeContents(line_content);
-    range.collapse(false);
+    setRangeInNode(range, line_content, pos);
+    const sel = document.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
 }
@@ -134,28 +135,17 @@ function get_chosen_line (): HTMLDivElement {
     return document.getElementsByClassName('chosen')[0].parentElement as HTMLDivElement;
 }
 
+export function get_chosen_line_content (): HTMLDivElement {
+    return get_chosen_line().lastElementChild as HTMLDivElement;
+}
+
 export function selection_in_place (): boolean {
     const selectionParent = document.getSelection().getRangeAt(0).commonAncestorContainer;
-    return get_chosen_line().lastElementChild.contains(selectionParent);
+    return get_chosen_line_content().contains(selectionParent);
 }
 
 export function find_span_for_place (node: Node): HTMLSpanElement {
-    // If it is a text node - we are in front of our span.
-    // If it is a div - we are in the end of the line.
     if (node.nodeType == Node.TEXT_NODE) return node.parentElement;
-    if (node.nodeName == 'DIV') return (node as Element).lastElementChild as HTMLSpanElement;
     if (node.nodeName != 'SPAN') throw new DOMException("Selected wrong element: " + node.nodeName);
     return node as HTMLSpanElement;
-}
-
-export function get_parent_for_span (span): HTMLDivElement {
-    if ((span.parentElement.nodeName != 'DIV') || (!span.parentElement.isEqualNode(get_chosen_line().lastElementChild)))
-        throw new DOMException("Suspicious span parent: " + span.parentElement);
-    return span.parentElement;
-}
-
-export function get_child_for_span (span) {
-    if (span.childNodes.length != 1)
-        throw new DOMException("Suspicious span children count: " + span.childNodes.length);
-    return span.firstChild;
 }
