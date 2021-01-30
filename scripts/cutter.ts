@@ -1,13 +1,6 @@
 import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../consts/constants";
-import {
-    areArraysEqual,
-    getRangeEndInNode,
-    getRangeStartInNode,
-    getSameElements,
-    setRangeEndInNode,
-    setRangeStartInNode
-} from "./utils";
-import {find_span_for_place, get_chosen_line_content} from "./terminal";
+import { areArraysEqual, getRangeEndInNode, getRangeStartInNode, getSameElements, setRangeEndInNode, setRangeStartInNode } from "./utils";
+import { find_span_for_place, get_chosen_line_content } from "./terminal";
 
 type Edges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
 let range_backup: { s: number, e: number };
@@ -28,8 +21,8 @@ function parse_range (range: Range, backup: boolean): Edges {
     if (backup) range_backup = { s: start, e: end };
 
     if (start == end) {
-        const f = find_span_for_place(first) as HTMLSpanElement;
-        const l = find_span_for_place(last) as HTMLSpanElement;
+        const f = find_span_for_place(first);
+        const l = find_span_for_place(last);
         return { first: f, last: l, first_offset: f_off, last_offset: l_off };
     } else {
         const f = normalize(first, f_off, true);

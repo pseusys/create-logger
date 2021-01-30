@@ -33,10 +33,7 @@ export function setRangeInNode (range: Range, node: HTMLElement, pos?: number) {
 }
 
 function setRangeAnythingInNode (range: Range, node: HTMLElement, pos: number, start: boolean) {
-    if (node.nodeType == Node.TEXT_NODE) {
-        if (start) range.setStart(node, pos);
-        else range.setEnd(node, pos);
-    } else if (!children(node).some((value: Node): boolean => {
+    if ((node.nodeType == Node.TEXT_NODE) || !children(node).some((value: Node): boolean => {
         if (value.nodeType == Node.TEXT_NODE) {
             if (value.textContent.length >= pos) {
                 if (start) range.setStart(value, pos);

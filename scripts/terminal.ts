@@ -1,6 +1,6 @@
 import { convert, Entry } from "./converter";
 import { reflect_selection } from "./tabs";
-import {getFocusOffsetInNode, getRangeStartInNode, setRangeInNode} from "./utils";
+import {getFocusOffsetInNode, setRangeInNode} from "./utils";
 
 export const terminal = document.getElementById('terminal');
 export let editable = true;
