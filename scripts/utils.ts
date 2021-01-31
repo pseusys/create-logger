@@ -1,5 +1,7 @@
 // ARRAY utils:
 
+import has = Reflect.has;
+
 export function areArraysEqual<T> (a: T[], b: T[]): boolean {
     if (!a || !b) return false;
     if (a.length !== b.length) return false;
@@ -18,6 +20,21 @@ export function getSameElements<T> (a: T[], b: T[]): T[] {
 
 // RANGE utils:
 
+declare global {
+    // Can use it while no third-party libraries are included
+    interface Range {
+        _setRangeInNode (node: HTMLElement, pos?: number): void;
+        _setRangeStartInNode (node: HTMLElement, pos: number): void;
+        _setRangeEndInNode (node: HTMLElement, pos: number): void;
+        _getRangeStartInNode (node: Node): NodeInfo | null;
+        _getRangeEndInNode (node: Node): NodeInfo | null;
+    }
+
+    interface Selection {
+        _getFocusOffsetInNode (node: Node): number | null
+    }
+}
+
 function children (node: Element, nodes: Node[] = []): Node[] {
     node.childNodes.forEach((value: Node): void => {
         nodes.push(value);
@@ -26,10 +43,10 @@ function children (node: Element, nodes: Node[] = []): Node[] {
     return nodes;
 }
 
-export function setRangeInNode (range: Range, node: HTMLElement, pos?: number) {
+Range.prototype._setRangeInNode = function (node: HTMLElement, pos?: number): void {
     const position = pos !== undefined ? Math.min(pos, node.textContent.length) : node.textContent.length;
-    setRangeStartInNode(range, node, position);
-    range.collapse(true);
+    this._setRangeStartInNode(node, position);
+    this.collapse(true);
 }
 
 function setRangeAnythingInNode (range: Range, node: HTMLElement, pos: number, start: boolean) {
@@ -50,12 +67,12 @@ function setRangeAnythingInNode (range: Range, node: HTMLElement, pos: number, s
     }
 }
 
-export function setRangeStartInNode (range: Range, node: HTMLElement, pos: number) {
-    setRangeAnythingInNode(range, node, pos, true);
+Range.prototype._setRangeStartInNode = function (node: HTMLElement, pos: number): void {
+    setRangeAnythingInNode(this, node, pos, true);
 }
 
-export function setRangeEndInNode (range: Range, node: HTMLElement, pos: number) {
-    setRangeAnythingInNode(range, node, pos, false);
+Range.prototype._setRangeEndInNode = function (node: HTMLElement, pos: number): void {
+    setRangeAnythingInNode(this, node, pos, false);
 }
 
 type NodeInfo = { offset: number, node: Node, node_offset: number };
@@ -101,19 +118,17 @@ function getRangeAnythingInNode (anchor: Node, off: number, node: Node): NodeInf
     } else return null;
 }
 
-export function getRangeStartInNode (range: Range, parent: Node): { start: number, first: Node, f_off: number } | null {
-    const { offset, node, node_offset } = getRangeAnythingInNode(range.startContainer, range.startOffset, parent);
-    return { start: offset, first: node, f_off: node_offset };
+Range.prototype._getRangeStartInNode = function (node: Node): NodeInfo | null {
+    return getRangeAnythingInNode(this.startContainer, this.startOffset, node);
 }
 
-export function getRangeEndInNode (range: Range, parent: Node): { end: number, last: Node, l_off: number } | null {
-    const { offset, node, node_offset } = getRangeAnythingInNode(range.endContainer, range.endOffset, parent);
-    return { end: offset, last: node, l_off: node_offset };
+Range.prototype._getRangeEndInNode = function (node: Node): NodeInfo | null {
+    return getRangeAnythingInNode(this.endContainer, this.endOffset, node);
 }
 
-export function getFocusOffsetInNode (selection: Selection, parent: Node): number | null {
-    const range = selection.getRangeAt(0);
-    if ((selection.focusNode == range.startContainer) && (selection.focusOffset == range.startOffset))
-        return getRangeStartInNode(range, parent).start;
-    else return getRangeEndInNode(range, parent).end;
+Selection.prototype._getFocusOffsetInNode = function (node: Node): number | null {
+    const range = this.getRangeAt(0);
+    if ((this.focusNode == range.startContainer) && (this.focusOffset == range.startOffset))
+        return range._getRangeStartInNode(node).start;
+    else return range._getRangeEndInNode(node).end;
 }

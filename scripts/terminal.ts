@@ -1,6 +1,5 @@
 import { convert, Entry } from "./converter";
 import { reflect_selection } from "./tabs";
-import {getFocusOffsetInNode, setRangeInNode} from "./utils";
 
 export const terminal = document.getElementById('terminal');
 export let editable = true;
@@ -9,29 +8,29 @@ let editableHTML: string[];
 
 
 terminal.onkeydown = (event) => {
+    const selection = document.getSelection();
+    if (selection.rangeCount == 0) return;
+
     if (event.key === 'Enter') {
         event.preventDefault();
         choose_line(create_line(get_chosen_line()));
     } else if (event.key == 'Backspace') {
-        const selection = document.getSelection();
         if (selection.isCollapsed) {
             const range = selection.getRangeAt(0);
             const chosen_children = get_chosen_line_content().children;
             if ((range.startContainer.textContent == '') && (chosen_children.length == 1)) {
                 if (chosen_children[0].classList.length != 0) {
                     chosen_children[0].className = '';
-                    reflect_selection();
+                    reflect_selection(selection);
                 }
                 event.preventDefault();
             }
         } else event.preventDefault();
     } else if ((event.key == 'ArrowUp') || (event.key == 'ArrowDown')) {
-        event.preventDefault();
-        const selection = document.getSelection()
         const chosen = get_chosen_line();
-        const off = selection.rangeCount > 0 ? getFocusOffsetInNode(selection, chosen) : undefined;
         const target = event.key == 'ArrowUp' ? chosen.previousElementSibling : chosen.nextElementSibling;
-        choose_line(target, off - 1);
+        choose_line(target, selection._getFocusOffsetInNode(chosen) - 1);
+        event.preventDefault();
     }
 };
 
@@ -61,7 +60,7 @@ export function choose_line (line, pos?) {
     line_number.classList.add('chosen');
 
     const range = document.createRange();
-    setRangeInNode(range, line_content, pos);
+    range._setRangeInNode(line_content, pos);
     const sel = document.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
@@ -139,8 +138,8 @@ export function get_chosen_line_content (): HTMLDivElement {
     return get_chosen_line().lastElementChild as HTMLDivElement;
 }
 
-export function selection_in_place (): boolean {
-    const selectionParent = document.getSelection().getRangeAt(0).commonAncestorContainer;
+export function selection_in_place (selection: Selection): boolean {
+    const selectionParent = selection.getRangeAt(0).commonAncestorContainer;
     return get_chosen_line_content().contains(selectionParent);
 }
 

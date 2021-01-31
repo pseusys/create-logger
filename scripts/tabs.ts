@@ -38,8 +38,8 @@ document.getElementById('tab-links').onclick = (event) => {
 
 
 
-export function reflect_selection (single?: Element) {
-    const classes = getCommonClasses(single);
+export function reflect_selection (selection: Selection, single?: Element) {
+    const classes = getCommonClasses(selection, single);
     if (classes) set_term_changers(classes);
     else drop_term_changers();
 }
@@ -48,10 +48,14 @@ const term_changers = [...document.getElementsByClassName('term-changer')] as HT
 
 for (const elem of term_changers)
     elem.onchange = () => {
-        if (!selection_in_place()) return;
-        const name = elem.getAttribute('name');
-        if (elem.getAttribute('type') == 'checkbox') change({ type: name, value: elem.checked });
-        else change({ type: name, value: elem.value });
+        const selection = document.getSelection();
+        if (selection.rangeCount > 0) {
+            if (!selection_in_place(selection)) return;
+            const name = elem.getAttribute('name');
+            if (elem.getAttribute('type') == 'checkbox')
+                change(selection, {type: name, value: elem.checked});
+            else change(selection, {type: name, value: elem.value});
+        }
     };
 
 export function drop_term_changers (): void {

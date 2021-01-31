@@ -25,15 +25,19 @@ document.ondrop = (event) => {
 
 
 document.onselectionchange = () => {
-    if (!editable || !selection_in_place()) return;
-    reflect_selection();
+    const selection = document.getSelection();
+    if (!editable || !selection_in_place(selection)) return;
+    reflect_selection(selection);
 }
 
 
 
 document.oncopy = (event) => {
-    const str = document.getSelection().toString();
-    const refined = str.replace(/\r?\n|\r/g, "").replace(/\u00a0/g, " ");
-    event.clipboardData.setData('text/plain', refined);
-    event.preventDefault();
+    const selection = document.getSelection();
+    if (!!selection) {
+        const str = document.getSelection().toString();
+        const refined = str.replace(/\r?\n|\r/g, "").replace(/\u00a0/g, " ");
+        event.clipboardData.setData('text/plain', refined);
+        event.preventDefault();
+    }
 };

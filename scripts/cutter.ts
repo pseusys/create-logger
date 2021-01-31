@@ -1,11 +1,13 @@
 import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../consts/constants";
-import { areArraysEqual, getRangeEndInNode, getRangeStartInNode, getSameElements, setRangeEndInNode, setRangeStartInNode } from "./utils";
+import { areArraysEqual, getSameElements } from "./utils";
 import { find_span_for_place, get_chosen_line_content } from "./terminal";
 
+type NodeWithOffset = { node: HTMLSpanElement, offset: number };
 type Edges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
-let range_backup: { s: number, e: number };
 
-function normalize (node: Node, offset: number, start: boolean): { node: HTMLSpanElement, offset: number } {
+let range_backup: { start: number, end: number };
+
+function normalize (node: Node, offset: number, start: boolean): NodeWithOffset {
     const span = find_span_for_place(node);
     if (start && (offset == node.textContent.length) && (span.nextElementSibling != null))
         return { node: span.nextElementSibling as HTMLSpanElement, offset: 0 };
@@ -16,24 +18,25 @@ function normalize (node: Node, offset: number, start: boolean): { node: HTMLSpa
 
 function parse_range (range: Range, backup: boolean): Edges {
     const parent = get_chosen_line_content();
-    let { start, first, f_off } = getRangeStartInNode(range, parent);
-    let { end, last, l_off } = getRangeEndInNode(range, parent);
-    if (backup) range_backup = { s: start, e: end };
+    let start = range._getRangeStartInNode(parent);
+    let end = range._getRangeEndInNode(parent);
+    if (backup) range_backup = { start: start.offset, end: end.offset };
 
-    if (start == end) {
-        const f = find_span_for_place(first);
-        const l = find_span_for_place(last);
-        return { first: f, last: l, first_offset: f_off, last_offset: l_off };
-    } else {
-        const f = normalize(first, f_off, true);
-        const l = normalize(last, l_off, false);
-        return { first: f.node, last: l.node, first_offset: f.offset, last_offset: l.offset };
+    if (start == end) return {
+        first: find_span_for_place(start.node),
+        last: find_span_for_place(end.node),
+        first_offset: start.node_offset,
+        last_offset: end.node_offset
+    }; else  {
+        const first = normalize(start.node, start.node_offset, true);
+        const last = normalize(end.node, end.node_offset, false);
+        return { first: first.node, last: last.node, first_offset: first.offset, last_offset: last.offset };
     }
 }
 
 function restore_range (range: Range): void {
-    setRangeStartInNode(range, get_chosen_line_content(), range_backup.s);
-    setRangeEndInNode(range, get_chosen_line_content(), range_backup.e);
+    range._setRangeStartInNode(get_chosen_line_content(), range_backup.start);
+    range._setRangeEndInNode(get_chosen_line_content(), range_backup.end);
 }
 
 
@@ -98,8 +101,8 @@ function changeClass(elem: Element, name: string, val: string): void {
     else elem.classList.add(new_name);
 }
 
-export function change(format: Formatting): void {
-    if (document.getSelection().isCollapsed) return;
+export function change(selection: Selection, format: Formatting): void {
+    if (selection.isCollapsed) return;
 
     const cuttingStart = (offset: number, start: HTMLSpanElement): boolean => {
         return (offset == 0) || (offset == start.textContent.length);
@@ -108,7 +111,7 @@ export function change(format: Formatting): void {
         return (offset == 0) || (offset == end.textContent.length)
     };
 
-    const range = document.getSelection().getRangeAt(0);
+    const range = selection.getRangeAt(0);
     const { first, last, first_offset, last_offset } = parse_range(range, true);
 
     if (first.isSameNode(last)) {
@@ -126,17 +129,15 @@ export function change(format: Formatting): void {
         else child.classList.toggle(format.type, format.value as boolean);
 
     joinAround(selected);
-    console.log(range_backup)
     restore_range(range);
 }
 
 
 
-export function getCommonClasses(single?: Element): string[] | null {
+export function getCommonClasses(selection: Selection, single?: Element): string[] | null {
     if (single) return [...single.classList];
     else {
-        const range = document.getSelection().getRangeAt(0);
-        let { first, last } = parse_range(range, false);
+        const { first, last } = parse_range(selection.getRangeAt(0), false);
         const multiple = getSelected(first, last).map((value): string[] => {
             const classes = [...value.classList];
             for (const def in DEFAULTS) {
