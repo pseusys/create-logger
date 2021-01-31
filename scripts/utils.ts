@@ -1,7 +1,5 @@
 // ARRAY utils:
 
-import has = Reflect.has;
-
 export function areArraysEqual<T> (a: T[], b: T[]): boolean {
     if (!a || !b) return false;
     if (a.length !== b.length) return false;
