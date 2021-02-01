@@ -2,21 +2,34 @@ import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../consts/consta
 import { areArraysEqual, getSameElements } from "./utils";
 import { find_span_for_place, get_chosen_line_content } from "./terminal";
 
-type NodeWithOffset = { node: HTMLSpanElement, offset: number };
-type Edges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
+type NodeEdges = { first: Node, last: Node, first_offset: number, last_offset: number };
+type SpanEdges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
 
 let range_backup: { start: number, end: number };
 
-function normalize (node: Node, offset: number, start: boolean): NodeWithOffset {
-    const span = find_span_for_place(node);
-    if (start && (offset == node.textContent.length) && (span.nextElementSibling != null))
-        return { node: span.nextElementSibling as HTMLSpanElement, offset: 0 };
-    if (!start && (offset == 0) && (span.previousElementSibling != null))
-        return { node: span.previousElementSibling as HTMLSpanElement, offset: node.textContent.length };
-    return { node: span, offset: offset };
+function normalize (edges: NodeEdges): SpanEdges {
+    let start = { node: find_span_for_place(edges.first), offset: edges.first_offset };
+    let end = { node: find_span_for_place(edges.last), offset: edges.last_offset };
+
+    if (start.node == end.node)
+        return { first: start.node, first_offset: start.offset, last: end.node, last_offset: end.offset };
+
+    if ((start.offset == start.node.textContent.length) && (start.node.nextElementSibling != null))
+        start = { node: start.node.nextElementSibling as HTMLSpanElement, offset: 0};
+
+    if (start.node == end.node)
+        return { first: start.node, first_offset: start.offset, last: end.node, last_offset: end.offset };
+
+    if ((end.offset == 0) && (end.node.previousElementSibling != null))
+        end = {
+            node: end.node.previousElementSibling as HTMLSpanElement,
+            offset: end.node.previousElementSibling.textContent.length
+        };
+
+    return { first: start.node, first_offset: start.offset, last: end.node, last_offset: end.offset };
 }
 
-function parse_range (range: Range, backup: boolean): Edges {
+function parse_range (range: Range, backup: boolean): SpanEdges {
     const parent = get_chosen_line_content();
     let start = range._getRangeStartInNode(parent);
     let end = range._getRangeEndInNode(parent);
@@ -27,11 +40,12 @@ function parse_range (range: Range, backup: boolean): Edges {
         last: find_span_for_place(end.node),
         first_offset: start.node_offset,
         last_offset: end.node_offset
-    }; else  {
-        const first = normalize(start.node, start.node_offset, true);
-        const last = normalize(end.node, end.node_offset, false);
-        return { first: first.node, last: last.node, first_offset: first.offset, last_offset: last.offset };
-    }
+    }; else return normalize({
+        first: start.node,
+        first_offset: start.node_offset,
+        last: end.node,
+        last_offset: end.node_offset
+    });
 }
 
 function restore_range (range: Range): void {
@@ -42,7 +56,7 @@ function restore_range (range: Range): void {
 
 
 //TODO: for both elements make null "var_name" and "var_type"
-function splitAt(elem: HTMLSpanElement, pos: number, postInsert: boolean = false) {
+function splitAt(elem: HTMLSpanElement, pos: number, postInsert: boolean) {
     const clone = elem.cloneNode(true) as HTMLSpanElement;
     if (!postInsert) {
         clone.textContent = elem.textContent.slice(0, pos);
@@ -108,7 +122,7 @@ export function change(selection: Selection, format: Formatting): void {
         return (offset == 0) || (offset == start.textContent.length);
     };
     const cuttingEnd = (offset: number, end: HTMLSpanElement): boolean => {
-        return (offset == 0) || (offset == end.textContent.length)
+        return (offset == 0) || (offset == end.textContent.length);
     };
 
     const range = selection.getRangeAt(0);
@@ -116,11 +130,11 @@ export function change(selection: Selection, format: Formatting): void {
 
     if (first.isSameNode(last)) {
         const finalOffset = last_offset - first_offset;
-        if (!cuttingStart(first_offset, first)) splitAt(first, first_offset);
+        if (!cuttingStart(first_offset, first)) splitAt(first, first_offset, false);
         if (!cuttingEnd(finalOffset, last)) splitAt(last, finalOffset, true);
     } else {
-        if (!cuttingStart(first_offset, first)) splitAt(first, first_offset);
-        if (!cuttingEnd(last_offset, last)) splitAt(last, last_offset);
+        if (!cuttingStart(first_offset, first)) splitAt(first, first_offset, false);
+        if (!cuttingEnd(last_offset, last)) splitAt(last, last_offset, true);
     }
 
     const selected = getSelected(first, last);

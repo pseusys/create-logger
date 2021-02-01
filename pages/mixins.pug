@@ -1,0 +1,20 @@
+mixin presets(...names)
+    .tile
+        each name in names
+            .gr
+                .preset_example(id=name)=name
+                button.preset_button(name=name type="button") Apply
+
+mixin simple(...simple)
+    each bit in simple
+        .gr
+            input.term-changer(name=bit id=bit type="checkbox")
+            label.ins(for=bit)=bit
+
+mixin colors(position, subs)
+    .gr-in
+        select.term-changer(id=position+"color" name=position)
+            option(value="" selected hidden) Choose a color...
+            each color in colors
+                option(value=color)=color
+        label.ins(for=position+"color")=subs

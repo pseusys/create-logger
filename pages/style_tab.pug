@@ -1,0 +1,29 @@
+.tile-set-left
+    .tile
+        +colors('for', "Front color")
+        +colors('back', "Back color")
+    .tile
+        each style in styles
+            .gr
+                input.term-changer(id=style value=style name="sty" type="radio")
+                label.ins(for=style)=style
+    .tile
+        +simple('blink', 'cross', 'under', 'ita')
+
+.tile-set-center
+    +presets('error', 'warning', 'info', 'plain')
+    +presets('modern', 'beautiful', 'original', 'creative')
+
+.tile-set-right
+    .tile
+        .gr-in
+            .gr
+                input#is_variable(type="checkbox")
+                label.ins(for="is_variable") Is this a variable?
+            .gr-in
+                input#var_name(type="text" placeholder="Variable name")
+            .gr-in
+                input#var_type(type="text" list="types_list" placeholder="Variable type")
+                datalist#types_list
+                    each type in types
+                        option(value=type)

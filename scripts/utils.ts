@@ -39,7 +39,7 @@ declare global {
 
 type NodeInfo = { offset: number, node: Node, node_offset: number };
 
-if (typeof Range !== 'undefined') {
+if ((typeof Range !== 'undefined') && (typeof Selection !== 'undefined')) {
 
     function children(node: Element, nodes: Node[] = []): Node[] {
         node.childNodes.forEach((value: Node): void => {

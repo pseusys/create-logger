@@ -1,26 +1,3 @@
-mixin presets(...names)
-    .tile
-        each name in names
-            .gr
-                .preset_example(id=name)=name
-                button.preset_button(name=name type="button") Apply
-
-mixin simple(...simple)
-    each bit in simple
-        .gr
-            input.term-changer(name=bit id=bit type="checkbox")
-            label.ins(for=bit)=bit
-
-mixin colors(position, subs)
-    .gr-in
-        select.term-changer(id=position+"color" name=position)
-            option(value="" selected hidden) Choose a color...
-            each color in colors
-                option(value=color)=color
-        label.ins(for=position+"color")=subs
-
-
-
 #tab-links
     button#file-tab.tab-link(name="file-content") File
     button#style-tab.tab-link(name="style-content") Style
@@ -29,61 +6,11 @@ mixin colors(position, subs)
 
 #tab-contents
     form#file-content.tab-content
-        .tile-set-left
-            .tile
-                button#save(type="button") Save
-                label.ins(for="save") Save as file...
-            .tile
-                input#file(type="file")
-                label.ins(for="file") Load from file...
-
-        .tile-set-center
-        .tile-set-right
-            .tile
-                .gr
-                    select#translation
-                        each translation, tag in translations
-                            option(value=tag)=translation
-                    label.ins(for="translation") Select translation
-                .gr
-                    input#theme(type="checkbox")
-                    label.ins(for="theme") Light theme
-                .gr
-                    input#vars(type="checkbox")
-                    label.ins(for="vars") Use var names in preview
+        include file_tab
 
 
     form#style-content.tab-content
-
-        .tile-set-left
-            .tile
-                +colors('for', "Front color")
-                +colors('back', "Back color")
-            .tile
-                each style in styles
-                    .gr
-                        input.term-changer(id=style value=style name="sty" type="radio")
-                        label.ins(for=style)=style
-            .tile
-                +simple('blink', 'cross', 'under', 'ita')
-
-        .tile-set-center
-            +presets('error', 'warning', 'info', 'plain')
-            +presets('modern', 'beautiful', 'original', 'creative')
-
-        .tile-set-right
-            .tile
-                .gr-in
-                    .gr
-                        input#is_variable(type="checkbox")
-                        label.ins(for="is_variable") Is this a variable?
-                    .gr-in
-                        input#var_name(type="text" placeholder="Variable name")
-                    .gr-in
-                        input#var_type(type="text" list="types_list" placeholder="Variable type")
-                        datalist#types_list
-                            each type in types
-                                option(value=type)
+        include style_tab
 
 
     form#preview-content.tab-content
