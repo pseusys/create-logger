@@ -1,5 +1,5 @@
-import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../consts/constants";
-import { areArraysEqual, getSameElements } from "./utils";
+import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../core/constants";
+import { areArraysEqual, getSameElements } from "../core/utils";
 import { find_span_for_place, get_chosen_line_content } from "./terminal";
 
 type NodeEdges = { first: Node, last: Node, first_offset: number, last_offset: number };

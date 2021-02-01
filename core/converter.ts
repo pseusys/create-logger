@@ -1,4 +1,4 @@
-import { CLASS_CODES, DEFAULTS, getPostfix, getPrefix } from "../consts/constants";
+import { CLASS_CODES, DEFAULTS, getPostfix, getPrefix } from "./constants";
 import { areArraysEqual } from "./utils";
 
 export interface Entry {

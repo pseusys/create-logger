@@ -1,7 +1,8 @@
 import './imports'
 
-import { open_tab, reflect_selection } from "./tabs";
+import { open_tab } from "./tabs";
 import { choose_line, editable, selection_in_place, terminal } from "./terminal";
+import { reflect_selection } from "./style_tab";
 
 
 

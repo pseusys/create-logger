@@ -1,5 +1,5 @@
-import { convert, Entry } from "./converter";
-import { reflect_selection } from "./tabs";
+import { convert, Entry } from "../core/converter";
+import { reflect_selection } from "./style_tab";
 
 export const terminal = document.getElementById('terminal');
 export let editable = true;

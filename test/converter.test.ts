@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import * as converter from "../scripts/converter"
+import * as converter from "../core/converter"
 
 describe("Converter test", () => {
     let description: string;
