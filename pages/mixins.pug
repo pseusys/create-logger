@@ -1,9 +1,10 @@
-mixin presets(...names)
+mixin presets(names)
     .tile
-        each name in names
+        each cls, name in names
             .gr
-                .preset_example(id=name)=name
-                button.preset_button(name=name type="button") Apply
+                .preset-holder
+                    .preset-example(id=name class=cls)=name
+                button.preset-button(name=name type="button") Apply
 
 mixin simple(...simple)
     each bit in simple

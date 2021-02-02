@@ -1,4 +1,5 @@
-import { switchMode } from "./terminal";
+//FIXME
+import {switchMode, TERMINAL_STATE} from "./terminal";
 
 let active_tab: string;
 
@@ -10,9 +11,11 @@ export function open_tab(tab_link, tab_content) {
     for (const link of tab_links as HTMLCollectionOf<HTMLButtonElement>) link.classList.remove('active');
 
     document.getElementById(tab_content).style.display = 'flex';
-    document.getElementById(tab_link).classList.add('active');
+    const link = document.getElementById(tab_link);
+    link.classList.add('active');
 
     active_tab = tab_content;
+    switchMode(TERMINAL_STATE[link.getAttribute('name')]);
 }
 
 document.getElementById('tab-links').onclick = (event) => {
@@ -25,11 +28,10 @@ document.getElementById('tab-links').onclick = (event) => {
         if (target.classList.contains('collapsing')) {
             tab_contents.style.display = 'none';
             header.style.height = 'auto';
-            switchMode(false);
         } else {
+            //TODO: revise later alongside with layouting
             tab_contents.style.display = '';
             header.style.height = '';
-            switchMode(true);
         }
     }
 };

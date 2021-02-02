@@ -14,12 +14,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install and Build 🔧
+      - name: Install 🔧
         run: |
           npm install
-          npm run build
 
-      - name: Test 🩺
+      - name: Test ⚙
         run: |
           npm run test
 
@@ -33,7 +32,7 @@ jobs:
       with:
         persist-credentials: false
     
-    - name: Install and Build 🔧
+    - name: Install and Build 🛠
       run: |
         npm install
         npm run build

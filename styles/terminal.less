@@ -38,10 +38,14 @@
   flex-grow: 1;
 }
 
+.chosen {
+  cursor: default !important;
+}
+
 
 
 :not([class~=chosen])+[class~=line-content] {
-  user-select: none;
+  user-select: none !important;
   // background: aqua;
 }
 

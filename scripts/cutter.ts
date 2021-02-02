@@ -106,16 +106,12 @@ interface Formatting {
     value: string | boolean;
 }
 
-function changeClass(elem: Element, name: string, val: string): void {
-    const new_name = name + SEPARATOR + val;
-    const same_class = [...elem.classList].find((value: string): boolean => {
-        return value.startsWith(name);
-    });
-    if (!!same_class) elem.classList.replace(same_class, new_name);
-    else elem.classList.add(new_name);
+export function style (selection: Selection | HTMLDivElement, format?: Formatting): void {
+    if (selection instanceof HTMLDivElement) applyFormatting(selection, format);
+    else cut(selection, format);
 }
 
-export function change(selection: Selection, format: Formatting): void {
+function cut (selection: Selection, format?: Formatting): void {
     if (selection.isCollapsed) return;
 
     const cuttingStart = (offset: number, start: HTMLSpanElement): boolean => {
@@ -138,31 +134,46 @@ export function change(selection: Selection, format: Formatting): void {
     }
 
     const selected = getSelected(first, last);
-    for (const child of selected)
-        if (multiplePrefix(format.type)) changeClass(child, format.type, format.value as string);
-        else child.classList.toggle(format.type, format.value as boolean);
+    for (const child of selected) applyFormatting(child, format);
 
     joinAround(selected);
     restore_range(range);
 }
 
+function applyFormatting (elem: HTMLElement, format?: Formatting) {
+    if (format == null) elem.className = "";
+    else {
+        if (multiplePrefix(format.type)) {
+            const new_name = format.type + SEPARATOR + format.value;
+            const same_class = [...elem.classList].find((value: string): boolean => {
+                return value.startsWith(format.type);
+            });
+            if (!!same_class) elem.classList.replace(same_class, new_name);
+            else elem.classList.add(new_name);
+        }
+        else elem.classList.toggle(format.type, format.value as boolean);
+    }
+}
 
 
-export function getCommonClasses(selection: Selection, single?: Element): string[] | null {
-    if (single) return [...single.classList];
+
+export function getCommonClasses(selection?: Selection, single?: HTMLDivElement): string[] | null {
+    let base: HTMLElement[];
+    if (!!single) base = [single];
     else {
         const { first, last } = parse_range(selection.getRangeAt(0), false);
-        const multiple = getSelected(first, last).map((value): string[] => {
-            const classes = [...value.classList];
-            for (const def in DEFAULTS) {
-                const target = classes.find((val) => { return getPrefix(val) == def; });
-                if (!target) classes.push(def + SEPARATOR + DEFAULTS[def]);
-            }
-            return classes;
-        });
-        if (multiple.length == 0) return null;
-        return multiple.reduce((prev: string[], value: string[]): string[] => {
-            return getSameElements(prev, value);
-        }, multiple[0]);
+        base = getSelected(first, last);
     }
+    const multiple = base.map((value: HTMLElement): string[] => {
+        const classes = [...value.classList];
+        for (const def in DEFAULTS) {
+            const target = classes.find((val) => { return getPrefix(val) == def; });
+            if (!target) classes.push(def + SEPARATOR + DEFAULTS[def]);
+        }
+        return classes;
+    });
+    if (multiple.length == 0) return null;
+    return multiple.reduce((prev: string[], value: string[]): string[] => {
+        return getSameElements(prev, value);
+    }, multiple[0]);
 }

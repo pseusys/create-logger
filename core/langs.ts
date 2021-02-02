@@ -10,7 +10,7 @@ export const TYPES = {
     char: "Character",
     string: "String",
     int_array: "Array of integers",
-    string_array: "Array strings"
+    string_array: "Array of strings"
 }
 
 

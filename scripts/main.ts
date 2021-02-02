@@ -1,14 +1,16 @@
 import './imports'
 
-import { open_tab } from "./tabs";
-import { choose_line, editable, selection_in_place, terminal } from "./terminal";
-import { reflect_selection } from "./style_tab";
-
+import {open_tab} from "./tabs";
+import {choose_line, mode, selection_in_place, terminal, TERMINAL_STATE} from "./terminal";
+import {reflect_selection, restorePresets} from "./style_tab";
+import {check} from "./storer";
 
 
 window.onload = () => {
     open_tab('style-tab', 'style-content');
     choose_line(terminal.firstElementChild);
+    restorePresets();
+    check();
 }
 
 
@@ -27,8 +29,9 @@ document.ondrop = (event) => {
 
 document.onselectionchange = () => {
     const selection = document.getSelection();
-    if (!editable || !selection_in_place(selection)) return;
+    if ((mode != TERMINAL_STATE.STYLE) || !selection_in_place(selection)) return;
     reflect_selection(selection);
+
 }
 
 

@@ -11,19 +11,20 @@
         +simple('blink', 'cross', 'under', 'ita')
 
 .tile-set-center
-    +presets('error', 'warning', 'info', 'plain')
-    +presets('modern', 'beautiful', 'original', 'creative')
+    +presets({ error: "back-red sty-bold", warning: "for-yellow", info: "for-blue", plain: "" })
+    //TODO: replace following with values read from cookies.
+    +presets({ modern: "", beautiful: "", original: "", creative: "" })
 
 .tile-set-right
     .tile
         .gr-in
             .gr
-                input#is_variable(type="checkbox")
-                label.ins(for="is_variable") Is this a variable?
+                input#is-variable(type="checkbox")
+                label.ins(for="is-variable") Is this a variable?
             .gr-in
-                input#var_name(type="text" placeholder="Variable name")
+                input#var-name(type="text" placeholder="Variable name")
             .gr-in
-                input#var_type(type="text" list="types_list" placeholder="Variable type")
-                datalist#types_list
+                input#var-type(type="text" list="types-list" placeholder="Variable type")
+                datalist#types-list
                     each type in types
                         option(value=type)

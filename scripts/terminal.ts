@@ -1,11 +1,9 @@
+//FIXME
 import { convert, Entry } from "../core/converter";
 import { reflect_selection } from "./style_tab";
 
+
 export const terminal = document.getElementById('terminal');
-export let editable = true;
-let editableHTML: string[];
-
-
 
 terminal.onkeydown = (event) => {
     const selection = document.getSelection();
@@ -33,6 +31,70 @@ terminal.onkeydown = (event) => {
         event.preventDefault();
     }
 };
+
+terminal.onclick = (event) => {
+    const target = event.target as HTMLElement;
+    //if (!target.parentElement.classList.contains('line') || !editable) return;
+    if (target.id === 'line-adder') choose_line(create_line(null, target.parentElement as HTMLDivElement));
+    else if (target.classList.contains('line-number')) choose_line(target.parentElement);
+};
+
+
+
+type TERMINAL_STATE = "FILE" | "STYLE" | "PREVIEW" | "CODE";
+export const TERMINAL_STATE = {
+    get FILE(): TERMINAL_STATE { return "FILE"; },
+    get STYLE(): TERMINAL_STATE { return "STYLE"; },
+    get PREVIEW(): TERMINAL_STATE { return "PREVIEW"; },
+    get CODE(): TERMINAL_STATE { return "CODE"; },
+}
+
+export let mode = TERMINAL_STATE.STYLE;
+export let editableHTML: string[];
+const lineAdder = document.getElementById('line-adder');
+
+export function switchMode(newMode: TERMINAL_STATE): void {
+    const line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
+    const line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
+    exitMode(mode, line_numbers, line_contents);
+    enterMode(newMode, line_numbers, line_contents);
+    mode = newMode;
+}
+
+function exitMode (oldMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], line_contents: HTMLDivElement[]): void {
+    disableAndClear();
+    switch (oldMode) {
+        case TERMINAL_STATE.FILE:
+        case TERMINAL_STATE.STYLE:
+            editableHTML = [];
+            for (const content of line_contents) editableHTML.push(content.innerHTML);
+        default:
+            for (const content of line_contents) content.style.userSelect = 'auto';
+            for (const number of line_numbers) number.style.cursor = 'default';
+            lineAdder.parentElement.style.display = 'none';
+            break;
+    }
+}
+
+function enterMode (newMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], line_contents: HTMLDivElement[]): void {
+    switch (newMode) {
+        case TERMINAL_STATE.FILE:
+            for (const content of line_contents) content.style.userSelect = 'none';
+            for (const content of line_contents) content.innerHTML = editableHTML.shift();
+            break;
+        case TERMINAL_STATE.STYLE:
+            for (const number of line_numbers) number.style.cursor = 'pointer';
+            lineAdder.parentElement.style.display = 'flex';
+            for (const content of line_contents) content.innerHTML = editableHTML.shift();
+            break;
+        case TERMINAL_STATE.PREVIEW:
+            for (const content of line_contents) content.innerHTML = convert(htmlToEntries([...editableHTML].shift()));
+            break;
+        case TERMINAL_STATE.CODE:
+            for (const content of line_contents) content.innerHTML = "";
+            break;
+    }
+}
 
 
 
@@ -85,47 +147,17 @@ function create_line (after: HTMLDivElement = null, before: HTMLDivElement = nul
     return line;
 }
 
-terminal.onclick = (event) => {
-    const target = event.target as HTMLElement;
-    if (!target.parentElement.classList.contains('line') || !editable) return;
-    if (target.id === 'line-adder') choose_line(create_line(null, target.parentElement as HTMLDivElement));
-    else if (target.classList.contains('line-number')) choose_line(target.parentElement);
-};
 
 
-
-function htmlToEntries(children: HTMLCollection): Entry[] {
-    const entries = [];
-    for (const child of children) entries.push({
-        classes: [...child.classList],
-        value: (child as HTMLSpanElement).textContent
+function htmlToEntries(inner: string): Entry[] {
+    const div = document.createElement('div');
+    div.innerHTML = inner;
+    return [...div.children].map((value: HTMLSpanElement): Entry => {
+        return {
+            classes: [...value.classList],
+            value: value.textContent
+        };
     });
-    return entries;
-}
-
-export function switchMode(edit: boolean): void {
-    const line_contents = document.getElementsByClassName('line-content');
-    const line_numbers = document.getElementsByClassName('line-number');
-
-    if (editable && !edit) {
-        disableAndClear();
-        editableHTML = [];
-        for (const content of line_contents) {
-            editableHTML.push(content.innerHTML);
-            content.innerHTML = convert(htmlToEntries(content.children));
-        }
-        for (const content of line_contents as HTMLCollectionOf<HTMLDivElement>) content.style.userSelect = 'auto';
-        for (const number of line_numbers as HTMLCollectionOf<HTMLDivElement>) number.style.cursor = 'default';
-        document.getElementById('line-adder').parentElement.style.display = 'none';
-
-    } else if (!editable && edit) {
-        for (const content of line_contents) content.innerHTML = editableHTML.shift();
-        for (const content of line_contents as HTMLCollectionOf<HTMLDivElement>) content.style.userSelect = '';
-        for (const number of line_numbers as HTMLCollectionOf<HTMLDivElement>) number.style.cursor = '';
-        document.getElementById('line-adder').parentElement.style.display = '';
-
-    } else if (!editable && !edit) for (const content of line_contents) content.innerHTML = "";
-    editable = edit;
 }
 
 

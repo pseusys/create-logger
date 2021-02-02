@@ -3,6 +3,7 @@ import * as converter from "../core/converter"
 
 describe("Converter test", () => {
     let description: string;
+    //TODO: replace with reading from file test.
     const entry_list: converter.Entry[] = [];
     describe("Should make up test string", () => {
         description = "\"This\" (in bold red) ";
