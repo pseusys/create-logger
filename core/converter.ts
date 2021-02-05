@@ -17,6 +17,7 @@ export const ESCAPE_TERMINATE = "0";
 function classesToStyles(classes: string[]): string[] {
     const styles: string[] = [];
     for (const cls of classes) {
+        if (!Object.keys(CLASS_CODES).includes(cls)) continue;
         if (DEFAULTS[getPrefix(cls)] == getPostfix(cls)) continue;
         styles.push(CLASS_CODES[cls]);
     }

@@ -18,13 +18,10 @@
 .tile-set-right
     .tile
         .gr-in
-            .gr
-                input#is-variable(type="checkbox")
-                label.ins(for="is-variable") Is this a variable?
             .gr-in
-                input#var-name(type="text" placeholder="Variable name")
+                input#var-name.variable(type="text" placeholder="Variable name")
             .gr-in
-                input#var-type(type="text" list="types-list" placeholder="Variable type")
+                input#var-type.variable(type="text" list="types-list" disabled="disabled" placeholder="Variable type")
                 datalist#types-list
                     each type in types
                         option(value=type)

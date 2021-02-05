@@ -1,18 +1,21 @@
-import { style, getCommonClasses } from "./cutter";
-import { selection_in_place, switchMode, TERMINAL_STATE } from "./terminal";
+import {style, getCommonClasses, getCollapse} from "./cutter";
+import {get_focus, range_in_place, switchMode, TERMINAL_STATE} from "./terminal";
 import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix } from "../core/constants";
 import {get, set} from "./storer";
 
 
-document.getElementById('style-content').onclick = (event) => {
+function globalHandler (event: Event): void {
     const target = event.target as HTMLElement;
+    const selection = window.getSelection();
+    if (selection.rangeCount == 0) return;
+    let r = selection.getRangeAt(0);
+    if (!range_in_place(r) && !!get_focus()) r = get_focus();
+    else r = null;
 
     if (target.classList.contains('term-changer') || target.classList.contains('preset-button')) {
-            const selection = focusedPreset ?? document.getSelection();
-            if (selection instanceof Selection)
-                if (!selection_in_place(selection) || (selection.rangeCount == 0)) return;
-            if (target.classList.contains('term-changer')) apply_style(selection, target as HTMLInputElement);
-            else apply_styles(selection, target as HTMLButtonElement);
+        const range = focusedPreset ?? r;
+        if (target.classList.contains('term-changer')) apply_style(range, target as HTMLInputElement);
+        else apply_styles(range, target as HTMLButtonElement);
 
     } else if (target.classList.contains('preset-example')) {
         if (!!focusedPreset && (target.id == focusedPreset.id)) {
@@ -22,8 +25,16 @@ document.getElementById('style-content').onclick = (event) => {
         //TODO: add some css for focused preset.
         switchMode(focusedPreset == null ? TERMINAL_STATE.STYLE : TERMINAL_STATE.FILE);
         reflect_selection(null, focusedPreset);
+
+    } else if (target.classList.contains('variable')) {
+        const field = event.target as HTMLInputElement;
+        if (field.id == 'var-name') variables[1].disabled = (field.value == "");
+        const collapse = getCollapse(r);
+        if (!!collapse) collapse.setAttribute(attr(field.id), field.value);
     }
 }
+
+document.getElementById('style-content').onclick = globalHandler;
 
 
 
@@ -31,20 +42,19 @@ document.getElementById('style-content').onclick = (event) => {
 
 const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLInputElement[];
 
-export function reflect_selection (selection?: Selection, single?: HTMLDivElement) {
-    if (!selection == !single) drop_term_changers();
-    else {
-        const classes = getCommonClasses(selection, single);
+export function reflect_selection (range?: Range, single?: HTMLDivElement) {
+    drop_term_changers();
+    if (!range != !single) {
+        const classes = getCommonClasses(range, single);
         if (!!classes) set_term_changers(classes);
-        else drop_term_changers();
     }
 }
 
-function apply_style (selection: Selection | HTMLDivElement, elem: HTMLInputElement): void {
+function apply_style (range: Range | HTMLDivElement, elem: HTMLInputElement): void {
     const name = elem.getAttribute('name');
     if (elem.getAttribute('type') == 'checkbox')
-        style(selection, { type: name, value: elem.checked });
-    else style(selection, { type: name, value: elem.value });
+        style(range, { type: name, value: elem.checked });
+    else style(range, { type: name, value: elem.value });
 }
 
 export function drop_term_changers (): void {
@@ -52,8 +62,6 @@ export function drop_term_changers (): void {
 }
 
 export function set_term_changers (classes: string[]): void {
-    drop_term_changers();
-
     for (const cls of classes) {
         if (!Object.keys(CLASS_CODES).includes(cls)) continue;
         const term_changer = [...term_changers].filter((value: HTMLInputElement): boolean => {
@@ -71,17 +79,17 @@ export function set_term_changers (classes: string[]): void {
 
 
 
-// Middle section: presets controls:
+// Middle section: presets controls.
 
 let focusedPreset: HTMLDivElement = null;
 
-function apply_styles (selection: Selection | HTMLDivElement, elem: HTMLButtonElement): void {
-    style(selection, null);
+function apply_styles (range: Range | HTMLDivElement, elem: HTMLButtonElement): void {
+    style(range, null);
     const temp = document.getElementById(elem.getAttribute('name')) as HTMLDivElement;
     [...temp.classList].forEach((value: string): void => {
         const type = getPrefix(value);
-        if (multiplePrefix(type)) style(selection, { type: type, value: getPostfix(value) });
-        else style(selection, { type: type, value: true });
+        if (multiplePrefix(type)) style(range, { type: type, value: getPostfix(value) });
+        else style(range, { type: type, value: true });
     });
 }
 
@@ -94,4 +102,37 @@ export function restorePresets () {
         const savedValue = get(value.id) as string;
         if (!!savedValue) value.className = savedValue;
     });
+}
+
+
+
+// Right section: variable controls.
+
+const variables = [document.getElementById('var-name'), document.getElementById('var-type')] as HTMLInputElement[];
+variables.forEach((value: HTMLInputElement): void => {
+    value.oninput = globalHandler;
+});
+let currentVariable: HTMLSpanElement; // on one of the variables gains focus, preserves selected node.
+
+export function reflectVariable (range: Range): void {
+    const collapse = getCollapse(range);
+    dropVariables();
+    if (!!collapse) {
+        variables.forEach((value: HTMLInputElement): void => {
+            value.value = collapse.getAttribute(attr(value.id));
+        });
+        variables[0].disabled = false;
+        variables[1].disabled &&= (variables[0].value.length == 0);
+    }
+}
+
+function dropVariables (): void {
+    variables.forEach((value: HTMLInputElement): void => {
+        value.value = "";
+        value.disabled = true;
+    })
+}
+
+function attr (attribute: string): string {
+    return 'data-' + attribute;
 }

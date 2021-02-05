@@ -19,7 +19,7 @@ terminal.onkeydown = (event) => {
             if ((range.startContainer.textContent == '') && (chosen_children.length == 1)) {
                 if (chosen_children[0].classList.length != 0) {
                     chosen_children[0].className = '';
-                    reflect_selection(selection);
+                    reflect_selection(selection.getRangeAt(0));
                 }
                 event.preventDefault();
             }
@@ -33,11 +33,36 @@ terminal.onkeydown = (event) => {
 };
 
 terminal.onclick = (event) => {
+    if (!!saved_focus) {
+        const selection = document.getSelection();
+        reset_focus(selection);
+    }
+
     const target = event.target as HTMLElement;
-    //if (!target.parentElement.classList.contains('line') || !editable) return;
     if (target.id === 'line-adder') choose_line(create_line(null, target.parentElement as HTMLDivElement));
     else if (target.classList.contains('line-number')) choose_line(target.parentElement);
 };
+
+
+
+// FIXME: How to reflect visually this saved Range? Honestly, I don't know...
+let saved_focus: Range = null;
+
+export function save_focus (selection: Selection) {
+    saved_focus = selection.getRangeAt(0);
+}
+
+export function get_focus (): Range {
+    return saved_focus;
+}
+
+function reset_focus (selection: Selection) {
+    if (!selection_in_place(selection) && range_in_place(saved_focus)) {
+        selection.removeAllRanges();
+        selection.addRange(saved_focus);
+        saved_focus = null;
+    }
+}
 
 
 
@@ -170,9 +195,14 @@ export function get_chosen_line_content (): HTMLDivElement {
     return get_chosen_line().lastElementChild as HTMLDivElement;
 }
 
-export function selection_in_place (selection: Selection): boolean {
-    const selectionParent = selection.getRangeAt(0).commonAncestorContainer;
+export function range_in_place (range: Range): boolean {
+    const selectionParent = range.commonAncestorContainer;
     return get_chosen_line_content().contains(selectionParent);
+}
+
+export function selection_in_place (selection: Selection): boolean {
+    if (selection.rangeCount == 0) return false;
+    return range_in_place(selection.getRangeAt(0));
 }
 
 export function find_span_for_place (node: Node): HTMLSpanElement {

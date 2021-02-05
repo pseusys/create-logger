@@ -2,6 +2,7 @@ import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../core/constant
 import { areArraysEqual, getSameElements } from "../core/utils";
 import { find_span_for_place, get_chosen_line_content } from "./terminal";
 
+
 type NodeEdges = { first: Node, last: Node, first_offset: number, last_offset: number };
 type SpanEdges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
 
@@ -106,13 +107,13 @@ interface Formatting {
     value: string | boolean;
 }
 
-export function style (selection: Selection | HTMLDivElement, format?: Formatting): void {
-    if (selection instanceof HTMLDivElement) applyFormatting(selection, format);
-    else cut(selection, format);
+export function style (range: Range | HTMLDivElement, format?: Formatting): void {
+    if (range instanceof HTMLDivElement) applyFormatting(range, format);
+    else cut(range, format);
 }
 
-function cut (selection: Selection, format?: Formatting): void {
-    if (selection.isCollapsed) return;
+function cut (range: Range, format?: Formatting): void {
+    if (range.collapsed) return;
 
     const cuttingStart = (offset: number, start: HTMLSpanElement): boolean => {
         return (offset == 0) || (offset == start.textContent.length);
@@ -121,7 +122,6 @@ function cut (selection: Selection, format?: Formatting): void {
         return (offset == 0) || (offset == end.textContent.length);
     };
 
-    const range = selection.getRangeAt(0);
     const { first, last, first_offset, last_offset } = parse_range(range, true);
 
     if (first.isSameNode(last)) {
@@ -157,11 +157,12 @@ function applyFormatting (elem: HTMLElement, format?: Formatting) {
 
 
 
-export function getCommonClasses(selection?: Selection, single?: HTMLDivElement): string[] | null {
+export function getCommonClasses(range?: Range, single?: HTMLDivElement): string[] | null {
+    if (!range == !single) return null;
     let base: HTMLElement[];
     if (!!single) base = [single];
     else {
-        const { first, last } = parse_range(selection.getRangeAt(0), false);
+        const { first, last } = parse_range(range, false);
         base = getSelected(first, last);
     }
     const multiple = base.map((value: HTMLElement): string[] => {
@@ -176,4 +177,10 @@ export function getCommonClasses(selection?: Selection, single?: HTMLDivElement)
     return multiple.reduce((prev: string[], value: string[]): string[] => {
         return getSameElements(prev, value);
     }, multiple[0]);
+}
+
+export function getCollapse (range: Range): HTMLSpanElement | null {
+    const { first, last } = parse_range(range, false);
+    if (first == last) return first;
+    else return null;
 }
