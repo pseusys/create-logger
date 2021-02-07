@@ -1,4 +1,4 @@
-import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../core/constants";
+import {DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES} from "../core/constants";
 import { areArraysEqual, getSameElements } from "../core/utils";
 import { find_span_for_place, get_chosen_line_content } from "./terminal";
 
@@ -56,8 +56,8 @@ function restore_range (range: Range): void {
 
 
 
-//TODO: for both elements make null "var_name" and "var_type"
 function splitAt(elem: HTMLSpanElement, pos: number, postInsert: boolean) {
+    elem.classList.remove(...Object.keys(VAR_NAMES));
     const clone = elem.cloneNode(true) as HTMLSpanElement;
     if (!postInsert) {
         clone.textContent = elem.textContent.slice(0, pos);
@@ -70,7 +70,6 @@ function splitAt(elem: HTMLSpanElement, pos: number, postInsert: boolean) {
     }
 }
 
-//TODO: for both elements make null "var_name" and "var_type"
 function joinAround(selected: HTMLSpanElement[]): void {
     if (selected.length == 0) return;
 
@@ -84,6 +83,7 @@ function joinAround(selected: HTMLSpanElement[]): void {
         if (areArraysEqual([...value.classList], [...friend.classList])) {
             value.textContent = friend.textContent + value.textContent;
             friend.remove();
+            value.classList.remove(...Object.keys(VAR_NAMES));
         }
     });
 }
@@ -105,6 +105,11 @@ function getSelected (first: HTMLSpanElement, last: HTMLSpanElement): HTMLSpanEl
 interface Formatting {
     type: string;
     value: string | boolean;
+}
+
+export function get_selected (range: Range): HTMLSpanElement[] {
+    const { first, last } = parse_range(range, false);
+    return getSelected(first, last);
 }
 
 export function style (range: Range | HTMLDivElement, format?: Formatting): void {
@@ -161,10 +166,7 @@ export function getCommonClasses(range?: Range, single?: HTMLDivElement): string
     if (!range == !single) return null;
     let base: HTMLElement[];
     if (!!single) base = [single];
-    else {
-        const { first, last } = parse_range(range, false);
-        base = getSelected(first, last);
-    }
+    else base = get_selected(range);
     const multiple = base.map((value: HTMLElement): string[] => {
         const classes = [...value.classList];
         for (const def in DEFAULTS) {

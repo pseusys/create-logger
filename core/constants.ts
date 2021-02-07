@@ -39,6 +39,11 @@ export const PREFIXES = {
     ita: "3"
 }
 
+export const VAR_NAMES = {
+    "var-name": "data-var-name",
+    "var-type": "data-var-type"
+}
+
 
 
 export function getPrefix (cls) {

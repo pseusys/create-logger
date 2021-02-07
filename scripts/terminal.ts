@@ -1,6 +1,7 @@
 //FIXME
 import { convert, Entry } from "../core/converter";
-import { reflect_selection } from "./style_tab";
+import {drop_term_changers, reflect_selection} from "./style_tab";
+import {get_selected} from "./cutter";
 
 
 export const terminal = document.getElementById('terminal');
@@ -35,7 +36,7 @@ terminal.onkeydown = (event) => {
 terminal.onclick = (event) => {
     if (!!saved_focus) {
         const selection = document.getSelection();
-        reset_focus(selection);
+        set_focus(selection);
     }
 
     const target = event.target as HTMLElement;
@@ -48,20 +49,31 @@ terminal.onclick = (event) => {
 // FIXME: How to reflect visually this saved Range? Honestly, I don't know...
 let saved_focus: Range = null;
 
-export function save_focus (selection: Selection) {
-    saved_focus = selection.getRangeAt(0);
-}
-
 export function get_focus (): Range {
     return saved_focus;
 }
 
-function reset_focus (selection: Selection) {
+function set_focus (selection: Selection) {
     if (!selection_in_place(selection) && range_in_place(saved_focus)) {
         selection.removeAllRanges();
         selection.addRange(saved_focus);
-        saved_focus = null;
     }
+}
+
+export function reflect_nodes (range: Range): void {
+    clear_selected();
+    get_selected(range).forEach((value: HTMLSpanElement): void => {
+        value.classList.add('selected');
+    });
+    saved_focus = range;
+}
+
+function clear_selected () {
+    saved_focus = null;
+    const chosen = get_chosen_line_content();
+    if (!!chosen) [...chosen.children].forEach((value) => {
+        value.classList.remove('selected');
+    });
 }
 
 
@@ -89,8 +101,9 @@ export function switchMode(newMode: TERMINAL_STATE): void {
 function exitMode (oldMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], line_contents: HTMLDivElement[]): void {
     disableAndClear();
     switch (oldMode) {
-        case TERMINAL_STATE.FILE:
         case TERMINAL_STATE.STYLE:
+            clear_selected();
+            drop_term_changers();
             editableHTML = [];
             for (const content of line_contents) editableHTML.push(content.innerHTML);
         default:
@@ -102,18 +115,21 @@ function exitMode (oldMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], line
 }
 
 function enterMode (newMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], line_contents: HTMLDivElement[]): void {
+    const html_copy = [...editableHTML];
     switch (newMode) {
         case TERMINAL_STATE.FILE:
             for (const content of line_contents) content.style.userSelect = 'none';
-            for (const content of line_contents) content.innerHTML = editableHTML.shift();
+            for (const content of line_contents) content.innerHTML = html_copy.shift();
             break;
         case TERMINAL_STATE.STYLE:
+            for (const content of line_contents) content.style.userSelect = 'none';
             for (const number of line_numbers) number.style.cursor = 'pointer';
             lineAdder.parentElement.style.display = 'flex';
             for (const content of line_contents) content.innerHTML = editableHTML.shift();
+            choose_line(terminal.firstElementChild);
             break;
         case TERMINAL_STATE.PREVIEW:
-            for (const content of line_contents) content.innerHTML = convert(htmlToEntries([...editableHTML].shift()));
+            for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
             for (const content of line_contents) content.innerHTML = "";
@@ -124,11 +140,12 @@ function enterMode (newMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], lin
 
 
 function disableAndClear() {
-    const line_contents = document.getElementsByClassName('line-content');
-    for (const content of line_contents) {
+    const content = get_chosen_line_content();
+    if (!!content) {
         content.setAttribute('contenteditable', 'false');
         for (const span of content.children) span.setAttribute('contenteditable', 'false');
     }
+    clear_selected();
 
     const line_numbers = document.getElementsByClassName('line-number');
     for (const number of line_numbers) number.classList.remove('chosen');
@@ -187,17 +204,23 @@ function htmlToEntries(inner: string): Entry[] {
 
 
 
-function get_chosen_line (): HTMLDivElement {
-    return document.getElementsByClassName('chosen')[0].parentElement as HTMLDivElement;
+function get_chosen_line (): HTMLDivElement | null {
+    const chosen = document.getElementsByClassName('chosen')[0];
+    if (!!chosen ) return chosen.parentElement as HTMLDivElement;
+    else return null;
 }
 
-export function get_chosen_line_content (): HTMLDivElement {
-    return get_chosen_line().lastElementChild as HTMLDivElement;
+export function get_chosen_line_content (): HTMLDivElement | null {
+    const line = get_chosen_line();
+    if (!!line) return get_chosen_line().lastElementChild as HTMLDivElement;
+    else return null;
 }
 
 export function range_in_place (range: Range): boolean {
     const selectionParent = range.commonAncestorContainer;
-    return get_chosen_line_content().contains(selectionParent);
+    const chosen = get_chosen_line_content();
+    if (!chosen) return false;
+    else return get_chosen_line_content().contains(selectionParent);
 }
 
 export function selection_in_place (selection: Selection): boolean {
@@ -206,7 +229,7 @@ export function selection_in_place (selection: Selection): boolean {
 }
 
 export function find_span_for_place (node: Node): HTMLSpanElement {
-    if (node.nodeType == Node.TEXT_NODE) return node.parentElement;
+    if ((node.nodeType == Node.TEXT_NODE) || (node.nodeName == "BR")) return node.parentElement;
     if (node.nodeName != 'SPAN') throw new DOMException("Selected wrong element: " + node.nodeName);
     return node as HTMLSpanElement;
 }

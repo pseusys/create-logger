@@ -1,6 +1,6 @@
 import {style, getCommonClasses, getCollapse} from "./cutter";
 import {get_focus, range_in_place, switchMode, TERMINAL_STATE} from "./terminal";
-import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix } from "../core/constants";
+import {CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES} from "../core/constants";
 import {get, set} from "./storer";
 
 
@@ -10,7 +10,6 @@ function globalHandler (event: Event): void {
     if (selection.rangeCount == 0) return;
     let r = selection.getRangeAt(0);
     if (!range_in_place(r) && !!get_focus()) r = get_focus();
-    else r = null;
 
     if (target.classList.contains('term-changer') || target.classList.contains('preset-button')) {
         const range = focusedPreset ?? r;
@@ -30,7 +29,7 @@ function globalHandler (event: Event): void {
         const field = event.target as HTMLInputElement;
         if (field.id == 'var-name') variables[1].disabled = (field.value == "");
         const collapse = getCollapse(r);
-        if (!!collapse) collapse.setAttribute(attr(field.id), field.value);
+        if (!!collapse) collapse.setAttribute(VAR_NAMES[field.id], field.value);
     }
 }
 
@@ -108,18 +107,18 @@ export function restorePresets () {
 
 // Right section: variable controls.
 
-const variables = [document.getElementById('var-name'), document.getElementById('var-type')] as HTMLInputElement[];
-variables.forEach((value: HTMLInputElement): void => {
-    value.oninput = globalHandler;
-});
-let currentVariable: HTMLSpanElement; // on one of the variables gains focus, preserves selected node.
+const variables = Object.keys(VAR_NAMES).map((value: string): HTMLInputElement => {
+    const input = document.getElementById(value);
+    input.oninput = globalHandler;
+    return input as HTMLInputElement;
+}) as HTMLInputElement[];
 
 export function reflectVariable (range: Range): void {
     const collapse = getCollapse(range);
     dropVariables();
     if (!!collapse) {
         variables.forEach((value: HTMLInputElement): void => {
-            value.value = collapse.getAttribute(attr(value.id));
+            value.value = collapse.getAttribute(VAR_NAMES[value.id]);
         });
         variables[0].disabled = false;
         variables[1].disabled &&= (variables[0].value.length == 0);
@@ -131,8 +130,4 @@ function dropVariables (): void {
         value.value = "";
         value.disabled = true;
     })
-}
-
-function attr (attribute: string): string {
-    return 'data-' + attribute;
 }

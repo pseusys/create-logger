@@ -1,7 +1,7 @@
 import './imports'
 
 import {open_tab} from "./tabs";
-import {choose_line, mode, save_focus, selection_in_place, terminal, TERMINAL_STATE} from "./terminal";
+import {choose_line, mode, reflect_nodes, selection_in_place, terminal, TERMINAL_STATE} from "./terminal";
 import {reflect_selection, reflectVariable, restorePresets} from "./style_tab";
 import {check} from "./storer";
 
@@ -30,9 +30,10 @@ document.ondrop = (event) => {
 document.onselectionchange = () => {
     const selection = document.getSelection();
     if ((mode != TERMINAL_STATE.STYLE) || !selection_in_place(selection)) return;
-    save_focus(selection);
-    reflect_selection(selection.getRangeAt(0));
-    reflectVariable(selection.getRangeAt(0));
+    const range = selection.getRangeAt(0);
+    reflect_nodes(range);
+    reflect_selection(range);
+    reflectVariable(range);
 }
 
 

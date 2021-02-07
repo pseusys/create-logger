@@ -39,14 +39,18 @@
 }
 
 .chosen {
-  cursor: default !important;
+  cursor: default;
 }
 
 
 
-:not([class~=chosen])+[class~=line-content] {
-  user-select: none !important;
+:not(.chosen)+.line-content {
+  user-select: none;
   // background: aqua;
+}
+
+.selected {
+  box-shadow: 0 .5rem .25rem -.25rem white;
 }
 
 
