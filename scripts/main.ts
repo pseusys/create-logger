@@ -38,12 +38,8 @@ document.onselectionchange = () => {
 
 
 
-
-
-
 document.oncopy = (event) => {
     const selection = document.getSelection();
-
     if (!!selection) {
         const str = getClearText(selection.getRangeAt(0));
         const refined = str.replace(/\u00a0/g, " ");
@@ -51,3 +47,16 @@ document.oncopy = (event) => {
         event.preventDefault();
     }
 };
+
+document.onpaste = (event) => {
+    const selection = document.getSelection();
+    if (!!selection && selection.isCollapsed) {
+        const str = event.clipboardData.getData('text/plain');
+        const refined = str.replace(/\r?\n|\r/g, "");
+        const range = selection.getRangeAt(0);
+        const text = range.commonAncestorContainer;
+        const offset = range._getRangeStartInNode(text).offset;
+        text.textContent = text.textContent.slice(0, offset) + refined + text.textContent.slice(offset);
+    }
+    event.preventDefault();
+}

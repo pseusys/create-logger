@@ -1,5 +1,5 @@
 //FIXME
-import {switchMode, TERMINAL_STATE} from "./terminal";
+import {switch_mode, TERMINAL_STATE} from "./terminal";
 
 let active_tab: string;
 
@@ -15,7 +15,7 @@ export function open_tab(tab_link, tab_content) {
     link.classList.add('active');
 
     active_tab = tab_content;
-    switchMode(TERMINAL_STATE[link.getAttribute('name')]);
+    switch_mode(TERMINAL_STATE[link.getAttribute('name')]);
 }
 
 document.getElementById('tab-links').onclick = (event) => {

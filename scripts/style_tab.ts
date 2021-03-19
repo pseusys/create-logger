@@ -1,5 +1,5 @@
 import {style, getCommonClasses, getCollapse} from "./cutter";
-import {get_focus, range_in_place, switchMode, TERMINAL_STATE} from "./terminal";
+import {get_focus, range_in_place, switch_mode, TERMINAL_STATE} from "./terminal";
 import {CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES} from "../core/constants";
 import {get, set} from "./storer";
 
@@ -22,7 +22,7 @@ function globalHandler (event: Event): void {
             focusedPreset = null;
         } else focusedPreset = target as HTMLDivElement;
         //TODO: add some css for focused preset.
-        switchMode(focusedPreset == null ? TERMINAL_STATE.STYLE : TERMINAL_STATE.FILE);
+        switch_mode(focusedPreset == null ? TERMINAL_STATE.STYLE : TERMINAL_STATE.FILE);
         reflect_selection(null, focusedPreset);
 
     } else if (target.classList.contains('variable')) {

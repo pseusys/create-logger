@@ -7,14 +7,15 @@ import { construct } from "../core/langs";
 
 
 /**
- * Div representing a "terminal window", with following structure:
- * #terminal
- *  |- .line (represents a terminal line, in 'FILE' and 'STYLE' mode only one at a time can be selected)
- *  |   |- .line-number (represents a line number, in 'STYLE' mode makes parent line focused)
- *  |   |- .line-content (terminal text, contains styled spans)
- *  | ...
- *  |- .line
- *      |- #line-adder.line-number (adds and focuses a new line in 'STYLE' mode only)
+ * Div representing a "terminal window", with following structure:<br/>
+ * terminal<br/>
+ *  |- .line (represents a terminal line, in 'STYLE' mode only one at a time can be selected)<br/>
+ *  |   |- .line-number (represents a line number, in 'STYLE' mode makes parent line chosen)<br/>
+ *  |   |- .line-content (terminal text, contains styled spans)<br/>
+ *  | ...<br/>
+ *  |- .line<br/>
+ *      |- #line-adder.line-number (adds and chooses a new line in 'STYLE' mode only)
+ * @see choose_line choose line
  */
 export const terminal = document.getElementById('terminal');
 
@@ -23,9 +24,12 @@ export const terminal = document.getElementById('terminal');
 /**
  * Terminal onkeydown handler (works in 'STYLE' mode only).
  * Has following functionality:
- * 1. On 'Enter' creates and focuses a new line below current.
- * 2. On 'Backspace' deletes a letter, keeping formatting ability.
- * 3. On 'ArrowUp' and 'ArrowDown' focuses upper or lower line respectively, keeping caret position if possible.
+ * * On 'Enter' creates and chooses a new line below current.
+ * * On 'Backspace' deletes a letter, keeping formatting ability.
+ * * On 'ArrowUp' and 'ArrowDown' chooses upper or lower line respectively, keeping caret position if possible.
+ * - NB! Stepping through span requires additional arrow key pressing:
+ *     <span>sample</span><span>text</span>: 11 arrows to walk through.
+ * @see choose_line choose line
  */
 terminal.onkeydown = (event) => {
     const selection = document.getSelection();
@@ -49,7 +53,7 @@ terminal.onkeydown = (event) => {
     } else if ((event.key == 'ArrowUp') || (event.key == 'ArrowDown')) {
         const chosen = get_chosen_line();
         const target = event.key == 'ArrowUp' ? chosen.previousElementSibling : chosen.nextElementSibling;
-        choose_line(target, selection._getFocusOffsetInNode(chosen) - 1);
+        choose_line(target as HTMLDivElement, selection._getFocusOffsetInNode(chosen) - 1);
         event.preventDefault();
     }
 };
@@ -57,9 +61,10 @@ terminal.onkeydown = (event) => {
 /**
  * Terminal onclick handler (works in 'STYLE' mode only).
  * Has following functionality:
- * 1. Restores saved selection (if any).
- * 2. If 'line-adder' clicked, adds and focuses line.
- * 3. If 'line-number' clicked, focuses line.
+ * * Restores saved selection (if any).
+ * * If 'line-adder' clicked, adds and chooses line.
+ * * If 'line-number' clicked, chooses line.
+ * @see choose_line choose line
  */
 terminal.onclick = (event) => {
     if (!!saved_focus) {
@@ -69,7 +74,7 @@ terminal.onclick = (event) => {
 
     const target = event.target as HTMLElement;
     if (target.id === 'line-adder') choose_line(create_line(null, target.parentElement as HTMLDivElement));
-    else if (target.classList.contains('line-number')) choose_line(target.parentElement);
+    else if (target.classList.contains('line-number')) choose_line(target.parentElement as HTMLDivElement);
 };
 
 
@@ -93,7 +98,6 @@ export function get_focus (): Range {
  * Function setting given selection (current selection in most cases) to saved range if it is not a terminal selection.
  * Beforehand it checks if given selection already is in terminal and if saved range is a valid terminal selection.
  * @see range_in_place terminal selection
- *
  * @param selection - given selection
  */
 function set_focus (selection: Selection) {
@@ -104,15 +108,15 @@ function set_focus (selection: Selection) {
 }
 
 /**
- * Function to visually reflect nodes (styled spans) in given range.
+ * Function to visually reflect styled spans in given range.
  * Each span receives a css white smooth shadow 'selection styling'.
  * It also saves given range to saved range.
- *
+ * @see terminal styled spans
  * @param range - given range
  */
 export function reflect_nodes (range: Range): void {
     clear_selected();
-    get_selected(range).forEach((value: HTMLSpanElement): void => {
+    get_selected(range).forEach((value: HTMLSpanElement) => {
         value.classList.add('selected');
     });
     saved_focus = range;
@@ -120,8 +124,8 @@ export function reflect_nodes (range: Range): void {
 
 /**
  * Function to remove selection styling from every node in chosen line.
- * @see range_in_place selection styling
- * @see get_chosen_line chosen line
+ * @see reflect_nodes selection styling
+ * @see choose_line chosen line
  */
 function clear_selected () {
     saved_focus = null;
@@ -135,29 +139,67 @@ function clear_selected () {
 
 // Terminal mode section.
 
+/**
+ * Strict enum of terminal states. There are generally four terminal states:
+ * * 'FILE' - terminal disabled, none of the contents clickable or selectable, view-only mode.
+ * * 'STYLE' - main and default state, only one line at a time active and selectable, line numbers / adder active, styled spans.
+ * * 'PREVIEW' - on each line instead of styled spans ASCII escape sequences presented, many lines selectable, line numbers / adder inactive.
+ * * 'CODE' - formatting compiled to code in selected language with different lines number, many lines selectable, line numbers / adder inactive.
+ * @see terminal styled spans
+ */
 type TERMINAL_STATE = "FILE" | "STYLE" | "PREVIEW" | "CODE";
 export const TERMINAL_STATE = {
     get FILE(): TERMINAL_STATE { return "FILE"; },
     get STYLE(): TERMINAL_STATE { return "STYLE"; },
     get PREVIEW(): TERMINAL_STATE { return "PREVIEW"; },
-    get CODE(): TERMINAL_STATE { return "CODE"; },
+    get CODE(): TERMINAL_STATE { return "CODE"; }
 }
 
+/**
+ * Current terminal mode.
+ */
 export let mode = TERMINAL_STATE.STYLE;
+/**
+ * Array containing lines of styled spans for converting to Entries and saving while current terminal mode is 'CODE'.
+ * @see Entry Entries
+ * @see terminal styled spans
+ */
 export let editableHTML: string[];
-const lineAdder = document.getElementById('line-adder');
+/**
+ * A special line number with '+' sign adding a new line and choosing it.
+ * @see choose_line choose line
+ */
+const line_adder = document.getElementById('line-adder');
 
-export function switchMode(newMode: TERMINAL_STATE): void {
+/**
+ * Function switching terminal to a new mode, performs exit from old one and enter to new one.
+ * @see exitMode exit mode
+ * @see enterMode enter mode
+ *
+ * @param new_mode - new terminal mode
+ */
+export function switch_mode (new_mode: TERMINAL_STATE) {
     exitMode(mode);
-    enterMode(newMode);
-    mode = newMode;
+    enterMode(new_mode);
+    mode = new_mode;
 }
 
-function exitMode (oldMode: TERMINAL_STATE): void {
-    disableAndClear();
+/**
+ * Function to exit terminal mode, performing following:
+ * * 'STYLE': clears selection styling and resets term changers, also saves actual line-contents to editableHTML.
+ * * 'CODE': adjusts line number to number of formatted lines in editableHTML.
+ * * default: makes line-contents unselectable, line-adder invisible and sets line-numbers to default cursor.
+ * @see reflect_nodes selection styling
+ * @see drop_term_changers reset term changers
+ * @see adjust_lines
+ * @see editableHTML
+ * @param old_mode - old terminal state
+ */
+function exitMode (old_mode: TERMINAL_STATE) {
+    disable_and_clear();
     let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
     let line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
-    switch (oldMode) {
+    switch (old_mode) {
         case TERMINAL_STATE.STYLE:
             clear_selected();
             drop_term_changers();
@@ -172,14 +214,32 @@ function exitMode (oldMode: TERMINAL_STATE): void {
     }
     for (const content of line_contents) content.style.userSelect = 'auto';
     for (const number of line_numbers) number.style.cursor = 'default';
-    lineAdder.parentElement.style.display = 'none';
+    line_adder.parentElement.style.display = 'none';
 }
 
-function enterMode (newMode: TERMINAL_STATE): void {
+/**
+ * Function to enter terminal mode, performing following:
+ * * 'FILE': makes line-contents unselectable and restores line-contents from editableHTML.
+ * * 'STYLE': makes line-contents unselectable, line-adder visible sets line-numbers to pointer cursor,
+ * restores line-contents from editableHTML and chooses first line.
+ * * 'PREVIEW': sets line contents to converted lines from editableHTML.
+ * * 'CODE': constructs new line set from editableHTML, adjusts line number to line set number
+ * and fills line-contents from line set
+ * @see editableHTML
+ * @see choose_line choose line
+ * @see Entry Entries
+ * @see htmlToEntries convert styled spans to Entries
+ * @see convert convert Entries to ASCII escape sequences
+ * @see construct convert Entries to code
+ * @see adjust_lines
+ * @see terminal styled spans
+ * @param new_mode - new terminal mode
+ */
+function enterMode (new_mode: TERMINAL_STATE) {
     const html_copy = [...editableHTML];
     let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
     let line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
-    switch (newMode) {
+    switch (new_mode) {
         case TERMINAL_STATE.FILE:
             for (const content of line_contents) content.style.userSelect = 'none';
             for (const content of line_contents) content.innerHTML = html_copy.shift();
@@ -187,9 +247,9 @@ function enterMode (newMode: TERMINAL_STATE): void {
         case TERMINAL_STATE.STYLE:
             for (const content of line_contents) content.style.userSelect = 'none';
             for (const number of line_numbers) number.style.cursor = 'pointer';
-            lineAdder.parentElement.style.display = 'flex';
+            line_adder.parentElement.style.display = 'flex';
             for (const content of line_contents) content.innerHTML = editableHTML.shift();
-            choose_line(terminal.firstElementChild);
+            choose_line(terminal.firstElementChild as HTMLDivElement);
             break;
         case TERMINAL_STATE.PREVIEW:
             for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
@@ -198,12 +258,13 @@ function enterMode (newMode: TERMINAL_STATE): void {
             const codes = construct("typescript", html_copy.map((value): Entry[] => {
                 return htmlToEntries(value);
             })).split("\n");
-            adjust_lines(codes.length); // FIXME: duplications!
+            adjust_lines(codes.length);
             line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
             line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
-            for (const content of line_contents) content.style.userSelect = 'auto';
-            for (const number of line_numbers) number.style.cursor = 'default';
-            for (const content of line_contents) content.innerHTML = codes.shift();
+            for (const content of line_contents) {
+                content.style.userSelect = 'auto';
+                content.innerHTML = codes.shift();
+            }
             break;
     }
 }
@@ -212,7 +273,13 @@ function enterMode (newMode: TERMINAL_STATE): void {
 
 // Lines management & style section.
 
-function disableAndClear() {
+/**
+ * Function to reset terminal state in 'STYLE' mode.
+ * It makes line-contents not editable, clears all selection styling and removes chosen line.
+ * @see reflect_nodes selection styling
+ * @see choose_line chosen line
+ */
+function disable_and_clear () {
     const content = get_chosen_line_content();
     if (!!content) {
         content.setAttribute('contenteditable', 'false');
@@ -224,25 +291,39 @@ function disableAndClear() {
     for (const number of line_numbers) number.classList.remove('chosen');
 }
 
-export function choose_line (line, pos?) {
+/**
+ * Function to choose line, 'chosen line' is the only editable line in 'STYLE' mode. It has special 'chosen' CSS class.
+ * It also sets caret to this line with collapsed selection.
+ * @param line - the line to become chosen.
+ * @param pos - position of caret in chosen line (if it is greater than line length, will be set to line end).
+ */
+export function choose_line (line: HTMLDivElement, pos?: number) {
     if (!line || !line.classList.contains('line') || (line.children.length != 2)) return;
 
     const line_number = line.firstElementChild;
     const line_content = line.lastElementChild;
 
-    disableAndClear();
+    disable_and_clear();
 
     line_content.setAttribute('contenteditable', 'true');
     for (const child of line_content.children) child.setAttribute('contenteditable', 'true');
     line_number.classList.add('chosen');
 
     const range = document.createRange();
-    range._setRangeInNode(line_content, pos);
+    range._setRangeInNode(line_content as HTMLDivElement, pos);
     const sel = document.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
 }
 
+/**
+ * Function to create a new line at specified position.
+ * The line contains line-adder with corresponding number and line-content with one empty span.
+ * WARNING: only one parameter should be passed!
+ * @param after - line after that the new line will be inserted.
+ * @param before - line before that the new line will be inserted.
+ * @return the new line.
+ */
 function create_line (after: HTMLDivElement = null, before: HTMLDivElement = null): HTMLDivElement {
     const line = document.createElement('div');
     line.classList.add('line');
@@ -253,7 +334,11 @@ function create_line (after: HTMLDivElement = null, before: HTMLDivElement = nul
 
     const line_content = document.createElement('div');
     line_content.classList.add('line-content');
-    line_content.appendChild(document.createElement('span'));
+
+    const first_span = document.createElement('span');
+    first_span.appendChild(document.createTextNode(""));
+
+    line_content.appendChild(first_span);
 
     line.append(line_number, line_content);
 
@@ -262,7 +347,12 @@ function create_line (after: HTMLDivElement = null, before: HTMLDivElement = nul
     return line;
 }
 
-function adjust_lines (num: number): void {
+/**
+ * Function setting line number to given number.
+ * It removes lines if current number is greater than given and adds if current number is less than given.
+ * @param num - new lines number.
+ */
+function adjust_lines (num: number) {
     const lines = [...document.getElementsByClassName('line')].filter((value: HTMLDivElement): boolean => {
         return value.children.length > 1;
     }) as HTMLDivElement[];
@@ -270,31 +360,25 @@ function adjust_lines (num: number): void {
     const diff = Math.abs(lines.length - num);
     let last_line = lines[lines.length - 1];
     if (lines.length > num) for (let i = 0; i < diff; i++) lines[lines.length - 1 - i].remove();
-    else for (let i = 0; i < diff; i++) last_line = create_line(last_line, null);
+    else for (let i = 0; i < diff; i++) last_line = create_line(last_line);
 }
 
 
 
 // Getting text section.
 
-function getText(node: Node, range: Range): string {
-    if (node.nodeName == 'DIV') {
-        const elem = node as HTMLDivElement;
-        if (elem.classList.contains('line-number')) return "";
-        if (elem.classList.contains('line-content')) return elem.textContent + "\n";
-        return [...elem.childNodes].reduce((previous: string, current: Node): string => {
-            return previous + getText(current, range);
-        }, "");
-    } else return node.textContent; // partial
-}
-
+/**
+ * Function to get text in given range. It extracts text from line-contents only.
+ * @param range - range to extract text from.
+ */
 export function getClearText(range: Range): string {
-    return [...range.commonAncestorContainer.childNodes].reduce((previous: string, current: Node): string => {
-        if (range.intersectsNode(current)) {
-            const text = getText(current, range);
-            if (current == range.startContainer) return previous + text.substring(range.startOffset);
-            else if (current == range.endContainer) return previous + text.substring(0, range.endOffset);
-            else return previous + text;
+    return [...terminal.childNodes].reduce((previous: string, line: HTMLDivElement): string => {
+        const content = line.lastElementChild;
+        if (range.intersectsNode(content)) {
+            let text = content.textContent;
+            const start = range._getRangeStartInNode(content)?.offset ?? 0;
+            const end = range._getRangeEndInNode(content)?.offset ?? text.length;
+            return previous + text.substring(start, end) + '\n';
         } else return previous;
     }, "");
 }
@@ -303,12 +387,20 @@ export function getClearText(range: Range): string {
 
 // Special nodes section.
 
+/**
+ * Function to get chosen line or null.
+ * @see choose_line chosen line
+ */
 function get_chosen_line (): HTMLDivElement | null {
     const chosen = document.getElementsByClassName('chosen')[0];
     if (!!chosen ) return chosen.parentElement as HTMLDivElement;
     else return null;
 }
 
+/**
+ * Function to get chosen line-content or null.
+ * @see choose_line chosen line
+ */
 export function get_chosen_line_content (): HTMLDivElement | null {
     const line = get_chosen_line();
     if (!!line) return get_chosen_line().lastElementChild as HTMLDivElement;
@@ -316,10 +408,9 @@ export function get_chosen_line_content (): HTMLDivElement | null {
 }
 
 /**
- * Checks if given range is a 'terminal selection' - a valid selection af some part of single
- * 'line-content' div, to witch any formatting may be applied.
- *
- * @param range - a range to check.
+ * Function checking if given range is a 'terminal selection' - a valid selection af some part of single
+ * line-content, to witch any formatting may be applied.
+ * @param range - range to check.
  */
 export function range_in_place (range: Range): boolean {
     const selectionParent = range.commonAncestorContainer;
@@ -328,11 +419,21 @@ export function range_in_place (range: Range): boolean {
     else return get_chosen_line_content().contains(selectionParent);
 }
 
+/**
+ * Function to check if given selection is a 'terminal selection'.
+ * @see range_in_place terminal selection
+ * @param selection - selection to check.
+ */
 export function selection_in_place (selection: Selection): boolean {
     if (selection.rangeCount == 0) return false;
     return range_in_place(selection.getRangeAt(0));
 }
 
+/**
+ * Function to find the (parent) span corresponding to any selected node in terminal.
+ * @throws DOMException if no span can be found for given element.
+ * @param node - given node.
+ */
 export function find_span_for_place (node: Node): HTMLSpanElement {
     if ((node.nodeType == Node.TEXT_NODE) || (node.nodeName == "BR")) return node.parentElement;
     if (node.nodeName != 'SPAN') throw new DOMException("Selected wrong element: " + node.nodeName);
@@ -343,6 +444,13 @@ export function find_span_for_place (node: Node): HTMLSpanElement {
 
 // Export section.
 
+/**
+ * Function converting inner HTML string to array of Entries, that can be converted to ASCII escape sequences or code.
+ * Inner HTML string should contain styled spans.
+ * @see Entry Entries
+ * @see terminal styled spans
+ * @param inner - inner HTML string to convert.
+ */
 function htmlToEntries(inner: string): Entry[] {
     const div = document.createElement('div');
     div.innerHTML = inner;
