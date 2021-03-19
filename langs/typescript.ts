@@ -4,7 +4,10 @@ import {convert} from "../core/converter";
 
 
 export default function construct (str: Entry[][]): string {
-    return create_function_for_line(str[0], 0);
+    const codes = str.map((current: Entry[], index: number) => {
+        return create_function_for_line(current, index);
+    });
+    return codes.join("\n\n");
 }
 
 
@@ -12,8 +15,7 @@ export default function construct (str: Entry[][]): string {
 const INTENT = "\u00A0\u00A0\u00A0\u00A0";
 
 function escape (str: string, separate: boolean = false): string {
-    let res = str.replace(/\\033/g, "\\u001b")
-        .replace(/["']/g, "\"");
+    let res = str.replace(/\\033/g, "\\u001b").replace(/["']/g, "\"");
     if (separate) res = "\"" + res + "\"";
     return res;
 }

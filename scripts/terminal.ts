@@ -1,13 +1,32 @@
-//FIXME
 import { convert } from "../core/converter";
-import {drop_term_changers, reflect_selection} from "./style_tab";
-import {get_selected} from "./cutter";
-import {Entry, VAR_NAMES} from "../core/constants";
-import {construct} from "../core/langs";
+import { drop_term_changers, reflect_selection } from "./style_tab";
+import { get_selected } from "./cutter";
+import { Entry, VAR_NAMES } from "../core/constants";
+import { construct } from "../core/langs";
 
 
+
+/**
+ * Div representing a "terminal window", with following structure:
+ * #terminal
+ *  |- .line (represents a terminal line, in 'FILE' and 'STYLE' mode only one at a time can be selected)
+ *  |   |- .line-number (represents a line number, in 'STYLE' mode makes parent line focused)
+ *  |   |- .line-content (terminal text, contains styled spans)
+ *  | ...
+ *  |- .line
+ *      |- #line-adder.line-number (adds and focuses a new line in 'STYLE' mode only)
+ */
 export const terminal = document.getElementById('terminal');
 
+
+
+/**
+ * Terminal onkeydown handler (works in 'STYLE' mode only).
+ * Has following functionality:
+ * 1. On 'Enter' creates and focuses a new line below current.
+ * 2. On 'Backspace' deletes a letter, keeping formatting ability.
+ * 3. On 'ArrowUp' and 'ArrowDown' focuses upper or lower line respectively, keeping caret position if possible.
+ */
 terminal.onkeydown = (event) => {
     const selection = document.getSelection();
     if (selection.rangeCount == 0) return;
@@ -35,6 +54,13 @@ terminal.onkeydown = (event) => {
     }
 };
 
+/**
+ * Terminal onclick handler (works in 'STYLE' mode only).
+ * Has following functionality:
+ * 1. Restores saved selection (if any).
+ * 2. If 'line-adder' clicked, adds and focuses line.
+ * 3. If 'line-number' clicked, focuses line.
+ */
 terminal.onclick = (event) => {
     if (!!saved_focus) {
         const selection = document.getSelection();
@@ -48,13 +74,28 @@ terminal.onclick = (event) => {
 
 
 
-// FIXME: How to reflect visually this saved Range? Honestly, I don't know...
+// Saving range section.
+
+/**
+ * Saved range, represents the last selection made in terminal even after focus moved to another element.
+ * Used with styling methods, especially if styling controls (e.g. input text - variable name) gets focused.
+ */
 let saved_focus: Range = null;
 
+/**
+ * Function returning last saved range (in most cases the same as current).
+ */
 export function get_focus (): Range {
     return saved_focus;
 }
 
+/**
+ * Function setting given selection (current selection in most cases) to saved range if it is not a terminal selection.
+ * Beforehand it checks if given selection already is in terminal and if saved range is a valid terminal selection.
+ * @see range_in_place terminal selection
+ *
+ * @param selection - given selection
+ */
 function set_focus (selection: Selection) {
     if (!selection_in_place(selection) && range_in_place(saved_focus)) {
         selection.removeAllRanges();
@@ -62,6 +103,13 @@ function set_focus (selection: Selection) {
     }
 }
 
+/**
+ * Function to visually reflect nodes (styled spans) in given range.
+ * Each span receives a css white smooth shadow 'selection styling'.
+ * It also saves given range to saved range.
+ *
+ * @param range - given range
+ */
 export function reflect_nodes (range: Range): void {
     clear_selected();
     get_selected(range).forEach((value: HTMLSpanElement): void => {
@@ -70,6 +118,11 @@ export function reflect_nodes (range: Range): void {
     saved_focus = range;
 }
 
+/**
+ * Function to remove selection styling from every node in chosen line.
+ * @see range_in_place selection styling
+ * @see get_chosen_line chosen line
+ */
 function clear_selected () {
     saved_focus = null;
     const chosen = get_chosen_line_content();
@@ -79,6 +132,8 @@ function clear_selected () {
 }
 
 
+
+// Terminal mode section.
 
 type TERMINAL_STATE = "FILE" | "STYLE" | "PREVIEW" | "CODE";
 export const TERMINAL_STATE = {
@@ -155,29 +210,7 @@ function enterMode (newMode: TERMINAL_STATE): void {
 
 
 
-function getText(node: Node, range: Range): string {
-    if (node.nodeName == 'DIV') {
-        const elem = node as HTMLDivElement;
-        if (elem.classList.contains('line-number')) return "";
-        if (elem.classList.contains('line-content')) return elem.textContent + "\n";
-        return [...elem.childNodes].reduce((previous: string, current: Node): string => {
-            return previous + getText(current, range);
-        }, "");
-    } else return node.textContent; // partial
-}
-
-export function getClearText(range: Range): string {
-    return [...range.commonAncestorContainer.childNodes].reduce((previous: string, current: Node): string => {
-        if (range.intersectsNode(current)) {
-            const text = getText(current, range);
-            if (current == range.startContainer) return previous + text.substring(range.startOffset);
-            else if (current == range.endContainer) return previous + text.substring(0, range.endOffset);
-            else return previous + text;
-        } else return previous;
-    }, "");
-}
-
-
+// Lines management & style section.
 
 function disableAndClear() {
     const content = get_chosen_line_content();
@@ -242,20 +275,33 @@ function adjust_lines (num: number): void {
 
 
 
-function htmlToEntries(inner: string): Entry[] {
-    const div = document.createElement('div');
-    div.innerHTML = inner;
-    return [...div.children].map((value: HTMLSpanElement): Entry => {
-        return {
-            classes: [...value.classList],
-            value: value.textContent,
-            var_name: value.getAttribute(VAR_NAMES["var-name"]),
-            var_type: value.getAttribute(VAR_NAMES["var-type"])
-        };
-    });
+// Getting text section.
+
+function getText(node: Node, range: Range): string {
+    if (node.nodeName == 'DIV') {
+        const elem = node as HTMLDivElement;
+        if (elem.classList.contains('line-number')) return "";
+        if (elem.classList.contains('line-content')) return elem.textContent + "\n";
+        return [...elem.childNodes].reduce((previous: string, current: Node): string => {
+            return previous + getText(current, range);
+        }, "");
+    } else return node.textContent; // partial
+}
+
+export function getClearText(range: Range): string {
+    return [...range.commonAncestorContainer.childNodes].reduce((previous: string, current: Node): string => {
+        if (range.intersectsNode(current)) {
+            const text = getText(current, range);
+            if (current == range.startContainer) return previous + text.substring(range.startOffset);
+            else if (current == range.endContainer) return previous + text.substring(0, range.endOffset);
+            else return previous + text;
+        } else return previous;
+    }, "");
 }
 
 
+
+// Special nodes section.
 
 function get_chosen_line (): HTMLDivElement | null {
     const chosen = document.getElementsByClassName('chosen')[0];
@@ -269,6 +315,12 @@ export function get_chosen_line_content (): HTMLDivElement | null {
     else return null;
 }
 
+/**
+ * Checks if given range is a 'terminal selection' - a valid selection af some part of single
+ * 'line-content' div, to witch any formatting may be applied.
+ *
+ * @param range - a range to check.
+ */
 export function range_in_place (range: Range): boolean {
     const selectionParent = range.commonAncestorContainer;
     const chosen = get_chosen_line_content();
@@ -285,4 +337,21 @@ export function find_span_for_place (node: Node): HTMLSpanElement {
     if ((node.nodeType == Node.TEXT_NODE) || (node.nodeName == "BR")) return node.parentElement;
     if (node.nodeName != 'SPAN') throw new DOMException("Selected wrong element: " + node.nodeName);
     return node as HTMLSpanElement;
+}
+
+
+
+// Export section.
+
+function htmlToEntries(inner: string): Entry[] {
+    const div = document.createElement('div');
+    div.innerHTML = inner;
+    return [...div.children].map((value: HTMLSpanElement): Entry => {
+        return {
+            classes: [...value.classList],
+            value: value.textContent,
+            var_name: value.getAttribute(VAR_NAMES["var-name"]),
+            var_type: value.getAttribute(VAR_NAMES["var-type"])
+        };
+    });
 }
