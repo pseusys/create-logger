@@ -1,10 +1,5 @@
-import { CLASS_CODES, DEFAULTS, getPostfix, getPrefix } from "./constants";
+import {CLASS_CODES, DEFAULTS, Entry, getPostfix, getPrefix} from "./constants";
 import { areArraysEqual } from "./utils";
-
-export interface Entry {
-    classes: string[];
-    value: string;
-}
 
 export const ESCAPE_START = "\\033[";
 export const ESCAPE_SEPARATOR = ";";
@@ -24,7 +19,8 @@ function classesToStyles(classes: string[]): string[] {
     return styles;
 }
 
-export function convert(str: Entry[]): string {
+// TODO: add option to use user var names
+export function convert(str: Entry[], useVarNames: boolean = false): string {
     let result = "";
     let previousClasses: string[] = [];
     for (const entry of str) {

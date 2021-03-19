@@ -1,7 +1,7 @@
 import './imports'
 
 import {open_tab} from "./tabs";
-import {choose_line, mode, reflect_nodes, selection_in_place, terminal, TERMINAL_STATE} from "./terminal";
+import {choose_line, getClearText, mode, reflect_nodes, selection_in_place, terminal, TERMINAL_STATE} from "./terminal";
 import {reflect_selection, reflectVariable, restorePresets} from "./style_tab";
 import {check} from "./storer";
 
@@ -38,11 +38,15 @@ document.onselectionchange = () => {
 
 
 
+
+
+
 document.oncopy = (event) => {
     const selection = document.getSelection();
+
     if (!!selection) {
-        const str = document.getSelection().toString();
-        const refined = str.replace(/\r?\n|\r/g, "").replace(/\u00a0/g, " ");
+        const str = getClearText(selection.getRangeAt(0));
+        const refined = str.replace(/\u00a0/g, " ");
         event.clipboardData.setData('text/plain', refined);
         event.preventDefault();
     }

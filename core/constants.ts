@@ -82,6 +82,15 @@ export const CLASS_CODES = generateClassCodes();
 
 
 
+export interface Entry {
+    classes: string[];
+    value: string;
+    var_name?: string;
+    var_type?: string;
+}
+
+
+
 // For passing variables to LESS:
 
 export const LESS_VARS = {

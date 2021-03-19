@@ -1,8 +1,6 @@
-import * as javascript from "../langs/javascript"
+import typescript from "../langs/typescript"
+import {Entry} from "./constants";
 
-export const LANGUAGES = {
-    javascript: javascript.construct
-}
 
 export const TYPES = {
     int: "Integer",
@@ -13,15 +11,12 @@ export const TYPES = {
     string_array: "Array of strings"
 }
 
-
-
-export interface Part {
-    classes: string[];
-    value: string;
-    var_name?: string;
-    type?: string;
+export const LANGUAGES = {
+    typescript: typescript
 }
 
-export function construct (language: string, str: Part[][]): string {
+
+
+export function construct (language: string, str: Entry[][]): string {
     return LANGUAGES[language](str);
 }

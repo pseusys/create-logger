@@ -20,7 +20,7 @@
 .line {
   .holder();
   flex-direction: row;
-  height: 1rem;
+  min-height: 1rem;
   width: 100%;
   margin: 0 0 .5rem;
 }
@@ -28,6 +28,7 @@
 .line-number {
   .holder();
   width: 5%;
+  pointer-events: none;
   cursor: pointer;
   user-select: none;
 }
@@ -36,6 +37,7 @@
   .holder();
   width: 95%;
   flex-grow: 1;
+  overflow-wrap: break-word;
 }
 
 .chosen {

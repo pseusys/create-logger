@@ -1,7 +1,9 @@
 //FIXME
-import { convert, Entry } from "../core/converter";
+import { convert } from "../core/converter";
 import {drop_term_changers, reflect_selection} from "./style_tab";
 import {get_selected} from "./cutter";
+import {Entry, VAR_NAMES} from "../core/constants";
+import {construct} from "../core/langs";
 
 
 export const terminal = document.getElementById('terminal');
@@ -91,31 +93,37 @@ export let editableHTML: string[];
 const lineAdder = document.getElementById('line-adder');
 
 export function switchMode(newMode: TERMINAL_STATE): void {
-    const line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
-    const line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
-    exitMode(mode, line_numbers, line_contents);
-    enterMode(newMode, line_numbers, line_contents);
+    exitMode(mode);
+    enterMode(newMode);
     mode = newMode;
 }
 
-function exitMode (oldMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], line_contents: HTMLDivElement[]): void {
+function exitMode (oldMode: TERMINAL_STATE): void {
     disableAndClear();
+    let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
+    let line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
     switch (oldMode) {
         case TERMINAL_STATE.STYLE:
             clear_selected();
             drop_term_changers();
             editableHTML = [];
             for (const content of line_contents) editableHTML.push(content.innerHTML);
-        default:
-            for (const content of line_contents) content.style.userSelect = 'auto';
-            for (const number of line_numbers) number.style.cursor = 'default';
-            lineAdder.parentElement.style.display = 'none';
+            break;
+        case TERMINAL_STATE.CODE:
+            adjust_lines(editableHTML.length);
+            line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
+            line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
             break;
     }
+    for (const content of line_contents) content.style.userSelect = 'auto';
+    for (const number of line_numbers) number.style.cursor = 'default';
+    lineAdder.parentElement.style.display = 'none';
 }
 
-function enterMode (newMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], line_contents: HTMLDivElement[]): void {
+function enterMode (newMode: TERMINAL_STATE): void {
     const html_copy = [...editableHTML];
+    let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
+    let line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
     switch (newMode) {
         case TERMINAL_STATE.FILE:
             for (const content of line_contents) content.style.userSelect = 'none';
@@ -132,9 +140,41 @@ function enterMode (newMode: TERMINAL_STATE, line_numbers: HTMLDivElement[], lin
             for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
-            for (const content of line_contents) content.innerHTML = "";
+            const codes = construct("typescript", html_copy.map((value): Entry[] => {
+                return htmlToEntries(value);
+            })).split("\n");
+            adjust_lines(codes.length); // FIXME: duplications!
+            line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
+            line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
+            for (const content of line_contents) content.style.userSelect = 'auto';
+            for (const number of line_numbers) number.style.cursor = 'default';
+            for (const content of line_contents) content.innerHTML = codes.shift();
             break;
     }
+}
+
+
+
+function getText(node: Node, range: Range): string {
+    if (node.nodeName == 'DIV') {
+        const elem = node as HTMLDivElement;
+        if (elem.classList.contains('line-number')) return "";
+        if (elem.classList.contains('line-content')) return elem.textContent + "\n";
+        return [...elem.childNodes].reduce((previous: string, current: Node): string => {
+            return previous + getText(current, range);
+        }, "");
+    } else return node.textContent; // partial
+}
+
+export function getClearText(range: Range): string {
+    return [...range.commonAncestorContainer.childNodes].reduce((previous: string, current: Node): string => {
+        if (range.intersectsNode(current)) {
+            const text = getText(current, range);
+            if (current == range.startContainer) return previous + text.substring(range.startOffset);
+            else if (current == range.endContainer) return previous + text.substring(0, range.endOffset);
+            else return previous + text;
+        } else return previous;
+    }, "");
 }
 
 
@@ -189,6 +229,17 @@ function create_line (after: HTMLDivElement = null, before: HTMLDivElement = nul
     return line;
 }
 
+function adjust_lines (num: number): void {
+    const lines = [...document.getElementsByClassName('line')].filter((value: HTMLDivElement): boolean => {
+        return value.children.length > 1;
+    }) as HTMLDivElement[];
+    if (lines.length == num) return;
+    const diff = Math.abs(lines.length - num);
+    let last_line = lines[lines.length - 1];
+    if (lines.length > num) for (let i = 0; i < diff; i++) lines[lines.length - 1 - i].remove();
+    else for (let i = 0; i < diff; i++) last_line = create_line(last_line, null);
+}
+
 
 
 function htmlToEntries(inner: string): Entry[] {
@@ -197,7 +248,9 @@ function htmlToEntries(inner: string): Entry[] {
     return [...div.children].map((value: HTMLSpanElement): Entry => {
         return {
             classes: [...value.classList],
-            value: value.textContent
+            value: value.textContent,
+            var_name: value.getAttribute(VAR_NAMES["var-name"]),
+            var_type: value.getAttribute(VAR_NAMES["var-type"])
         };
     });
 }
