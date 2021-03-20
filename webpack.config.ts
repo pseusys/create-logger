@@ -16,7 +16,6 @@ const config: webpack.Configuration = {
         path: path.join(__dirname, './build/'),
         filename: "./all.min.js"
     },
-    devtool: 'eval-source-map',
     optimization: {
         minimize: true
     },
@@ -67,5 +66,7 @@ const config: webpack.Configuration = {
         new CleanWebpackPlugin()
     ]
 }
+
+if (process.env.DEBUG) config.devtool = 'eval-source-map';
 
 export default config;

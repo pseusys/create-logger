@@ -1,4 +1,4 @@
-// Can use it while no third-party libraries are included
+// Can use it while no third-party libraries are included.
 declare interface Range {
     _setRangeInNode(node: HTMLElement, pos?: number): void;
     _setRangeStartInNode(node: HTMLElement, pos: number): void;

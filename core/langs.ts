@@ -1,5 +1,7 @@
-import typescript from "../langs/typescript"
 import {Entry} from "./constants";
+
+import typescript from "../langs/typescript";
+import javascript from "../langs/javascript";
 
 
 export const TYPES = {
@@ -13,7 +15,7 @@ export const TYPES = {
 
 export const LANGUAGES = {
     "TypeScript (Node.js)": typescript,
-    "JavaScript (DOM)": typescript
+    "JavaScript (DOM)": javascript
 }
 
 

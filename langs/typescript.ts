@@ -16,12 +16,6 @@ export default function construct (str: Entry[][]): string {
 const WHITESPACE = "\u00A0";
 const INTENT = "\u00A0\u00A0\u00A0\u00A0";
 
-function escape (str: string, separate: boolean = false): string {
-    let res = str.replace(/\\033/g, '\\u001b').replace(/["']/g, '"');
-    if (separate) res = `"${res}"`;
-    return res;
-}
-
 function type (type: string): string {
     switch (type) {
         case TYPES.int:
@@ -62,19 +56,16 @@ function create_function_for_line (entries: Entry[], iter: number): string {
     entries.forEach((value: Entry): void => {
         const str = convert([value], true);
         if (!!value.var_name) {
-            const divided = str.split(value.value);
-            code.push(escape(divided[0], true));
-            code.push(escape(value.var_name, false));
-            code.push(escape(divided[1], true));
+            code.push(`\$\{${value.var_name}\}`);
             sample.push(`[${value.var_name}]`);
         } else {
-            code.push(escape(str, true));
+            code.push(str);
             sample.push(value.value);
         }
     });
 
     return `/**\n${WHITESPACE}* Function writing "${sample.join("")}" to console.\n${WHITESPACE}**/\n` +
         `export function print${iter}thLine (${declaration.join(", ")}) {\n` +
-        `${INTENT}console.log(${code.join(" + ")});\n` +
+        `${INTENT}console.log(\`${code.join("")}\`);\n` +
         `}`;
 }

@@ -1,6 +1,6 @@
 import { convert } from "../core/converter";
 import { drop_term_changers, reflect_selection } from "./style_tab";
-import { get_selected_nodes_in_range } from "./cutter";
+import { get_selected_nodes } from "./cutter";
 import { Entry, VAR_NAMES } from "../core/constants";
 import { construct } from "../core/langs";
 
@@ -98,7 +98,7 @@ export function get_focus (): Range {
  * Function setting given selection (current selection in most cases) to saved range if it is not a terminal selection.
  * Beforehand it checks if given selection already is in terminal and if saved range is a valid terminal selection.
  * @see range_in_place terminal selection
- * @param selection - given selection
+ * @param selection given selection
  */
 function set_focus (selection: Selection) {
     if (!selection_in_place(selection) && range_in_place(saved_focus)) {
@@ -112,11 +112,11 @@ function set_focus (selection: Selection) {
  * Each span receives a css white smooth shadow 'selection styling'.
  * It also saves given range to saved range.
  * @see terminal styled spans
- * @param range - given range
+ * @param range given range
  */
 export function reflect_nodes (range: Range): void {
     clear_selected();
-    get_selected_nodes_in_range(range).forEach((value: HTMLSpanElement) => {
+    get_selected_nodes(range).forEach((value: HTMLSpanElement) => {
         value.classList.add('selected');
     });
     saved_focus = range;
@@ -176,7 +176,7 @@ const line_adder = document.getElementById('line-adder');
  * @see exitMode exit mode
  * @see enterMode enter mode
  *
- * @param new_mode - new terminal mode
+ * @param new_mode new terminal mode
  */
 export function switch_mode (new_mode: TERMINAL_STATE) {
     exitMode(mode);
@@ -193,7 +193,7 @@ export function switch_mode (new_mode: TERMINAL_STATE) {
  * @see drop_term_changers reset term changers
  * @see adjust_lines
  * @see editableHTML
- * @param old_mode - old terminal state
+ * @param old_mode old terminal state
  */
 function exitMode (old_mode: TERMINAL_STATE) {
     disable_and_clear();
@@ -233,7 +233,7 @@ function exitMode (old_mode: TERMINAL_STATE) {
  * @see construct convert Entries to code
  * @see adjust_lines
  * @see terminal styled spans
- * @param new_mode - new terminal mode
+ * @param new_mode new terminal mode
  */
 function enterMode (new_mode: TERMINAL_STATE) {
     const html_copy = [...editableHTML];
@@ -255,7 +255,7 @@ function enterMode (new_mode: TERMINAL_STATE) {
             for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
-            const codes = construct("TypeScript (Node.js)", html_copy.map((value): Entry[] => {
+            const codes = construct("JavaScript (DOM)", html_copy.map((value): Entry[] => {
                 return htmlToEntries(value);
             })).split("\n");
             adjust_lines(codes.length);
@@ -294,8 +294,8 @@ function disable_and_clear () {
 /**
  * Function to choose line, 'chosen line' is the only editable line in 'STYLE' mode. It has special 'chosen' CSS class.
  * It also sets caret to this line with collapsed selection.
- * @param line - the line to become chosen.
- * @param pos - position of caret in chosen line (if it is greater than line length, will be set to line end).
+ * @param line the line to become chosen.
+ * @param pos position of caret in chosen line (if it is greater than line length, will be set to line end).
  */
 export function choose_line (line: HTMLDivElement, pos?: number) {
     if (!line || !line.classList.contains('line') || (line.children.length != 2)) return;
@@ -320,8 +320,8 @@ export function choose_line (line: HTMLDivElement, pos?: number) {
  * Function to create a new line at specified position.
  * The line contains line-adder with corresponding number and line-content with one empty span.
  * WARNING: only one parameter should be passed!
- * @param after - line after that the new line will be inserted.
- * @param before - line before that the new line will be inserted.
+ * @param after line after that the new line will be inserted.
+ * @param before line before that the new line will be inserted.
  * @return the new line.
  */
 function create_line (after: HTMLDivElement = null, before: HTMLDivElement = null): HTMLDivElement {
@@ -350,7 +350,7 @@ function create_line (after: HTMLDivElement = null, before: HTMLDivElement = nul
 /**
  * Function setting line number to given number.
  * It removes lines if current number is greater than given and adds if current number is less than given.
- * @param num - new lines number.
+ * @param num new lines number.
  */
 function adjust_lines (num: number) {
     const lines = [...document.getElementsByClassName('line')].filter((value: HTMLDivElement): boolean => {
@@ -369,7 +369,7 @@ function adjust_lines (num: number) {
 
 /**
  * Function to get text in given range. It extracts text from line-contents only.
- * @param range - range to extract text from.
+ * @param range range to extract text from.
  */
 export function getClearText(range: Range): string {
     return [...terminal.childNodes].reduce((previous: string, line: HTMLDivElement): string => {
@@ -410,7 +410,7 @@ export function get_chosen_line_content (): HTMLDivElement | null {
 /**
  * Function checking if given range is a 'terminal selection' - a valid selection af some part of single
  * line-content, to witch any formatting may be applied.
- * @param range - range to check.
+ * @param range range to check.
  */
 export function range_in_place (range: Range): boolean {
     const selectionParent = range.commonAncestorContainer;
@@ -422,7 +422,7 @@ export function range_in_place (range: Range): boolean {
 /**
  * Function to check if given selection is a 'terminal selection'.
  * @see range_in_place terminal selection
- * @param selection - selection to check.
+ * @param selection selection to check.
  */
 export function selection_in_place (selection: Selection): boolean {
     if (selection.rangeCount == 0) return false;
@@ -432,7 +432,7 @@ export function selection_in_place (selection: Selection): boolean {
 /**
  * Function to find the (parent) span corresponding to any selected node in terminal.
  * @throws DOMException if no span can be found for given element.
- * @param node - given node.
+ * @param node given node.
  */
 export function find_span_for_place (node: Node): HTMLSpanElement {
     if ((node.nodeType == Node.TEXT_NODE) || (node.nodeName == "BR")) return node.parentElement;
@@ -449,7 +449,7 @@ export function find_span_for_place (node: Node): HTMLSpanElement {
  * Inner HTML string should contain styled spans.
  * @see Entry Entries
  * @see terminal styled spans
- * @param inner - inner HTML string to convert.
+ * @param inner inner HTML string to convert.
  */
 function htmlToEntries(inner: string): Entry[] {
     const div = document.createElement('div');

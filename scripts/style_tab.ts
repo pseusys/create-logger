@@ -1,4 +1,4 @@
-import {style, getCommonClasses, getCollapse} from "./cutter";
+import {style, get_common_classes, get_collapse} from "./cutter";
 import {get_focus, range_in_place, switch_mode, TERMINAL_STATE} from "./terminal";
 import {CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES} from "../core/constants";
 import {get, set} from "./storer";
@@ -28,7 +28,7 @@ function globalHandler (event: Event): void {
     } else if (target.classList.contains('variable')) {
         const field = event.target as HTMLInputElement;
         if (field.id == 'var-name') variables[1].disabled = (field.value == "");
-        const collapse = getCollapse(r);
+        const collapse = get_collapse(r);
         if (!!collapse) collapse.setAttribute(VAR_NAMES[field.id], field.value);
     }
 }
@@ -44,15 +44,14 @@ const term_changers = [...document.getElementsByClassName('term-changer')] as HT
 export function reflect_selection (range?: Range, single?: HTMLDivElement) {
     drop_term_changers();
     if (!range != !single) {
-        const classes = getCommonClasses(range, single);
+        const classes = get_common_classes(range, single);
         if (!!classes) set_term_changers(classes);
     }
 }
 
 function apply_style (range: Range | HTMLDivElement, elem: HTMLInputElement): void {
     const name = elem.getAttribute('name');
-    if (elem.getAttribute('type') == 'checkbox')
-        style(range, { type: name, value: elem.checked });
+    if (elem.getAttribute('type') == 'checkbox') style(range, { type: name, value: elem.checked });
     else style(range, { type: name, value: elem.value });
 }
 
@@ -114,7 +113,7 @@ const variables = Object.keys(VAR_NAMES).map((value: string): HTMLInputElement =
 }) as HTMLInputElement[];
 
 export function reflectVariable (range: Range): void {
-    const collapse = getCollapse(range);
+    const collapse = get_collapse(range);
     dropVariables();
     if (!!collapse) {
         variables.forEach((value: HTMLInputElement): void => {

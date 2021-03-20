@@ -53,10 +53,17 @@ document.onpaste = (event) => {
     if (!!selection && selection.isCollapsed) {
         const str = event.clipboardData.getData('text/plain');
         const refined = str.replace(/\r?\n|\r/g, "");
+
         const range = selection.getRangeAt(0);
         const text = range.commonAncestorContainer;
         const offset = range._getRangeStartInNode(text).offset;
+
+        if (text.nodeType != Node.TEXT_NODE)
+            throw new DOMException("Paste into non-text node: " + text.nodeName);
+
         text.textContent = text.textContent.slice(0, offset) + refined + text.textContent.slice(offset);
+        range.setStart(text, offset);
+        range.setEnd(text, refined.length + offset);
     }
     event.preventDefault();
 }
