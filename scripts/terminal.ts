@@ -1,6 +1,6 @@
 import { convert } from "../core/converter";
 import { drop_term_changers, reflect_selection } from "./style_tab";
-import { get_selected } from "./cutter";
+import { get_selected_nodes_in_range } from "./cutter";
 import { Entry, VAR_NAMES } from "../core/constants";
 import { construct } from "../core/langs";
 
@@ -116,7 +116,7 @@ function set_focus (selection: Selection) {
  */
 export function reflect_nodes (range: Range): void {
     clear_selected();
-    get_selected(range).forEach((value: HTMLSpanElement) => {
+    get_selected_nodes_in_range(range).forEach((value: HTMLSpanElement) => {
         value.classList.add('selected');
     });
     saved_focus = range;
@@ -255,7 +255,7 @@ function enterMode (new_mode: TERMINAL_STATE) {
             for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
-            const codes = construct("typescript", html_copy.map((value): Entry[] => {
+            const codes = construct("TypeScript (Node.js)", html_copy.map((value): Entry[] => {
                 return htmlToEntries(value);
             })).split("\n");
             adjust_lines(codes.length);

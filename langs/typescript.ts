@@ -7,16 +7,18 @@ export default function construct (str: Entry[][]): string {
     const codes = str.map((current: Entry[], index: number) => {
         return create_function_for_line(current, index);
     });
-    return codes.join("\n\n");
+    const warning = "// Following functions work in Node.js environment only. For DOM analogues see 'JavaScript'."
+    return `${warning}\n\n${codes.join("\n\n")}`;
 }
 
 
 
+const WHITESPACE = "\u00A0";
 const INTENT = "\u00A0\u00A0\u00A0\u00A0";
 
 function escape (str: string, separate: boolean = false): string {
-    let res = str.replace(/\\033/g, "\\u001b").replace(/["']/g, "\"");
-    if (separate) res = "\"" + res + "\"";
+    let res = str.replace(/\\033/g, '\\u001b').replace(/["']/g, '"');
+    if (separate) res = `"${res}"`;
     return res;
 }
 
@@ -24,21 +26,21 @@ function type (type: string): string {
     switch (type) {
         case TYPES.int:
         case TYPES.float:
-            return "number";
+            return 'number';
         case TYPES.char:
         case TYPES.string:
-            return "string";
+            return 'string';
         case TYPES.int_array:
-            return "number[]";
+            return 'number[]';
         case TYPES.string_array:
-            return "string[]";
+            return 'string[]';
     }
 }
 
 
 
-//TODO: extract constants from lines
-function determine_constants () {
+//TODO: extract escape sequences from code (maybe general func)
+function extract_escapes () {
 
 }
 
@@ -46,14 +48,16 @@ function create_function_for_line (entries: Entry[], iter: number): string {
     const declaration = entries.map((value: Entry): string => {
         let currentVar = "";
         if (!!value.var_name) {
-            let currentVarType = value.var_type ?? "any";
+            let currentVarType = value.var_type ?? 'any';
             currentVarType = type(currentVarType) ?? currentVarType;
-            currentVar += value.var_name + ": " + currentVarType;
+            currentVar += value.var_name + ': ' + currentVarType;
         }
         return currentVar;
     }).filter((value: string): boolean => {
         return !!value;
     });
+
+    const sample = [];
     const code = [];
     entries.forEach((value: Entry): void => {
         const str = convert([value], true);
@@ -62,9 +66,15 @@ function create_function_for_line (entries: Entry[], iter: number): string {
             code.push(escape(divided[0], true));
             code.push(escape(value.var_name, false));
             code.push(escape(divided[1], true));
-        } else code.push(escape(str, !value.var_name));
+            sample.push(`[${value.var_name}]`);
+        } else {
+            code.push(escape(str, true));
+            sample.push(value.value);
+        }
     });
-    return "function print" + iter + "thLine (" + declaration.join(", ") + "): string {\n" +
-        INTENT + "return " + code.join(" + ") +
-        ";\n}";
+
+    return `/**\n${WHITESPACE}* Function writing "${sample.join("")}" to console.\n${WHITESPACE}**/\n` +
+        `export function print${iter}thLine (${declaration.join(", ")}) {\n` +
+        `${INTENT}console.log(${code.join(" + ")});\n` +
+        `}`;
 }

@@ -12,7 +12,8 @@ export const TYPES = {
 }
 
 export const LANGUAGES = {
-    typescript: typescript
+    "TypeScript (Node.js)": typescript,
+    "JavaScript (DOM)": typescript
 }
 
 

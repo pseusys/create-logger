@@ -1,52 +1,51 @@
-import {DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES} from "../core/constants";
+import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES } from "../core/constants";
 import { areArraysEqual, getSameElements } from "../core/utils";
 import { find_span_for_place, get_chosen_line_content } from "./terminal";
 
 
-type NodeEdges = { first: Node, last: Node, first_offset: number, last_offset: number };
+
+/**
+ * Type representing range inside a line-content (range containing multiple span elements only). Params:
+ * + first - first node of the range.
+ * + last - last node of the range.
+ * + first_offset - offset inside first node (first offset).
+ * + last_offset - offset inside last node (last offset).
+ */
 type SpanEdges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
 
+/**
+ *
+ */
 let range_backup: { start: number, end: number };
 
-function normalize (edges: NodeEdges): SpanEdges {
-    let start = { node: find_span_for_place(edges.first), offset: edges.first_offset };
-    let end = { node: find_span_for_place(edges.last), offset: edges.last_offset };
 
-    if (start.node == end.node)
-        return { first: start.node, first_offset: start.offset, last: end.node, last_offset: end.offset };
-
-    if ((start.offset == start.node.textContent.length) && (start.node.nextElementSibling != null))
-        start = { node: start.node.nextElementSibling as HTMLSpanElement, offset: 0};
-
-    if (start.node == end.node)
-        return { first: start.node, first_offset: start.offset, last: end.node, last_offset: end.offset };
-
-    if ((end.offset == 0) && (end.node.previousElementSibling != null))
-        end = {
-            node: end.node.previousElementSibling as HTMLSpanElement,
-            offset: end.node.previousElementSibling.textContent.length
-        };
-
-    return { first: start.node, first_offset: start.offset, last: end.node, last_offset: end.offset };
-}
 
 function parse_range (range: Range, backup: boolean): SpanEdges {
     const parent = get_chosen_line_content();
-    let start = range._getRangeStartInNode(parent);
-    let end = range._getRangeEndInNode(parent);
-    if (backup) range_backup = { start: start.offset, end: end.offset };
+    let first = range._getRangeStartInNode(parent);
+    let last = range._getRangeEndInNode(parent);
+    if (backup) range_backup = { start: first.offset, end: last.offset };
 
-    if (start == end) return {
-        first: find_span_for_place(start.node),
-        last: find_span_for_place(end.node),
-        first_offset: start.node_offset,
-        last_offset: end.node_offset
-    }; else return normalize({
-        first: start.node,
-        first_offset: start.node_offset,
-        last: end.node,
-        last_offset: end.node_offset
-    });
+    let first_node = find_span_for_place(first.node);
+    let first_offset = first.node_offset;
+    let last_node = find_span_for_place(last.node);
+    let last_offset = last.node_offset;
+
+    if (first_node == last_node)
+        return { first: first_node, first_offset: first_offset, last: last_node, last_offset: last_offset };
+
+    if ((first_offset == first_node.textContent.length) && (first_node.nextElementSibling != null)) {
+        first_node = first_node.nextElementSibling as HTMLSpanElement;
+        first_offset = 0;
+    }
+    if (first_node == last_node)
+        return { first: first_node, first_offset: first_offset, last: last_node, last_offset: last_offset };
+
+    if ((last_offset == 0) && (last_node.previousElementSibling != null)) {
+        last_node = last_node.previousElementSibling as HTMLSpanElement;
+        last_offset = last_node.textContent.length;
+    }
+    return { first: first_node, first_offset: first_offset, last: last_node, last_offset: last_offset };
 }
 
 function restore_range (range: Range): void {
@@ -56,7 +55,7 @@ function restore_range (range: Range): void {
 
 
 
-function splitAt(elem: HTMLSpanElement, pos: number, postInsert: boolean) {
+function splitAt (elem: HTMLSpanElement, pos: number, postInsert: boolean) {
     elem.classList.remove(...Object.keys(VAR_NAMES));
     const clone = elem.cloneNode(true) as HTMLSpanElement;
     if (!postInsert) {
@@ -70,7 +69,7 @@ function splitAt(elem: HTMLSpanElement, pos: number, postInsert: boolean) {
     }
 }
 
-function joinAround(selected: HTMLSpanElement[]): void {
+function joinAround (selected: HTMLSpanElement[]): void {
     if (selected.length == 0) return;
 
     const around = [...selected];
@@ -90,7 +89,7 @@ function joinAround(selected: HTMLSpanElement[]): void {
 
 
 
-function getSelected (first: HTMLSpanElement, last: HTMLSpanElement): HTMLSpanElement[] {
+function get_selected_nodes (first: HTMLSpanElement, last: HTMLSpanElement): HTMLSpanElement[] {
     if (first == last) return [first];
     const selected: HTMLSpanElement[] = [];
     let current = first;
@@ -107,9 +106,9 @@ interface Formatting {
     value: string | boolean;
 }
 
-export function get_selected (range: Range): HTMLSpanElement[] {
+export function get_selected_nodes_in_range (range: Range): HTMLSpanElement[] {
     const { first, last } = parse_range(range, false);
-    return getSelected(first, last);
+    return get_selected_nodes(first, last);
 }
 
 export function style (range: Range | HTMLDivElement, format?: Formatting): void {
@@ -138,7 +137,7 @@ function cut (range: Range, format?: Formatting): void {
         if (!cuttingEnd(last_offset, last)) splitAt(last, last_offset, true);
     }
 
-    const selected = getSelected(first, last);
+    const selected = get_selected_nodes(first, last);
     for (const child of selected) applyFormatting(child, format);
 
     joinAround(selected);
@@ -166,7 +165,7 @@ export function getCommonClasses(range?: Range, single?: HTMLDivElement): string
     if (!range == !single) return null;
     let base: HTMLElement[];
     if (!!single) base = [single];
-    else base = get_selected(range);
+    else base = get_selected_nodes_in_range(range);
     const multiple = base.map((value: HTMLElement): string[] => {
         const classes = [...value.classList];
         for (const def in DEFAULTS) {

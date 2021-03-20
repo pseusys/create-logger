@@ -23,8 +23,6 @@ function children(node: Element, nodes: Node[] = []): Node[] {
 
 Range.prototype._setRangeInNode = function (node: HTMLElement, pos?: number): void {
     const position = pos !== undefined ? Math.min(pos, node.textContent.length) : node.textContent.length;
-    console.log(node)
-    console.log(position)
     this._setRangeStartInNode(node, position);
     this.collapse(true);
 }

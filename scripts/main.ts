@@ -8,7 +8,7 @@ import {check} from "./storer";
 
 window.onload = () => {
     open_tab('style-tab', 'style-content');
-    choose_line(terminal.firstElementChild);
+    choose_line(terminal.firstElementChild as HTMLDivElement);
     restorePresets();
     check();
 }
