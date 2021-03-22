@@ -1,19 +1,37 @@
-// Can use it while no third-party libraries are included.
+// We have to declare Range and Selection for this code not to break Node.js environment.
+// We can extend basic types as far as no untrusted third-party libraries are included.
+
 declare interface Range {
-    _setRangeInNode(node: HTMLElement, pos?: number): void;
-    _setRangeStartInNode(node: HTMLElement, pos: number): void;
-    _setRangeEndInNode(node: HTMLElement, pos: number): void;
-    _getRangeStartInNode(node: Node): NodeInfo | null;
-    _getRangeEndInNode(node: Node): NodeInfo | null;
+    _set_range_in_node (node: HTMLElement, pos?: number): void;
+    _set_range_start_in_node (node: HTMLElement, pos: number): void;
+    _set_range_end_in_node (node: HTMLElement, pos: number): void;
+    _get_range_start_in_node (node: Node): NodeInfo | null;
+    _get_range_end_in_node (node: Node): NodeInfo | null;
 }
 
 declare interface Selection {
-    _getFocusOffsetInNode(node: Node): number | null
+    _get_focus_offset_in_node (node: Node): number | null;
 }
 
+
+
+// Declarations & utils section.
+
+/**
+ * A type, representing one of the Range sides. It contains node and its offset.
+ * + `offset` - offset from the beginning of parent line-content to the beginning of range.
+ * + `node` - node (text node) in the beginning of the range.
+ * + `node_offset` - offset from beginning of the `node` to beginning of the range.
+ */
 type NodeInfo = { offset: number, node: Node, node_offset: number };
 
-function children(node: Element, nodes: Node[] = []): Node[] {
+/**
+ * Function, returning all descendants of given node, elder come first.<\br>
+ * E.G. <foo><bar><baz><\baz><\bar><tan><\tan><\foo> -> [foo, bar, baz, tan]
+ * @param node parent node.
+ * @param nodes !ALWAYS! empty array, used for recursion.
+ */
+function children (node: Element, nodes: Node[] = []): Node[] {
     node.childNodes.forEach((value: Node): void => {
         nodes.push(value);
         if (value.hasChildNodes()) children(value as Element, nodes);
@@ -21,13 +39,29 @@ function children(node: Element, nodes: Node[] = []): Node[] {
     return nodes;
 }
 
-Range.prototype._setRangeInNode = function (node: HTMLElement, pos?: number): void {
+
+
+// 'Set range' section.
+
+/**
+ * Method, setting collapsed range (aka caret) in current node (line-content).
+ * @param node parent line-content, the caret will be set inside of it.
+ * @param pos position of caret inside node. By default will be set to the very end.
+ */
+Range.prototype._set_range_in_node = function (node: HTMLElement, pos?: number) {
     const position = pos !== undefined ? Math.min(pos, node.textContent.length) : node.textContent.length;
-    this._setRangeStartInNode(node, position);
+    this._set_range_start_in_node(node, position);
     this.collapse(true);
 }
 
-function setRangeAnythingInNode(range: Range, node: HTMLElement, pos: number, start: boolean) {
+/**
+ * Function to set [start / end] of the range inside node.
+ * @param range range to set inside of the node.
+ * @param node node to set range in.
+ * @param pos position to set
+ * @param start sets start of the range to pos if true, end if false
+ */
+function set_range_anything_in_node (range: Range, node: HTMLElement, pos: number, start: boolean) {
     if ((node.nodeType == Node.TEXT_NODE) || !children(node).some((value: Node): boolean => {
         if (value.nodeType == Node.TEXT_NODE) {
             if (value.textContent.length >= pos) {
@@ -45,15 +79,38 @@ function setRangeAnythingInNode(range: Range, node: HTMLElement, pos: number, st
     }
 }
 
-Range.prototype._setRangeStartInNode = function (node: HTMLElement, pos: number): void {
-    setRangeAnythingInNode(this, node, pos, true);
+/**
+ * Function, setting start of the range inside of the given line-content node.
+ * @see set_range_anything_in_node set range [start] in node
+ * @param node line-content to set range start in.
+ * @param pos position to set.
+ */
+Range.prototype._set_range_start_in_node = function (node: HTMLElement, pos: number) {
+    set_range_anything_in_node(this, node, pos, true);
 }
 
-Range.prototype._setRangeEndInNode = function (node: HTMLElement, pos: number): void {
-    setRangeAnythingInNode(this, node, pos, false);
+/**
+ * Function, setting end of the range inside of the given line-content node.
+ * @see set_range_anything_in_node set range [end] in node
+ * @param node line-content to set range end in.
+ * @param pos position to set.
+ */
+Range.prototype._set_range_end_in_node = function (node: HTMLElement, pos: number) {
+    set_range_anything_in_node(this, node, pos, false);
 }
 
-function nodesInChars(before: Node | null, parent: Node): NodeInfo {
+
+
+// 'Get range' section.
+
+/**
+ * Function counting offset before a node in parent node _in characters_.
+ * If no node provided, parent length will be counted.
+ * @param before node to count offset before or null, in that case  parent length will be counted.
+ * @param parent node to count offset in.
+ * @return NodeInfo info about position of before in parent.
+ */
+function nodes_in_chars (before: Node | null, parent: Node): NodeInfo {
     const desc = children(parent as Element);
     const max_index = before === null ? desc.length : desc.findIndex((value: Node): boolean => {
         return value == before;
@@ -78,30 +135,58 @@ function nodesInChars(before: Node | null, parent: Node): NodeInfo {
     };
 }
 
-function getRangeAnythingInNode(anchor: Node, off: number, node: Node): NodeInfo | null {
+/**
+ * Function to get beginning or end of the range inside node.
+ * @param anchor `[start / end]Container` of the range, must be a child of node.
+ * @param off `[start / end]Offset` of the range.
+ * @param node parent node, line-content, containing whole range.
+ * @return information about position of range [start / end] in node, or null if nod is not parent of anchor.
+ */
+function get_range_anything_in_node (anchor: Node, off: number, node: Node): NodeInfo | null {
     if (node.contains(anchor)) {
         if (node == anchor) {
             if (node.nodeType == Node.TEXT_NODE) return {offset: off, node: node, node_offset: off};
-            else return nodesInChars(off == node.childNodes.length ? null : node.childNodes[off], node);
+            else return nodes_in_chars(off == node.childNodes.length ? null : node.childNodes[off], node);
         } else {
-            const info = getRangeAnythingInNode(anchor, off, anchor);
-            const {offset} = nodesInChars(anchor, node);
+            const info = get_range_anything_in_node(anchor, off, anchor);
+            const {offset} = nodes_in_chars(anchor, node);
             return {offset: offset + info.offset, node: info.node, node_offset: info.node_offset};
         }
     } else return null;
 }
 
-Range.prototype._getRangeStartInNode = function (node: Node): NodeInfo | null {
-    return getRangeAnythingInNode(this.startContainer, this.startOffset, node);
+/**
+ * Function, getting start of the range inside of the given line-content node.
+ * @see get_range_anything_in_node get range [start] in node
+ * @param node line-content to get range start in.
+ * @return NodeInfo info about range start or null if range is not inside of node.
+ */
+Range.prototype._get_range_start_in_node = function (node: Node): NodeInfo | null {
+    return get_range_anything_in_node(this.startContainer, this.startOffset, node);
 }
 
-Range.prototype._getRangeEndInNode = function (node: Node): NodeInfo | null {
-    return getRangeAnythingInNode(this.endContainer, this.endOffset, node);
+/**
+ * Function, getting end of the range inside of the given line-content node.
+ * @see get_range_anything_in_node get range [end] in node
+ * @param node line-content to get range end in.
+ * @return NodeInfo info about range end or null if range is not inside of node.
+ */
+Range.prototype._get_range_end_in_node = function (node: Node): NodeInfo | null {
+    return get_range_anything_in_node(this.endContainer, this.endOffset, node);
 }
 
-Selection.prototype._getFocusOffsetInNode = function (node: Node): number | null {
+
+
+// Selection section.
+
+/**
+ * Function to get position of caret inside the selection (start or end, obviously).
+ * @param node node, containing selection.
+ * @return position of caret or null, if node does not contain selection.
+ */
+Selection.prototype._get_focus_offset_in_node = function (node: Node): number | null {
     const range = this.getRangeAt(0);
     if ((this.focusNode == range.startContainer) && (this.focusOffset == range.startOffset))
-        return range._getRangeStartInNode(node).start;
-    else return range._getRangeEndInNode(node).end;
+        return range._get_range_start_in_node(node).start;
+    else return range._get_range_end_in_node(node).end;
 }

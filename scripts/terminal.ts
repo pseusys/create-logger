@@ -32,6 +32,8 @@ export const terminal = document.getElementById('terminal');
  * @see choose_line choose line
  */
 terminal.onkeydown = (event) => {
+    if (mode != TERMINAL_STATE.STYLE) return;
+
     const selection = document.getSelection();
     if (selection.rangeCount == 0) return;
 
@@ -46,6 +48,9 @@ terminal.onkeydown = (event) => {
                 if (chosen_children[0].classList.length != 0) {
                     chosen_children[0].className = '';
                     reflect_selection(selection.getRangeAt(0));
+                } else {
+                    get_chosen_line().remove();
+                    reorder_lines();
                 }
                 event.preventDefault();
             }
@@ -53,7 +58,7 @@ terminal.onkeydown = (event) => {
     } else if ((event.key == 'ArrowUp') || (event.key == 'ArrowDown')) {
         const chosen = get_chosen_line();
         const target = event.key == 'ArrowUp' ? chosen.previousElementSibling : chosen.nextElementSibling;
-        choose_line(target as HTMLDivElement, selection._getFocusOffsetInNode(chosen) - 1);
+        choose_line(target as HTMLDivElement, selection._get_focus_offset_in_node(chosen) - 1);
         event.preventDefault();
     }
 };
@@ -67,6 +72,8 @@ terminal.onkeydown = (event) => {
  * @see choose_line choose line
  */
 terminal.onclick = (event) => {
+    if (mode != TERMINAL_STATE.STYLE) return;
+
     if (!!saved_focus) {
         const selection = document.getSelection();
         set_focus(selection);
@@ -255,8 +262,10 @@ function enterMode (new_mode: TERMINAL_STATE) {
             for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
-            const codes = construct("JavaScript (DOM)", html_copy.map((value): Entry[] => {
+            const codes = construct("JavaScript (DOM)", html_copy.map((value: string): Entry[] => {
                 return htmlToEntries(value);
+            }).filter((value: Entry[]): boolean => {
+                return value.length != 0;
             })).split("\n");
             adjust_lines(codes.length);
             line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
@@ -265,6 +274,7 @@ function enterMode (new_mode: TERMINAL_STATE) {
                 content.style.userSelect = 'auto';
                 content.innerHTML = codes.shift();
             }
+            for (const number of line_numbers) number.style.cursor = 'default';
             break;
     }
 }
@@ -310,7 +320,7 @@ export function choose_line (line: HTMLDivElement, pos?: number) {
     line_number.classList.add('chosen');
 
     const range = document.createRange();
-    range._setRangeInNode(line_content as HTMLDivElement, pos);
+    range._set_range_in_node(line_content as HTMLDivElement, pos);
     const sel = document.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
@@ -330,7 +340,6 @@ function create_line (after: HTMLDivElement = null, before: HTMLDivElement = nul
 
     const line_number = document.createElement('div');
     line_number.classList.add('line-number');
-    line_number.innerHTML = String(document.getElementsByClassName('line').length);
 
     const line_content = document.createElement('div');
     line_content.classList.add('line-content');
@@ -344,6 +353,7 @@ function create_line (after: HTMLDivElement = null, before: HTMLDivElement = nul
 
     if (!!after) after.after(line);
     if (!!before) before.before(line);
+    reorder_lines();
     return line;
 }
 
@@ -358,9 +368,17 @@ function adjust_lines (num: number) {
     }) as HTMLDivElement[];
     if (lines.length == num) return;
     const diff = Math.abs(lines.length - num);
-    let last_line = lines[lines.length - 1];
-    if (lines.length > num) for (let i = 0; i < diff; i++) lines[lines.length - 1 - i].remove();
-    else for (let i = 0; i < diff; i++) last_line = create_line(last_line);
+    if (lines.length > num) for (let i = 0; i < diff; i++) lines[i].remove();
+    else for (let i = 0; i < diff; i++) lines[0] = create_line(null, lines[0]);
+    reorder_lines();
+}
+
+function reorder_lines() {
+    ([...document.getElementsByClassName('line')].filter((value: HTMLDivElement): boolean => {
+        return value.children.length > 1;
+    }) as HTMLDivElement[]).forEach((line: HTMLDivElement, index: number) => {
+        line.firstElementChild.innerHTML = String(index + 1);
+    });
 }
 
 
@@ -376,8 +394,8 @@ export function getClearText(range: Range): string {
         const content = line.lastElementChild;
         if (range.intersectsNode(content)) {
             let text = content.textContent;
-            const start = range._getRangeStartInNode(content)?.offset ?? 0;
-            const end = range._getRangeEndInNode(content)?.offset ?? text.length;
+            const start = range._get_range_start_in_node(content)?.offset ?? 0;
+            const end = range._get_range_end_in_node(content)?.offset ?? text.length;
             return previous + text.substring(start, end) + '\n';
         } else return previous;
     }, "");
@@ -450,16 +468,20 @@ export function find_span_for_place (node: Node): HTMLSpanElement {
  * @see Entry Entries
  * @see terminal styled spans
  * @param inner inner HTML string to convert.
+ * @return Entries array or empty array if no entries can be converted.
  */
 function htmlToEntries(inner: string): Entry[] {
     const div = document.createElement('div');
     div.innerHTML = inner;
-    return [...div.children].map((value: HTMLSpanElement): Entry => {
-        return {
+    const entries = [];
+    [...div.children].forEach((value: HTMLSpanElement) => {
+        if (value.textContent != "") entries.push({
             classes: [...value.classList],
             value: value.textContent,
             var_name: value.getAttribute(VAR_NAMES["var-name"]),
             var_type: value.getAttribute(VAR_NAMES["var-type"])
-        };
+        });
     });
+    div.remove();
+    return entries;
 }

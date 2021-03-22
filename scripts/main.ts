@@ -56,7 +56,7 @@ document.onpaste = (event) => {
 
         const range = selection.getRangeAt(0);
         const text = range.commonAncestorContainer;
-        const offset = range._getRangeStartInNode(text).offset;
+        const offset = range._get_range_start_in_node(text).offset;
 
         if (text.nodeType != Node.TEXT_NODE)
             throw new DOMException("Paste into non-text node: " + text.nodeName);

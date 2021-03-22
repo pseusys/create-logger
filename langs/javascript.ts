@@ -82,6 +82,6 @@ function create_function_for_line (entries: Entry[], iter: number): string {
 
     return `/**\n${WHITESPACE}* Function writing "${sample.join("")}" to console.\n${WHITESPACE}**/\n` +
         `function print${iter}thLine (${declaration.join(", ")}) {\n` +
-        `${INTENT}console.log(${code.join(", ")}, ${CSSes.join(", ")});\n` +
+        `${INTENT}console.log(${code.join(" + ")}, ${CSSes.join(", ")});\n` +
         `}`;
 }

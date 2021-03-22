@@ -28,14 +28,14 @@ let range_backup: { start: number, end: number };
  * Especially it corrects range edges at position `0` and `node.text.length - 1`.
  * Node boundaries never begin at the end of the node or end at the beginning, even if user actually selected that.
  * @see terminal styled span
- * @param range range to parse
+ * @param range range to parse.
  * @param backup if true, back given range up to restore it after cutting and joining.
  * @return SpanEdges complete information about range inside line-content.
  */
 function parse_range (range: Range, backup: boolean): SpanEdges {
     const parent = get_chosen_line_content();
-    let first = range._getRangeStartInNode(parent);
-    let last = range._getRangeEndInNode(parent);
+    let first = range._get_range_start_in_node(parent);
+    let last = range._get_range_end_in_node(parent);
     if (backup) range_backup = { start: first.offset, end: last.offset };
 
     let first_node = find_span_for_place(first.node);
@@ -65,8 +65,8 @@ function parse_range (range: Range, backup: boolean): SpanEdges {
  * @param range - range to put restored boundaries to (`Selection.getRangeAt(0)`).
  */
 function restore_range (range: Range) {
-    range._setRangeStartInNode(get_chosen_line_content(), range_backup.start);
-    range._setRangeEndInNode(get_chosen_line_content(), range_backup.end);
+    range._set_range_start_in_node(get_chosen_line_content(), range_backup.start);
+    range._set_range_end_in_node(get_chosen_line_content(), range_backup.end);
 }
 
 /**
@@ -258,7 +258,7 @@ function apply_formatting (elem: HTMLElement, format?: Formatting) {
  * @param single - node to identify classes.
  * @return list of common classes or null if none.
  */
-export function get_common_classes(range?: Range, single?: HTMLDivElement): string[] | null {
+export function get_common_classes (range?: Range, single?: HTMLDivElement): string[] | null {
     if (!range == !single) return null;
     let base: HTMLElement[];
     if (!!single) base = [single];
