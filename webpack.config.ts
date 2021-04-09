@@ -27,6 +27,10 @@ const config: webpack.Configuration = {
                 exclude: /(node_modules|bower_components)/
             },
             {
+                test: /\.jsx?$/,
+                use: 'babel-loader'
+            },
+            {
                 test: /\.less$/,
                 use: [
                     {
@@ -45,6 +49,17 @@ const config: webpack.Configuration = {
                     }
                 ],
                 exclude: /(node_modules|bower_components)/
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    {
+                        loader: "style-loader",
+                    },
+                    {
+                        loader: "css-loader",
+                    }
+                ]
             },
             {
                 test: /\.pug$/,

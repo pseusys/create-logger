@@ -4,34 +4,20 @@
 
 #tab-links {
   .holder();
-  min-height: 30%;
+  height: 7%;
   border-bottom: 1px solid #ccc;
 }
 
 .tab-link {
-  background-color: inherit;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
-  user-select: none;
-}
-
-.tab-link:hover {
-  background-color: #ddd;
-}
-
-.tab-links:active {
-  background-color: #ccc;
+  user-select: none !important;
+  height: 100% !important;
 }
 
 
 
 #tab-contents {
   .holder();
-  max-height: 70%;
-  height: 70%;
+  height: 18%;
   padding: .5rem;
 }
 
@@ -51,6 +37,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   + .tile {
     margin-left: .5rem;
   }
@@ -76,6 +63,8 @@
   height: 100%;
   width: 35%;
   justify-content: center;
+  margin-right: 10px;
+  margin-left: 10px;
 }
 
 .tile-set-left {
@@ -86,6 +75,7 @@
 .tile-set-center {
   .tile-set();
   width: 30%;
+  margin: 0;
 }
 
 .tile-set-right {
@@ -104,6 +94,20 @@
 .preset-example {
   cursor: pointer;
   user-select: none;
+}
+
+
+
+.mdl-textfield {
+  padding: 0 !important;
+}
+
+.mdl-textfield__label {
+  top: 4px !important;
+}
+
+.mdl-textfield__label:after {
+  bottom: 0 !important;
 }
 
 

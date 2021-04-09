@@ -4,7 +4,7 @@ mixin presets(names)
             .gr
                 .preset-holder
                     .preset-example(id=name class=cls)=name
-                button.preset-button(name=name type="button") Apply
+                button.mdl-button.mdl-js-button.mdl-button--raised.preset-button(name=name type="button") Apply
 
 mixin simple(...simple)
     each bit in simple

@@ -1,5 +1,6 @@
-//FIXME
-import {switch_mode, TERMINAL_STATE} from "./terminal";
+import { switch_mode, TERMINAL_STATE } from "./terminal";
+
+
 
 let active_tab: string;
 

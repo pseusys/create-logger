@@ -1,7 +1,8 @@
-import {style, get_common_classes, get_collapse} from "./cutter";
-import {get_focus, range_in_place, switch_mode, TERMINAL_STATE} from "./terminal";
-import {CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES} from "../core/constants";
-import {get, set} from "./storer";
+import { style, get_common_classes, get_collapse } from "./cutter";
+import { get_focus, range_in_place, switch_mode, TERMINAL_STATE } from "./terminal";
+import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES } from "../core/constants";
+import { get, set } from "./storer";
+
 
 
 function globalHandler (event: Event): void {
@@ -23,11 +24,16 @@ function globalHandler (event: Event): void {
         } else focusedPreset = target as HTMLDivElement;
         //TODO: add some css for focused preset.
         switch_mode(focusedPreset == null ? TERMINAL_STATE.STYLE : TERMINAL_STATE.FILE);
-        reflect_selection(null, focusedPreset);
+        reflect_term_changers(null, focusedPreset);
 
     } else if (target.classList.contains('variable')) {
+        if (!range_in_place(r)) return;
         const field = event.target as HTMLInputElement;
-        if (field.id == 'var-name') variables[1].disabled = (field.value == "");
+        if (field.id == 'var-name-input') {
+            const is_disabled = (field.value.length == 0);
+            toggle_text_input(variables[1], is_disabled);
+            if (is_disabled) variables[1].value = "";
+        }
         const collapse = get_collapse(r);
         if (!!collapse) collapse.setAttribute(VAR_NAMES[field.id], field.value);
     }
@@ -37,11 +43,19 @@ document.getElementById('style-content').onclick = globalHandler;
 
 
 
+function toggle_text_input(text_input: HTMLInputElement | HTMLSelectElement, tog: boolean) {
+    text_input.disabled = tog;
+    text_input.parentElement.classList.toggle("is-disabled", tog);
+    text_input.parentElement.classList.toggle("is-dirty", !tog);
+}
+
+
+
 // Left section: styles controls.
 
 const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLInputElement[];
 
-export function reflect_selection (range?: Range, single?: HTMLDivElement) {
+export function reflect_term_changers (range?: Range, single?: HTMLDivElement) {
     drop_term_changers();
     if (!range != !single) {
         const classes = get_common_classes(range, single);
@@ -120,7 +134,9 @@ export function reflectVariable (range: Range): void {
             value.value = collapse.getAttribute(VAR_NAMES[value.id]);
         });
         variables[0].disabled = false;
-        variables[1].disabled &&= (variables[0].value.length == 0);
+        const is_disabled = (variables[0].value.length == 0);
+        variables[0].parentElement.classList.toggle("is-dirty", !is_disabled);
+        toggle_text_input(variables[1], is_disabled);
     }
 }
 

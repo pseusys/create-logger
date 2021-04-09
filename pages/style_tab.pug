@@ -19,9 +19,13 @@
     .tile
         .gr-in
             .gr-in
-                input#var-name.variable(type="text" placeholder="Variable name")
+                #var-name.mdl-textfield.mdl-js-textfield
+                    input#var-name-input.variable.mdl-textfield__input(type="text")
+                    label.mdl-textfield__label(for="var-name") Variable name
             .gr-in
-                input#var-type.variable(type="text" list="types-list" disabled="disabled" placeholder="Variable type")
-                datalist#types-list
-                    each type in types
-                        option(value=type)
+                #var-type.mdl-textfield.mdl-js-textfield
+                    select#var-type-input.variable.mdl-textfield__input(disabled="disabled")
+                        option
+                        each type in types
+                            option(value=type)=type
+                    label.mdl-textfield__label(for="var-type") Variable type

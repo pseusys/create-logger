@@ -42,8 +42,8 @@ export const PREFIXES = {
 }
 
 export const VAR_NAMES = {
-    "var-name": "data-var-name",
-    "var-type": "data-var-type"
+    "var-name-input": "data-var-name",
+    "var-type-input": "data-var-type"
 }
 
 
@@ -112,8 +112,8 @@ export const PUG_VARS = {
     colors: Object.keys(COLORS),
     styles: Object.keys(STYLES),
 
-    languages: LANGUAGES,
-    types: TYPES,
+    languages: Object.keys(LANGUAGES),
+    types: TYPES, // TODO: check if whole set needed?
 
     literals: LITERALS,
     translations: TRANSLATIONS

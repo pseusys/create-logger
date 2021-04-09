@@ -1,8 +1,11 @@
 #tab-links
-    button#file-tab.tab-link(name="FILE") File
-    button#style-tab.tab-link(name="STYLE") Style
-    button#preview-tab.tab-link.collapsing(name="PREVIEW") Preview
-    button#code-tab.tab-link.collapsing(name="CODE") Code &#9660;
+    button#file-tab.mdl-button.mdl-js-button.tab-link(name="FILE") File
+    button#style-tab.mdl-button.mdl-js-button.tab-link(name="STYLE") Style
+    button#preview-tab.tab-link.mdl-button.mdl-js-button.collapsing(name="PREVIEW") Preview
+    button#code-tab.tab-link.mdl-button.mdl-js-button.collapsing(name="CODE") Code &#9660;
+    ul.mdl-menu.mdl-js-menu(for="code-tab")
+        each language in languages
+            li.mdl-menu__item=language
 
 #tab-contents
     form#file-content.tab-content

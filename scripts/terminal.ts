@@ -1,5 +1,5 @@
 import { convert } from "../core/converter";
-import { drop_term_changers, reflect_selection } from "./style_tab";
+import { drop_term_changers, reflect_term_changers } from "./style_tab";
 import { get_selected_nodes } from "./cutter";
 import { Entry, VAR_NAMES } from "../core/constants";
 import { construct } from "../core/langs";
@@ -22,7 +22,7 @@ export const terminal = document.getElementById('terminal');
 
 
 /**
- * Terminal onkeydown handler (works in 'STYLE' mode only).
+ * Terminal on key down handler (works in 'STYLE' mode only).
  * Has following functionality:
  * * On 'Enter' creates and chooses a new line below current.
  * * On 'Backspace' deletes a letter, keeping formatting ability.
@@ -47,7 +47,7 @@ terminal.onkeydown = (event) => {
             if ((range.startContainer.textContent == '') && (chosen_children.length == 1)) {
                 if (chosen_children[0].classList.length != 0) {
                     chosen_children[0].className = '';
-                    reflect_selection(selection.getRangeAt(0));
+                    reflect_term_changers(selection.getRangeAt(0));
                 } else {
                     get_chosen_line().remove();
                     reorder_lines();
@@ -64,7 +64,7 @@ terminal.onkeydown = (event) => {
 };
 
 /**
- * Terminal onclick handler (works in 'STYLE' mode only).
+ * Terminal on click handler (works in 'STYLE' mode only).
  * Has following functionality:
  * * Restores saved selection (if any).
  * * If 'line-adder' clicked, adds and chooses line.

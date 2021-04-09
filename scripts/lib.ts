@@ -49,7 +49,7 @@ function children (node: Element, nodes: Node[] = []): Node[] {
  * @param pos position of caret inside node. By default will be set to the very end.
  */
 Range.prototype._set_range_in_node = function (node: HTMLElement, pos?: number) {
-    const position = pos !== undefined ? Math.min(pos, node.textContent.length) : node.textContent.length;
+    const position = pos != undefined ? Math.min(pos, node.textContent.length) : node.textContent.length;
     this._set_range_start_in_node(node, position);
     this.collapse(true);
 }
