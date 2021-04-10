@@ -2,37 +2,25 @@
 @normal: 400;
 @dim: 100;
 
+.ins {
+  cursor: default;
+  user-select: none;
+}
 
 
-html, body, #base {
+
+@positions: start, center, end;
+each(@positions, {
+  .@{value}-container {
     width: 100%;
     height: 100%;
-    margin: 0;
-}
 
-.holder {
-    width: 100%;
-    margin: 0;
-    display: flex;
-    box-sizing: border-box;
-}
-
-
-
-.ins {
-    cursor: default;
-    user-select: none;
-}
-
-
-
-#base {
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-}
 
-#footer {
-    .holder();
-    height: 3%;
-}
+    justify-content: @value;
+    > * {
+      margin: 5px !important;
+    }
+  }
+});

@@ -7,8 +7,32 @@ html(lang='en')
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title Create your logger
     body
-        #base
-            include tabs
-            #terminal
-                include terminal
-            #footer
+        .mdl-layout.mdl-js-layout.mdl-layout--fixed-header.mdl-layout--fixed-tabs.mdl-layout--no-drawer-button
+            header.mdl-layout__header
+                .mdl-layout__header-row
+                    .mdl-layout-title Title
+                    .mdl-layout-spacer
+                    nav.mdl-navigation
+                        a.mdl-navigation__link(href="") Link
+                        a.mdl-navigation__link(href="") Link
+                .mdl-layout__tab-bar.mdl-js-ripple-effect.mdl-layout__tab-manual-switch
+                    a.mdl-layout__tab(href="#GENERAL") General
+                    a.mdl-layout__tab.is-active(href="#STYLE") Style
+                    a.mdl-layout__tab.collapsing(href="#PREVIEW") Preview
+                    a.mdl-layout__tab.collapsing(href="#CODE") Code
+
+            main.mdl-layout__content
+                #tabs
+                    section#GENERAL.mdl-layout__tab-panel
+                        form#file-content.tab-content.mdl-grid
+                            include general_tab
+                    section#STYLE.mdl-layout__tab-panel.is-active
+                        form#style-content.tab-content.mdl-grid
+                            include style_tab
+                    section#PREVIEW.mdl-layout__tab-panel
+                        form#preview-content.tab-content
+                    section#CODE.mdl-layout__tab-panel
+                        form#code-content.tab-content
+
+                #terminal.mdl-shadow--2dp
+                    include terminal

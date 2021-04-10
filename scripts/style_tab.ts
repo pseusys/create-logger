@@ -39,7 +39,7 @@ function globalHandler (event: Event): void {
     }
 }
 
-document.getElementById('style-content').onclick = globalHandler;
+//document.getElementById('style-content').onclick = globalHandler;
 
 
 

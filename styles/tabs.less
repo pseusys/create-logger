@@ -2,85 +2,23 @@
 
 
 
-#tab-links {
-  .holder();
-  height: 7%;
-  border-bottom: 1px solid #ccc;
-}
-
-.tab-link {
-  user-select: none !important;
-  height: 100% !important;
+#tabs {
+  display: flex;
+  height: 30%;
 }
 
 
-
-#tab-contents {
-  .holder();
-  height: 18%;
-  padding: .5rem;
-}
 
 .tab-content {
-  .holder();
-  height: 100%;
-  display: none;
-}
-
-#preview-content {
-  height: 0;
-}
-
-
-
-.tile {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
   width: 100%;
-  + .tile {
-    margin-left: .5rem;
-  }
-}
-
-.gr {
-  .holder();
-  flex-direction: row;
-}
-
-.gr-in {
-  .holder();
-  flex-direction: column;
-  + .gr-in {
-    margin-top: .5rem;
-  }
-}
-
-
-
-.tile-set() {
-  display: flex;
   height: 100%;
-  width: 35%;
-  justify-content: center;
-  margin-right: 10px;
-  margin-left: 10px;
+  box-sizing: border-box;
 }
 
-.tile-set-left {
-  .tile-set();
-  justify-content: flex-start;
-}
 
-.tile-set-center {
-  .tile-set();
-  width: 30%;
-  margin: 0;
-}
 
-.tile-set-right {
-  .tile-set();
-  justify-content: flex-end;
+.invisible-input {
+  display: none;
 }
 
 
@@ -94,24 +32,4 @@
 .preset-example {
   cursor: pointer;
   user-select: none;
-}
-
-
-
-.mdl-textfield {
-  padding: 0 !important;
-}
-
-.mdl-textfield__label {
-  top: 4px !important;
-}
-
-.mdl-textfield__label:after {
-  bottom: 0 !important;
-}
-
-
-
-input[type='radio'] + label {
-  position: relative;
 }

@@ -1,7 +1,6 @@
 import "./imports"
 
-import { open_tab } from "./tabs";
-import { choose_line, getClearText, mode, reflect_nodes, selection_in_place, terminal, TERMINAL_STATE } from "./terminal";
+import { choose_line, getClearText, mode, reflect_nodes, selection_in_place, switch_mode, terminal, TERMINAL_STATE } from "./terminal";
 import { reflect_term_changers, reflectVariable, restorePresets } from "./style_tab";
 import { check } from "./storer";
 
@@ -14,7 +13,7 @@ import { check } from "./storer";
  * @see STYLE STYLE mode
  */
 window.onload = () => {
-    open_tab('style-tab', 'style-content');
+    switch_mode(TERMINAL_STATE.STYLE);
     choose_line(terminal.firstElementChild as HTMLDivElement);
     check();
     restorePresets();
@@ -105,3 +104,28 @@ document.onpaste = (event) => {
     }
     event.preventDefault();
 }
+
+
+
+function tab_callback (current_tab: HTMLAnchorElement) {
+    const href = current_tab.href.split('#').pop();
+
+    [...document.getElementsByClassName('mdl-layout__tab')].forEach((value: HTMLAnchorElement) => {
+        value.classList.remove('is-active');
+    });
+    [...document.getElementsByClassName('mdl-layout__tab-panel')].forEach((value: HTMLAnchorElement) => {
+        value.classList.remove('is-active');
+    });
+    current_tab.classList.add('is-active');
+    document.getElementById(href).classList.add('is-active');
+
+    const tabs = document.getElementById("tabs");
+    if (current_tab.classList.contains("collapsing")) tabs.style.display = 'none';
+    else tabs.style.display = '';
+
+    switch_mode(TERMINAL_STATE[href]);
+}
+
+[...document.getElementsByClassName('mdl-layout__tab')].forEach((value: HTMLAnchorElement) => {
+    value.onclick = () => { tab_callback(value); }
+});

@@ -1,0 +1,34 @@
+.mdl-cell--3-col
+    .center-container
+        label.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored.mdl-js-ripple-effect Save
+
+        input#load-file.invisible-input(type="file")
+        label.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored.mdl-js-ripple-effect(for="load-file") Load
+
+.mdl-cell--5-col
+    .start-container
+        div.mdl-textfield.mdl-js-textfield
+            select#translation.mdl-textfield__input
+                each translation, tag in translations
+                    option(value=tag)=translation
+            label.mdl-textfield__label(for="translation") Select translation
+
+        div.mdl-textfield.mdl-js-textfield
+            select#language.mdl-textfield__input
+                each language in languages
+                    option(value=language)=language
+            label.mdl-textfield__label(for="language") Select language
+
+.mdl-cell--4-col
+    .center-container
+        label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect(for="theme-check")
+            input#theme-check.mdl-checkbox__input(type="checkbox" checked=true)
+            span.mdl-checkbox__label Light theme
+
+        label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect(for="vars-check")
+            input#vars-check.mdl-checkbox__input(type="checkbox" checked=false)
+            span.mdl-checkbox__label Use var names in preview
+
+        label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect(for="readable-check")
+            input#readable-check.mdl-checkbox__input(type="checkbox" checked=false)
+            span.mdl-checkbox__label Make human readable

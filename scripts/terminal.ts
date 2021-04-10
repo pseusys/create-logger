@@ -148,15 +148,15 @@ function clear_selected () {
 
 /**
  * Strict enum of terminal states. There are generally four terminal states:
- * * 'FILE' - terminal disabled, none of the contents clickable or selectable, view-only mode.
+ * * 'GENERAL' - terminal disabled, none of the contents clickable or selectable, view-only mode.
  * * 'STYLE' - main and default state, only one line at a time active and selectable, line numbers / adder active, styled spans.
  * * 'PREVIEW' - on each line instead of styled spans ASCII escape sequences presented, many lines selectable, line numbers / adder inactive.
  * * 'CODE' - formatting compiled to code in selected language with different lines number, many lines selectable, line numbers / adder inactive.
  * @see terminal styled spans
  */
-type TERMINAL_STATE = "FILE" | "STYLE" | "PREVIEW" | "CODE";
+type TERMINAL_STATE = "GENERAL" | "STYLE" | "PREVIEW" | "CODE";
 export const TERMINAL_STATE = {
-    get FILE(): TERMINAL_STATE { return "FILE"; },
+    get GENERAL(): TERMINAL_STATE { return "GENERAL"; },
     get STYLE(): TERMINAL_STATE { return "STYLE"; },
     get PREVIEW(): TERMINAL_STATE { return "PREVIEW"; },
     get CODE(): TERMINAL_STATE { return "CODE"; }
@@ -247,7 +247,7 @@ function enterMode (new_mode: TERMINAL_STATE) {
     let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
     let line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
     switch (new_mode) {
-        case TERMINAL_STATE.FILE:
+        case TERMINAL_STATE.GENERAL:
             for (const content of line_contents) content.style.userSelect = 'none';
             for (const content of line_contents) content.innerHTML = html_copy.shift();
             break;
