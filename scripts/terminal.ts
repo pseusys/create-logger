@@ -93,6 +93,9 @@ terminal.onclick = (event) => {
  * Used with styling methods, especially if styling controls (e.g. input text - variable name) gets focused.
  */
 let saved_focus: Range = null;
+const saved_selection = document.createElement("DIV"); //doc
+saved_selection.classList.add('selection');
+terminal.before(saved_selection);
 
 /**
  * Function returning last saved range (in most cases the same as current).
@@ -127,6 +130,12 @@ export function reflect_nodes (range: Range): void {
         value.classList.add('selected');
     });
     saved_focus = range;
+
+    const rect = saved_focus.getBoundingClientRect();
+    saved_selection.style.top = get_chosen_line().getBoundingClientRect().top + "px";
+    saved_selection.style.left = rect.left + "px";
+    saved_selection.style.width = rect.width + "px";
+    saved_selection.style.height = get_chosen_line().getBoundingClientRect().height + "px";
 }
 
 /**

@@ -13,7 +13,7 @@ function globalHandler (event: Event): void {
     if (!range_in_place(r) && !!get_focus()) r = get_focus();
 
     if (target.classList.contains('term-changer') || target.classList.contains('preset-button')) {
-        const range = focusedPreset ?? r;
+        const range = focusedPreset ?? r; // checkboxes drop selection
         if (target.classList.contains('term-changer')) apply_style(range, target as HTMLInputElement);
         else apply_styles(range, target as HTMLButtonElement);
 
@@ -23,7 +23,7 @@ function globalHandler (event: Event): void {
             focusedPreset = null;
         } else focusedPreset = target as HTMLDivElement;
         //TODO: add some css for focused preset.
-        switch_mode(focusedPreset == null ? TERMINAL_STATE.STYLE : TERMINAL_STATE.FILE);
+        switch_mode(focusedPreset == null ? TERMINAL_STATE.STYLE : TERMINAL_STATE.GENERAL);
         reflect_term_changers(null, focusedPreset);
 
     } else if (target.classList.contains('variable')) {
@@ -39,11 +39,11 @@ function globalHandler (event: Event): void {
     }
 }
 
-//document.getElementById('style-content').onclick = globalHandler;
+document.getElementById('style-content').onclick = globalHandler;
 
 
 
-function toggle_text_input(text_input: HTMLInputElement | HTMLSelectElement, tog: boolean) {
+function toggle_text_input(text_input: HTMLInputElement | HTMLSelectElement, tog: boolean) { // TO LIB
     text_input.disabled = tog;
     text_input.parentElement.classList.toggle("is-disabled", tog);
     text_input.parentElement.classList.toggle("is-dirty", !tog);
@@ -53,7 +53,7 @@ function toggle_text_input(text_input: HTMLInputElement | HTMLSelectElement, tog
 
 // Left section: styles controls.
 
-const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLInputElement[];
+const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLElement[];
 
 export function reflect_term_changers (range?: Range, single?: HTMLDivElement) {
     drop_term_changers();
@@ -65,27 +65,38 @@ export function reflect_term_changers (range?: Range, single?: HTMLDivElement) {
 
 function apply_style (range: Range | HTMLDivElement, elem: HTMLInputElement): void {
     const name = elem.getAttribute('name');
-    if (elem.getAttribute('type') == 'checkbox') style(range, { type: name, value: elem.checked });
+    if (elem.getAttribute('type') == 'checkbox') style(range, { type: name, value: get_checkbox(elem) });
     else style(range, { type: name, value: elem.value });
 }
 
 export function drop_term_changers (): void {
     (document.getElementById('style-content') as HTMLFormElement).reset();
+    [...term_changers].forEach((value: HTMLElement) => {
+        if (value.nodeName == "INPUT") set_checkbox(value as HTMLInputElement, false);
+    });
+}
+
+function set_checkbox (checkbox: HTMLInputElement, value: boolean) { // TO LIB
+    checkbox.parentElement.classList.toggle('is-checked', value);
+}
+
+function get_checkbox (checkbox: HTMLInputElement): boolean { // TO LIB
+    return checkbox.parentElement.classList.contains('is-checked');
 }
 
 export function set_term_changers (classes: string[]): void {
     for (const cls of classes) {
         if (!Object.keys(CLASS_CODES).includes(cls)) continue;
-        const term_changer = [...term_changers].filter((value: HTMLInputElement): boolean => {
+        const term_changer = [...term_changers].filter((value: HTMLElement): boolean => {
             return value.getAttribute('name') == getPrefix(cls);
-        });
+        }) as HTMLInputElement[];
 
         if (term_changer.length == 1) {
-            if (term_changer[0].getAttribute('type') == 'checkbox') term_changer[0].checked = true;
+            if (term_changer[0].getAttribute('type') == 'checkbox') set_checkbox(term_changer[0], true);
             else term_changer[0].value = getPostfix(cls);
-        } else term_changer.find((value: HTMLInputElement): boolean => {
+        } else set_checkbox(term_changer.find((value: HTMLInputElement): boolean => {
             return value.value == getPostfix(cls);
-        }).checked = true;
+        }), true);
     }
 }
 

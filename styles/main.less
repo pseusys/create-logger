@@ -12,9 +12,6 @@
 @positions: start, center, end;
 each(@positions, {
   .@{value}-container {
-    width: 100%;
-    height: 100%;
-
     display: flex;
     flex-direction: column;
 
@@ -24,3 +21,8 @@ each(@positions, {
     }
   }
 });
+
+.split-container {
+  display: flex;
+  justify-content: center;
+}

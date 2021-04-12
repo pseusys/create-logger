@@ -18,6 +18,11 @@
   background-color: @def-back;
   color: @def-for;
   font-weight: @@def-sty;
+
+  ::selection {
+    background: transparent;
+    text-shadow: none;
+  }
 }
 
 .line {
@@ -64,4 +69,12 @@
 
 [contenteditable] {
   outline: 0 solid transparent;
+}
+
+
+
+.selection {
+  position: fixed;
+  pointer-events: none;
+  background-color: black;
 }

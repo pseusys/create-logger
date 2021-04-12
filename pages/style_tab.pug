@@ -1,31 +1,59 @@
-.tile-set-left
+mixin presets(names)
     .tile
-        +colors('for', "Front color")
-        +colors('back', "Back color")
-    .tile
-        each style in styles
+        each cls, name in names
             .gr
-                input.term-changer(id=style value=style name="sty" type="radio")
-                label.ins(for=style)=style
-    .tile
-        +simple('blink', 'cross', 'under', 'ita')
+                .preset-holder
+                    .preset-example(id=name class=cls)=name
+                button.mdl-button.mdl-js-button.mdl-button--raised.preset-button(name=name type="button") Apply
 
-.tile-set-center
-    +presets({ error: "back-red sty-bold", warning: "for-yellow", info: "for-blue", plain: "" })
-    //TODO: replace following with values read from cookies.
-    +presets({ modern: "", beautiful: "", original: "", creative: "" })
+mixin checkboxes(...simple)
+    each check in simple
+        label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect(for=check)
+            input.term-changer.mdl-checkbox__input(id=check name=check type="checkbox")
+            span.mdl-checkbox__label=check
 
-.tile-set-right
-    .tile
-        .gr-in
-            .gr-in
-                #var-name.mdl-textfield.mdl-js-textfield
-                    input#var-name-input.variable.mdl-textfield__input(type="text")
-                    label.mdl-textfield__label(for="var-name") Variable name
-            .gr-in
-                #var-type.mdl-textfield.mdl-js-textfield
-                    select#var-type-input.variable.mdl-textfield__input(disabled="disabled")
-                        option
-                        each type in types
-                            option(value=type)=type
-                    label.mdl-textfield__label(for="var-type") Variable type
+mixin colors(position, subs)
+    div.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
+        select.term-changer.mdl-textfield__input(id=position+"color" name=position)
+            option(selected disabled hidden) Choose color...
+            each color in colors
+                option(value=color)=color
+        label.mdl-textfield__label(for=position+"color")=subs
+
+
+
+.mdl-cell--2-col.start-container
+    +colors('for', "Front color")
+    +colors('back', "Back color")
+
+.mdl-cell--3-col.split-container
+    .center-container
+        each style in styles
+            label.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for=style)
+                input.term-changer.mdl-radio__button(id=style value=style name="sty" type="radio")
+                span.mdl-radio__label=style
+    .center-container
+        +checkboxes('blink', 'cross', 'under', 'ita')
+
+
+
+.mdl-cell--2-col
+    //+presets({ error: "back-red sty-bold", warning: "for-yellow", info: "for-blue", plain: "" })
+
+.mdl-cell--2-col
+    //+presets({ modern: "", beautiful: "", original: "", creative: "" })
+
+
+
+.mdl-cell--2-col
+    .gr-in
+        #var-name.mdl-textfield.mdl-js-textfield
+            input#var-name-input.variable.mdl-textfield__input(type="text")
+            label.mdl-textfield__label(for="var-name") Variable name
+    .gr-in
+        #var-type.mdl-textfield.mdl-js-textfield
+            select#var-type-input.variable.mdl-textfield__input(disabled="disabled")
+                option
+                each type in types
+                    option(value=type)=type
+            label.mdl-textfield__label(for="var-type") Variable type

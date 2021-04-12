@@ -1,6 +1,6 @@
 import * as assert from "assert";
-import * as converter from "../core/converter"
-import {Entry} from "../core/constants";
+import * as converter from "../core/converter";
+import { Entry } from "../core/constants";
 
 describe("Converter test", () => {
     let description: string;
