@@ -185,12 +185,13 @@ interface Formatting {
  * cutting and merging them if necessary.
  * @see terminal styled spans
  * @see restorePresets preset example
- * @param range node or range to apply style to.
+ * @param acceptor node or acceptor to apply style to.
  * @param format style that will be applied.
  */
-export function style (range: Range | HTMLDivElement, format?: Formatting) {
-    if (range instanceof HTMLDivElement) apply_formatting(range, format);
-    else cut(range, format);
+export function style (acceptor: Range | HTMLSpanElement, format?: Formatting) {
+    if (acceptor instanceof HTMLElement) {
+        if (acceptor.nodeName == 'SPAN') apply_formatting(acceptor, format);
+    } else cut(acceptor, format);
 }
 
 /**

@@ -2,15 +2,25 @@
 // We can extend basic types as far as no untrusted third-party libraries are included.
 
 declare interface Range {
-    _set_range_in_node (node: HTMLElement, pos?: number): void;
-    _set_range_start_in_node (node: HTMLElement, pos: number): void;
-    _set_range_end_in_node (node: HTMLElement, pos: number): void;
+    _set_range_in_node (node: HTMLElement, pos?: number);
+    _set_range_start_in_node (node: HTMLElement, pos: number);
+    _set_range_end_in_node (node: HTMLElement, pos: number);
     _get_range_start_in_node (node: Node): NodeInfo | null;
     _get_range_end_in_node (node: Node): NodeInfo | null;
 }
 
 declare interface Selection {
     _get_focus_offset_in_node (node: Node): number | null;
+}
+
+declare interface HTMLInputElement {
+    _check (value: boolean);
+    _set (value: string);
+    _enable (enabled: boolean);
+}
+
+declare interface HTMLSelectElement {
+    _enable (enabled: boolean);
 }
 
 
@@ -189,4 +199,44 @@ Selection.prototype._get_focus_offset_in_node = function (node: Node): number | 
     if ((this.focusNode == range.startContainer) && (this.focusOffset == range.startOffset))
         return range._get_range_start_in_node(node).start;
     else return range._get_range_end_in_node(node).end;
+}
+
+
+
+// MDL-nodes mastering section.
+
+/**
+ * Function, setting check to MDL checkbox.
+ * @param value boolean value to set.
+ */
+HTMLInputElement.prototype._check = function (value: boolean) {
+    this.parentElement.classList.toggle('is-checked', value);
+}
+
+/**
+ * Function, setting string to MDL text input.
+ * @param value string value to set.
+ */
+HTMLInputElement.prototype._set = function (value: string) {
+    const dirty = (value.length == 0);
+    this.value = value;
+    this.parentElement.classList.toggle('is-dirty', !dirty);
+}
+
+/**
+ * Function to enable/disable MDL text input.
+ * @param enabled enable or disable node.
+ */
+HTMLInputElement.prototype._enable = function (enabled: boolean) {
+    this.disabled = !enabled;
+    this.parentElement.classList.toggle('is-disabled', !enabled);
+}
+
+/**
+ * Function to enable/disable MDL select.
+ * @param enabled enable or disable node.
+ */
+HTMLSelectElement.prototype._enable = function (enabled: boolean) {
+    this.disabled = !enabled;
+    this.parentElement.classList.toggle('is-disabled', !enabled);
 }

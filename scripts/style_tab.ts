@@ -10,12 +10,12 @@ document.getElementById('style-content').onclick = (event: MouseEvent) => {
     const selection = window.getSelection();
     if (selection.rangeCount == 0) return;
 
-    if (target.classList.contains('term-changer') || target.classList.contains('preset-button')) {
-        const range = focusedPreset ?? get_focus();
-        if (target.classList.contains('term-changer')) apply_style(range, target);
-        else apply_styles(range, target as HTMLButtonElement);
+    if (target.classList.contains('term-changer') || target.classList.contains('preset-label')) {
+        const acceptor = focusedPreset ?? get_focus();
+        if (target.classList.contains('term-changer')) apply_style(acceptor, target);
+        else apply_styles(acceptor, target as HTMLSpanElement);
 
-    } else if (target.classList.contains('preset-example')) {
+    } else if (target.classList.contains('preset-button')) {
         if (!!focusedPreset && (target.id == focusedPreset.id)) {
             savePreset(focusedPreset);
             focusedPreset = null;
@@ -31,15 +31,15 @@ document.getElementById('style-content').onclick = (event: MouseEvent) => {
 
 const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLElement[];
 
-function apply_style (range: Range | HTMLDivElement, elem: HTMLElement): void {
+function apply_style (acceptor: Range | HTMLSpanElement, elem: HTMLElement): void {
     const name = elem.getAttribute('name');
     if (elem.nodeName == "INPUT") {
         const check = elem as HTMLInputElement;
-        if (check.getAttribute('type') == 'checkbox') style(range, { type: name, value: check.checked });
-        else style(range, { type: name, value: check.value });
+        if (check.getAttribute('type') == 'checkbox') style(acceptor, { type: name, value: check.checked });
+        else style(acceptor, { type: name, value: check.value });
     } else {
         const sel = elem as HTMLSelectElement;
-        if (sel.selectedIndex != 0) style(range, { type: name, value: sel.value });
+        if (sel.selectedIndex != 0) style(acceptor, { type: name, value: sel.value });
     }
 }
 
@@ -55,23 +55,19 @@ export function reflect_term_changers (range?: Range, single?: HTMLDivElement) {
         }) as HTMLInputElement[];
 
         if (term_changer.length == 1) {
-            if (term_changer[0].getAttribute('type') == 'checkbox') set_checkbox(term_changer[0], true);
+            if (term_changer[0].getAttribute('type') == 'checkbox') term_changer[0]._check(true);
             else term_changer[0].value = getPostfix(cls);
-        } else set_checkbox(term_changer.find((value: HTMLInputElement): boolean => {
+        } else term_changer.find((value: HTMLInputElement): boolean => {
             return value.value == getPostfix(cls);
-        }), true);
+        })._check(true);
     }
 }
 
 export function drop_term_changers (): void {
     (document.getElementById('colors-tab') as HTMLFormElement).reset();
     [...term_changers].forEach((value: HTMLElement) => {
-        if (value.nodeName == "INPUT") set_checkbox(value as HTMLInputElement, false);
+        if (value.nodeName == "INPUT") (value as HTMLInputElement)._check(false);
     });
-}
-
-function set_checkbox (checkbox: HTMLInputElement, value: boolean) { // TO LIB
-    checkbox.parentElement.classList.toggle('is-checked', value);
 }
 
 
@@ -80,13 +76,13 @@ function set_checkbox (checkbox: HTMLInputElement, value: boolean) { // TO LIB
 
 let focusedPreset: HTMLDivElement = null;
 
-function apply_styles (range: Range | HTMLDivElement, elem: HTMLButtonElement): void {
-    style(range, null);
-    const temp = document.getElementById(elem.getAttribute('name')) as HTMLDivElement;
-    [...temp.classList].forEach((value: string): void => {
+function apply_styles (acceptor: Range | HTMLSpanElement, elem: HTMLElement): void {
+    style(acceptor, null);
+    [...elem.classList].forEach((value: string): void => {
+        if ((value == "preset-label") || (value == 'mdl-chip__text')) return;
         const type = getPrefix(value);
-        if (multiplePrefix(type)) style(range, { type: type, value: getPostfix(value) });
-        else style(range, { type: type, value: true });
+        if (multiplePrefix(type)) style(acceptor, { type: type, value: getPostfix(value) });
+        else style(acceptor, { type: type, value: true });
     });
 }
 
@@ -110,7 +106,7 @@ var_name.oninput = () => {
     const collapse = get_collapse(get_focus());
     if (!!collapse) {
         collapse.setAttribute(VAR_NAMES[var_name.id], var_name.value);
-        if (var_name.value == "") collapse.setAttribute(VAR_NAMES["var-type-input"], "");
+        if (var_name.value.length == 0) collapse.setAttribute(VAR_NAMES["var-type-input"], "");
     }
     reflectVariable(get_focus());
 };
@@ -124,33 +120,22 @@ var_type.oninput = () => {
 export function reflectVariable (range: Range): void {
     const collapse = get_collapse(range);
     dropVariables();
+
     if (!!collapse) {
         const variable = collapse.getAttribute(VAR_NAMES[var_name.id]) ?? "";
-        const is_disabled = (variable.length == 0);
-        if (!is_disabled) {
-            var_name.value = variable;
-            var_name.parentElement.classList.add('is-dirty');
-
-            var_type.disabled = false;
-            var_type.parentElement.classList.remove('is-disabled');
+        if (variable.length != 0) {
+            var_name._set(variable);
+            var_type._enable(true);
 
             const type = collapse.getAttribute(VAR_NAMES[var_type.id]) ?? "";
-            const is_untyped = (type.length == 0);
-            if (!is_untyped) var_type.value = type;
+            if (type.length != 0) var_type.value = type;
         }
-    } else {
-        var_name.disabled = true;
-        var_name.parentElement.classList.add('is-disabled');
-    }
+    } else var_name._enable(false);
 }
 
 function dropVariables (): void {
-    var_name.value = "";
-    var_name.parentElement.classList.remove('is-dirty');
-    var_name.disabled = false;
-    var_name.parentElement.classList.remove('is-disabled');
-
     (document.getElementById('variables-tab') as HTMLFormElement).reset();
-    var_type.disabled = true;
-    var_type.parentElement.classList.add('is-disabled');
+    var_name._set("");
+    var_name._enable(true);
+    var_type._enable(false);
 }

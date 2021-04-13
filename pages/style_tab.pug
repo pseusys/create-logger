@@ -2,9 +2,9 @@ mixin presets(names)
     each cls, name in names
         span.mdl-chip
             .preset
-                span.mdl-chip__text(id=name class=cls)=name
+                span.preset-label.mdl-chip__text(class=cls)=name
             .mdl-layout-spacer
-            button.mdl-chip__action(name=name type="button")
+            button.preset-button.mdl-chip__action(type="button")
                 i.material-icons cancel
 
 mixin checkboxes(...simple)
