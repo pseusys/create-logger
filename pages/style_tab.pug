@@ -1,10 +1,11 @@
 mixin presets(names)
-    .tile
-        each cls, name in names
-            .gr
-                .preset-holder
-                    .preset-example(id=name class=cls)=name
-                button.mdl-button.mdl-js-button.mdl-button--raised.preset-button(name=name type="button") Apply
+    each cls, name in names
+        span.mdl-chip
+            .preset
+                span.mdl-chip__text(id=name class=cls)=name
+            .mdl-layout-spacer
+            button.mdl-chip__action(name=name type="button")
+                i.material-icons cancel
 
 mixin checkboxes(...simple)
     each check in simple
@@ -22,11 +23,11 @@ mixin colors(position, subs)
 
 
 
-.mdl-cell--2-col.start-container
+form#colors-tab.mdl-cell--2-col.start-container
     +colors('for', "Front color")
     +colors('back', "Back color")
 
-.mdl-cell--3-col.split-container
+form#styles-tab.mdl-cell--3-col.split-container
     .center-container
         each style in styles
             label.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for=style)
@@ -35,25 +36,22 @@ mixin colors(position, subs)
     .center-container
         +checkboxes('blink', 'cross', 'under', 'ita')
 
-
-
-.mdl-cell--2-col
-    //+presets({ error: "back-red sty-bold", warning: "for-yellow", info: "for-blue", plain: "" })
-
-.mdl-cell--2-col
-    //+presets({ modern: "", beautiful: "", original: "", creative: "" })
-
-
+form#presets-tab.mdl-cell--3-col.split-container
+    .center-container
+        +presets({ error: "back-red sty-bold", warning: "for-yellow", info: "for-blue" })
+    .center-container
+        +presets({ beautiful: "", original: "", creative: "" })
 
 .mdl-cell--2-col
-    .gr-in
-        #var-name.mdl-textfield.mdl-js-textfield
-            input#var-name-input.variable.mdl-textfield__input(type="text")
-            label.mdl-textfield__label(for="var-name") Variable name
-    .gr-in
-        #var-type.mdl-textfield.mdl-js-textfield
-            select#var-type-input.variable.mdl-textfield__input(disabled="disabled")
-                option
-                each type in types
-                    option(value=type)=type
-            label.mdl-textfield__label(for="var-type") Variable type
+
+form#variables-tab.mdl-cell--2-col.start-container
+    #var-name.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
+        input#var-name-input.variable.mdl-textfield__input(type="text")
+        label.mdl-textfield__label(for="var-name") Variable name
+
+    #var-type.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
+        select#var-type-input.variable.mdl-textfield__input(disabled)
+            option(selected disabled hidden) Choose type...
+            each type in types
+                option(value=type)=type
+        label.mdl-textfield__label(for="var-type") Variable type

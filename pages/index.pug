@@ -3,12 +3,13 @@ html(lang='en')
     head
         meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
         title Create your logger
     body
         .mdl-layout.mdl-js-layout.mdl-layout--fixed-header.mdl-layout--fixed-tabs.mdl-layout--no-drawer-button
             header.mdl-layout__header
                 .mdl-layout__header-row
-                    .mdl-layout-title Title
+                    .mdl-layout-title Create logger
                     .mdl-layout-spacer
                     nav.mdl-navigation
                         a.mdl-navigation__link(href="") Link
@@ -22,15 +23,15 @@ html(lang='en')
             main.mdl-layout__content
                 #tabs
                     section#GENERAL.mdl-layout__tab-panel
-                        form#file-content.tab-content.mdl-grid
+                        #file-content.tab-content.mdl-grid
                             include general_tab
                     section#STYLE.mdl-layout__tab-panel.is-active
-                        form#style-content.tab-content.mdl-grid
+                        #style-content.tab-content.mdl-grid
                             include style_tab
                     section#PREVIEW.mdl-layout__tab-panel
-                        form#preview-content.tab-content
+                        #preview-content.tab-content
                     section#CODE.mdl-layout__tab-panel
-                        form#code-content.tab-content
+                        #code-content.tab-content
 
                 #terminal.mdl-shadow--2dp
                     include terminal

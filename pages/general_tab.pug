@@ -11,13 +11,13 @@ mixin settings_select(name, id)
 
 
 
-.mdl-cell--3-col.center-container
+form.mdl-cell--3-col.center-container
     label.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored.mdl-js-ripple-effect Save
 
     input#load-file.invisible-input(type="file")
     label.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored.mdl-js-ripple-effect(for="load-file") Load
 
-.mdl-cell--5-col.start-container
+form.mdl-cell--5-col.start-container
     +settings_select("Select translation", "translation")
         each translation, tag in translations
             option(value=tag)=translation
@@ -25,7 +25,7 @@ mixin settings_select(name, id)
         each language in languages
             option(value=language)=language
 
-.mdl-cell--4-col.center-container
+form.mdl-cell--4-col.center-container
     +settings_switch("Light theme", "theme-check", true)
     +settings_switch("Use var names in preview", "vars-check", false)
     +settings_switch("Make human readable", "readable-check", false)

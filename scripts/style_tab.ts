@@ -1,20 +1,18 @@
 import { style, get_common_classes, get_collapse } from "./cutter";
-import { get_focus, range_in_place, switch_mode, TERMINAL_STATE } from "./terminal";
+import { get_focus, switch_mode, TERMINAL_STATE } from "./terminal";
 import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES } from "../core/constants";
 import { get, set } from "./storer";
 
 
 
-function globalHandler (event: Event): void {
+document.getElementById('style-content').onclick = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
     const selection = window.getSelection();
     if (selection.rangeCount == 0) return;
-    let r = selection.getRangeAt(0);
-    if (!range_in_place(r) && !!get_focus()) r = get_focus();
 
     if (target.classList.contains('term-changer') || target.classList.contains('preset-button')) {
-        const range = focusedPreset ?? r; // checkboxes drop selection
-        if (target.classList.contains('term-changer')) apply_style(range, target as HTMLInputElement);
+        const range = focusedPreset ?? get_focus();
+        if (target.classList.contains('term-changer')) apply_style(range, target);
         else apply_styles(range, target as HTMLButtonElement);
 
     } else if (target.classList.contains('preset-example')) {
@@ -22,31 +20,9 @@ function globalHandler (event: Event): void {
             savePreset(focusedPreset);
             focusedPreset = null;
         } else focusedPreset = target as HTMLDivElement;
-        //TODO: add some css for focused preset.
         switch_mode(focusedPreset == null ? TERMINAL_STATE.STYLE : TERMINAL_STATE.GENERAL);
         reflect_term_changers(null, focusedPreset);
-
-    } else if (target.classList.contains('variable')) {
-        if (!range_in_place(r)) return;
-        const field = event.target as HTMLInputElement;
-        if (field.id == 'var-name-input') {
-            const is_disabled = (field.value.length == 0);
-            toggle_text_input(variables[1], is_disabled);
-            if (is_disabled) variables[1].value = "";
-        }
-        const collapse = get_collapse(r);
-        if (!!collapse) collapse.setAttribute(VAR_NAMES[field.id], field.value);
     }
-}
-
-document.getElementById('style-content').onclick = globalHandler;
-
-
-
-function toggle_text_input(text_input: HTMLInputElement | HTMLSelectElement, tog: boolean) { // TO LIB
-    text_input.disabled = tog;
-    text_input.parentElement.classList.toggle("is-disabled", tog);
-    text_input.parentElement.classList.toggle("is-dirty", !tog);
 }
 
 
@@ -55,37 +31,24 @@ function toggle_text_input(text_input: HTMLInputElement | HTMLSelectElement, tog
 
 const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLElement[];
 
-export function reflect_term_changers (range?: Range, single?: HTMLDivElement) {
-    drop_term_changers();
-    if (!range != !single) {
-        const classes = get_common_classes(range, single);
-        if (!!classes) set_term_changers(classes);
+function apply_style (range: Range | HTMLDivElement, elem: HTMLElement): void {
+    const name = elem.getAttribute('name');
+    if (elem.nodeName == "INPUT") {
+        const check = elem as HTMLInputElement;
+        if (check.getAttribute('type') == 'checkbox') style(range, { type: name, value: check.checked });
+        else style(range, { type: name, value: check.value });
+    } else {
+        const sel = elem as HTMLSelectElement;
+        if (sel.selectedIndex != 0) style(range, { type: name, value: sel.value });
     }
 }
 
-function apply_style (range: Range | HTMLDivElement, elem: HTMLInputElement): void {
-    const name = elem.getAttribute('name');
-    if (elem.getAttribute('type') == 'checkbox') style(range, { type: name, value: get_checkbox(elem) });
-    else style(range, { type: name, value: elem.value });
-}
+export function reflect_term_changers (range?: Range, single?: HTMLDivElement) {
+    drop_term_changers();
+    if (!range == !single) return;
 
-export function drop_term_changers (): void {
-    (document.getElementById('style-content') as HTMLFormElement).reset();
-    [...term_changers].forEach((value: HTMLElement) => {
-        if (value.nodeName == "INPUT") set_checkbox(value as HTMLInputElement, false);
-    });
-}
-
-function set_checkbox (checkbox: HTMLInputElement, value: boolean) { // TO LIB
-    checkbox.parentElement.classList.toggle('is-checked', value);
-}
-
-function get_checkbox (checkbox: HTMLInputElement): boolean { // TO LIB
-    return checkbox.parentElement.classList.contains('is-checked');
-}
-
-export function set_term_changers (classes: string[]): void {
-    for (const cls of classes) {
+    const classes = get_common_classes(range, single);
+    if (!!classes) for (const cls of classes) {
         if (!Object.keys(CLASS_CODES).includes(cls)) continue;
         const term_changer = [...term_changers].filter((value: HTMLElement): boolean => {
             return value.getAttribute('name') == getPrefix(cls);
@@ -98,6 +61,17 @@ export function set_term_changers (classes: string[]): void {
             return value.value == getPostfix(cls);
         }), true);
     }
+}
+
+export function drop_term_changers (): void {
+    (document.getElementById('colors-tab') as HTMLFormElement).reset();
+    [...term_changers].forEach((value: HTMLElement) => {
+        if (value.nodeName == "INPUT") set_checkbox(value as HTMLInputElement, false);
+    });
+}
+
+function set_checkbox (checkbox: HTMLInputElement, value: boolean) { // TO LIB
+    checkbox.parentElement.classList.toggle('is-checked', value);
 }
 
 
@@ -131,29 +105,52 @@ export function restorePresets () {
 
 // Right section: variable controls.
 
-const variables = Object.keys(VAR_NAMES).map((value: string): HTMLInputElement => {
-    const input = document.getElementById(value);
-    input.oninput = globalHandler;
-    return input as HTMLInputElement;
-}) as HTMLInputElement[];
+const var_name = document.getElementById("var-name-input") as HTMLInputElement;
+var_name.oninput = () => {
+    const collapse = get_collapse(get_focus());
+    if (!!collapse) {
+        collapse.setAttribute(VAR_NAMES[var_name.id], var_name.value);
+        if (var_name.value == "") collapse.setAttribute(VAR_NAMES["var-type-input"], "");
+    }
+    reflectVariable(get_focus());
+};
+const var_type = document.getElementById("var-type-input") as HTMLSelectElement;
+var_type.oninput = () => {
+    const collapse = get_collapse(get_focus());
+    if (!!collapse && var_type.selectedIndex != 0) collapse.setAttribute(VAR_NAMES[var_type.id], var_type.value);
+    reflectVariable(get_focus());
+};
 
 export function reflectVariable (range: Range): void {
     const collapse = get_collapse(range);
     dropVariables();
     if (!!collapse) {
-        variables.forEach((value: HTMLInputElement): void => {
-            value.value = collapse.getAttribute(VAR_NAMES[value.id]);
-        });
-        variables[0].disabled = false;
-        const is_disabled = (variables[0].value.length == 0);
-        variables[0].parentElement.classList.toggle("is-dirty", !is_disabled);
-        toggle_text_input(variables[1], is_disabled);
+        const variable = collapse.getAttribute(VAR_NAMES[var_name.id]) ?? "";
+        const is_disabled = (variable.length == 0);
+        if (!is_disabled) {
+            var_name.value = variable;
+            var_name.parentElement.classList.add('is-dirty');
+
+            var_type.disabled = false;
+            var_type.parentElement.classList.remove('is-disabled');
+
+            const type = collapse.getAttribute(VAR_NAMES[var_type.id]) ?? "";
+            const is_untyped = (type.length == 0);
+            if (!is_untyped) var_type.value = type;
+        }
+    } else {
+        var_name.disabled = true;
+        var_name.parentElement.classList.add('is-disabled');
     }
 }
 
 function dropVariables (): void {
-    variables.forEach((value: HTMLInputElement): void => {
-        value.value = "";
-        value.disabled = true;
-    })
+    var_name.value = "";
+    var_name.parentElement.classList.remove('is-dirty');
+    var_name.disabled = false;
+    var_name.parentElement.classList.remove('is-disabled');
+
+    (document.getElementById('variables-tab') as HTMLFormElement).reset();
+    var_type.disabled = true;
+    var_type.parentElement.classList.add('is-disabled');
 }
