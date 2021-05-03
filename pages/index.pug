@@ -1,3 +1,10 @@
+mixin section(id, content_id, active="")
+    section.mdl-layout__tab-panel(id=id class=active)
+        .tab-content.mdl-grid(id=content_id)
+            block
+
+
+
 doctype html
 html(lang='en')
     head
@@ -22,16 +29,12 @@ html(lang='en')
 
             main.mdl-layout__content
                 #tabs
-                    section#GENERAL.mdl-layout__tab-panel
-                        #file-content.tab-content.mdl-grid
-                            include general_tab
-                    section#STYLE.mdl-layout__tab-panel.is-active
-                        #style-content.tab-content.mdl-grid
-                            include style_tab
-                    section#PREVIEW.mdl-layout__tab-panel
-                        #preview-content.tab-content
-                    section#CODE.mdl-layout__tab-panel
-                        #code-content.tab-content
+                    +section("GENERAL", "file-content")
+                        include general_tab
+                    +section("STYLE", "style-content", "is-active")
+                        include style_tab
+                    +section("PREVIEW", "preview-content")
+                    +section("CODE", "code-content")
 
                 #terminal.mdl-shadow--2dp
                     include terminal

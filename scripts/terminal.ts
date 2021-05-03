@@ -1,6 +1,5 @@
 import { convert } from "../core/converter";
 import { drop_term_changers, reflect_term_changers } from "./style_tab";
-import { get_selected_nodes } from "./cutter";
 import { Entry, VAR_NAMES } from "../core/constants";
 import { construct } from "../core/langs";
 
@@ -15,6 +14,7 @@ import { construct } from "../core/langs";
  *  | ...<br/>
  *  |- .line<br/>
  *      |- #line-adder.line-number (adds and chooses a new line in 'STYLE' mode only)
+ * @see TERMINAL_STATE terminal mode
  * @see choose_line choose line
  */
 export const terminal = document.getElementById('terminal');
@@ -29,6 +29,7 @@ export const terminal = document.getElementById('terminal');
  * * On 'ArrowUp' and 'ArrowDown' chooses upper or lower line respectively, keeping caret position if possible.
  * - NB! Stepping through span requires additional arrow key pressing:
  *     <span>sample</span><span>text</span>: 11 arrows to walk through.
+ * @see TERMINAL_STATE terminal mode
  * @see choose_line choose line
  */
 terminal.onkeydown = (event) => {
@@ -69,6 +70,7 @@ terminal.onkeydown = (event) => {
  * * Restores saved selection (if any).
  * * If 'line-adder' clicked, adds and chooses line.
  * * If 'line-number' clicked, chooses line.
+ * @see TERMINAL_STATE terminal mode
  * @see choose_line choose line
  */
 terminal.onclick = (event) => {
@@ -93,7 +95,12 @@ terminal.onclick = (event) => {
  * Used with styling methods, especially if styling controls (e.g. input text - variable name) gets focused.
  */
 let saved_focus: Range = null;
-const saved_selection = document.createElement("DIV"); // doc
+
+/**
+ * Div styled in a special way to reflect saved range (replacement for ::selection class).
+ * It is transparent for clicks.
+ */
+const saved_selection = document.createElement("DIV");
 saved_selection.classList.add('selection');
 terminal.before(saved_selection);
 
@@ -119,36 +126,35 @@ function set_focus (selection: Selection) {
 
 /**
  * Function to visually reflect styled spans in given range.
- * Each span receives a css white smooth shadow 'selection styling'.
+ * It applies and sets 'saved_selection' div to given selection ('selection styling').
  * It also saves given range to saved range.
  * @see terminal styled spans
  * @param range given range
  */
 export function reflect_nodes (range: Range): void {
     clear_selected();
-    get_selected_nodes(range).forEach((value: HTMLSpanElement) => {
-        value.classList.add('selected');
-    });
     saved_focus = range;
 
     const rect = saved_focus.getBoundingClientRect(); // doc
-    saved_selection.style.top = get_chosen_line().getBoundingClientRect().top + "px";
+    saved_selection.style.top = (get_chosen_line().getBoundingClientRect().top - 4) + "px";
     saved_selection.style.left = rect.left + "px";
-    saved_selection.style.width = rect.width + "px";
-    saved_selection.style.height = get_chosen_line().getBoundingClientRect().height + "px";
+    saved_selection.style.width = (rect.width + 2) + "px";
+    saved_selection.style.height = (get_chosen_line().getBoundingClientRect().height + 4) + "px";
+    saved_selection.style.visibility = "visible";
 }
 
 /**
- * Function to remove selection styling from every node in chosen line.
+ * Function to remove selection styling, resetting 'saved selection' div.
  * @see reflect_nodes selection styling
  * @see choose_line chosen line
  */
 function clear_selected () {
     saved_focus = null;
-    const chosen = get_chosen_line_content();
-    if (!!chosen) [...chosen.children].forEach((value) => {
-        value.classList.remove('selected');
-    });
+    saved_selection.style.top = "0";
+    saved_selection.style.left = "0";
+    saved_selection.style.width = "0";
+    saved_selection.style.height = "0";
+    saved_selection.style.visibility = "hidden";
 }
 
 
@@ -156,7 +162,7 @@ function clear_selected () {
 // Terminal mode section.
 
 /**
- * Strict enum of terminal states. There are generally four terminal states:
+ * Strict enum of terminal states, modes. There are generally four terminal states:
  * * 'GENERAL' - terminal disabled, none of the contents clickable or selectable, view-only mode.
  * * 'STYLE' - main and default state, only one line at a time active and selectable, line numbers / adder active, styled spans.
  * * 'PREVIEW' - on each line instead of styled spans ASCII escape sequences presented, many lines selectable, line numbers / adder inactive.
@@ -179,6 +185,7 @@ export let mode = TERMINAL_STATE.STYLE;
  * Array containing lines of styled spans for converting to Entries and saving while current terminal mode is 'CODE'.
  * @see Entry Entries
  * @see terminal styled spans
+ * @see TERMINAL_STATE terminal mode
  */
 export let editableHTML: string[];
 /**
@@ -205,6 +212,7 @@ export function switch_mode (new_mode: TERMINAL_STATE) {
  * * 'STYLE': clears selection styling and resets term changers, also saves actual line-contents to editableHTML.
  * * 'CODE': adjusts line number to number of formatted lines in editableHTML.
  * * default: makes line-contents unselectable, line-adder invisible and sets line-numbers to default cursor.
+ * @see TERMINAL_STATE terminal mode
  * @see reflect_nodes selection styling
  * @see drop_term_changers reset term changers
  * @see adjust_lines
@@ -217,7 +225,6 @@ function exitMode (old_mode: TERMINAL_STATE) {
     let line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
     switch (old_mode) {
         case TERMINAL_STATE.STYLE:
-            clear_selected();
             drop_term_changers();
             editableHTML = [];
             for (const content of line_contents) editableHTML.push(content.innerHTML);
@@ -241,6 +248,7 @@ function exitMode (old_mode: TERMINAL_STATE) {
  * * 'PREVIEW': sets line contents to converted lines from editableHTML.
  * * 'CODE': constructs new line set from editableHTML, adjusts line number to line set number
  * and fills line-contents from line set
+ * @see TERMINAL_STATE terminal mode
  * @see editableHTML
  * @see choose_line choose line
  * @see Entry Entries
@@ -294,7 +302,8 @@ function enterMode (new_mode: TERMINAL_STATE) {
 
 /**
  * Function to reset terminal state in 'STYLE' mode.
- * It makes line-contents not editable, clears all selection styling and removes chosen line.
+ * It makes line-contents not editable, clears selection styling and removes chosen line.
+ * @see TERMINAL_STATE terminal mode
  * @see reflect_nodes selection styling
  * @see choose_line chosen line
  */
@@ -313,6 +322,7 @@ function disable_and_clear () {
 /**
  * Function to choose line, 'chosen line' is the only editable line in 'STYLE' mode. It has special 'chosen' CSS class.
  * It also sets caret to this line with collapsed selection.
+ * @see TERMINAL_STATE terminal mode
  * @param line the line to become chosen.
  * @param pos position of caret in chosen line (if it is greater than line length, will be set to line end).
  */

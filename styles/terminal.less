@@ -17,6 +17,7 @@
 
   background-color: @def-back;
   color: @def-for;
+  caret-color: transparent;
   font-weight: @@def-sty;
 
   ::selection {
@@ -30,7 +31,7 @@
   flex-direction: row;
   min-height: 1rem;
   width: 100%;
-  margin: 0 0 .5rem;
+  margin: .5rem 0;
 }
 
 .line-number {
@@ -61,8 +62,8 @@
   user-select: none;
 }
 
-.selected {
-  box-shadow: 0 .5rem .25rem -.25rem white;
+span[data-var-name] {
+  box-shadow: 0 .37rem .25rem -.1rem white, 0 -.37rem .25rem -.1rem white;
 }
 
 
@@ -76,5 +77,11 @@
 .selection {
   position: fixed;
   pointer-events: none;
-  background-color: black;
+  border-radius: 2px;
+  border-top-width: 2px;
+  border-top-style: solid;
+  border-top-color: #ff4081;
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: #ff4081;
 }

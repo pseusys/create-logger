@@ -1,7 +1,7 @@
-import { DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES } from "../core/constants";
+import { CLASS_CODES, DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES } from "../core/constants";
 import { areArraysEqual, getSameElements } from "../core/utils";
 import { find_span_for_place, get_chosen_line_content, terminal } from "./terminal";
-import { restorePresets } from "./style_tab";
+import { restore_presets } from "./style_tab";
 
 
 
@@ -184,7 +184,7 @@ interface Formatting {
  * It applies given style to a node (preset example) or to a range of nodes (styled spans),
  * cutting and merging them if necessary.
  * @see terminal styled spans
- * @see restorePresets preset example
+ * @see restore_presets preset example
  * @param acceptor node or acceptor to apply style to.
  * @param format style that will be applied.
  */
@@ -234,8 +234,9 @@ function cut (range: Range, format?: Formatting) {
  * @param format style to apply.
  */
 function apply_formatting (elem: HTMLElement, format?: Formatting) {
-    if (format == null) elem.className = "";
-    else {
+    if (format == null) elem.className = [...elem.classList].filter((value: string): boolean => {
+        return !Object.keys(CLASS_CODES).includes(value);
+    }).join(" "); else {
         if (multiplePrefix(format.type)) {
             const new_name = format.type + SEPARATOR + format.value;
             const same_class = [...elem.classList].find((value: string): boolean => {
@@ -259,7 +260,7 @@ function apply_formatting (elem: HTMLElement, format?: Formatting) {
  * @param single - node to identify classes.
  * @return list of common classes or null if none.
  */
-export function get_common_classes (range?: Range, single?: HTMLDivElement): string[] | null {
+export function get_common_classes (range?: Range, single?: HTMLSpanElement): string[] | null {
     if (!range == !single) return null;
     let base: HTMLElement[];
     if (!!single) base = [single];

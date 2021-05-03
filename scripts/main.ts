@@ -1,7 +1,7 @@
 import "./imports"
 
 import { choose_line, getClearText, mode, reflect_nodes, selection_in_place, switch_mode, terminal, TERMINAL_STATE } from "./terminal";
-import { reflect_term_changers, reflectVariable, restorePresets } from "./style_tab";
+import { reflect_term_changers, reflect_variable, restore_presets } from "./style_tab";
 import { check } from "./storer";
 
 
@@ -16,7 +16,7 @@ window.onload = () => {
     switch_mode(TERMINAL_STATE.STYLE);
     choose_line(terminal.firstElementChild as HTMLDivElement);
     check();
-    restorePresets();
+    restore_presets();
 }
 
 
@@ -50,7 +50,7 @@ document.ondrop = (event) => {
  * @see STYLE STYLE mode
  * @see reflect_nodes selecting nodes
  * @see reflect_term_changers term changers
- * @see reflectVariable reflect variable
+ * @see reflect_variable reflect variable
  */
 document.onselectionchange = () => {
     const selection = document.getSelection();
@@ -58,7 +58,7 @@ document.onselectionchange = () => {
     const range = selection.getRangeAt(0);
     reflect_nodes(range);
     reflect_term_changers(range);
-    reflectVariable(range);
+    reflect_variable(range);
 }
 
 
