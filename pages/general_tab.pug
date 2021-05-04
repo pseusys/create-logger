@@ -11,13 +11,13 @@ mixin settings_select(name, id)
 
 
 
-form.mdl-cell--3-col.center-container
+form.mdl-cell--2-col-phone.mdl-cell--2-col-tablet.mdl-cell--3-col-desktop.center-container
     label.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored.mdl-js-ripple-effect Save
 
     input#load-file(type="file")
     label.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored.mdl-js-ripple-effect(for="load-file") Load
 
-form.mdl-cell--5-col.start-container
+form.mdl-cell--2-col-phone.mdl-cell--3-col-tablet.mdl-cell--5-col-desktop.start-container
     +settings_select("Select translation", "translation")
         each translation, tag in translations
             option(value=tag)=translation
@@ -25,7 +25,7 @@ form.mdl-cell--5-col.start-container
         each language in languages
             option(value=language)=language
 
-form.mdl-cell--4-col.center-container
+form.mdl-cell--4-col-phone.mdl-cell--3-col-tablet.mdl-cell--4-col-desktop.center-container
     +settings_switch("Light theme", "theme-check", true)
     +settings_switch("Use var names in preview", "vars-check", false)
     +settings_switch("Make human readable", "readable-check", false)
