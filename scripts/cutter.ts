@@ -2,6 +2,7 @@ import { CLASS_CODES, DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES 
 import { areArraysEqual, getSameElements } from "../core/utils";
 import { find_span_for_place, get_chosen_line_content, terminal } from "./terminal";
 import { restore_presets } from "./style_tab";
+import {load, ranger} from "./ranger";
 
 
 
@@ -14,13 +15,13 @@ import { restore_presets } from "./style_tab";
  * + `first_offset` - offset inside first node (first offset).
  * + `last_offset` - offset inside last node (last offset).
  */
-type SpanEdges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
+//type SpanEdges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
 
 /**
  * Container for range offsets from the beginning of current line-content.
  * Used to restore range after nodes get cut and merged.
  */
-let range_backup: { start: number, end: number };
+//let range_backup: { start: number, end: number };
 
 
 /**
@@ -32,6 +33,7 @@ let range_backup: { start: number, end: number };
  * @param backup if true, back given range up to restore it after cutting and joining.
  * @return SpanEdges complete information about range inside line-content.
  */
+/*
 function parse_range (range: Range, backup: boolean): SpanEdges {
     const parent = get_chosen_line_content();
     let first = range._get_range_start_in_node(parent);
@@ -59,26 +61,31 @@ function parse_range (range: Range, backup: boolean): SpanEdges {
     }
     return { first: first_node, first_offset: first_offset, last: last_node, last_offset: last_offset };
 }
+*/
 
 /**
  * Function to restore backed up range and set to current line-content.
  * @param range - range to put restored boundaries to (`Selection.getRangeAt(0)`).
  */
+/*
 function restore_range (range: Range) {
     range._set_range_start_in_node(get_chosen_line_content(), range_backup.start);
     range._set_range_end_in_node(get_chosen_line_content(), range_backup.end);
 }
+*/
 
 /**
  * Function that determines if range starts and ends in single styled span.
  * @see terminal styled span
  * @param range - given range.
  */
+/*
 export function get_collapse (range: Range): HTMLSpanElement | null {
     const { first, last } = parse_range(range, false);
     if (first == last) return first;
     else return null;
 }
+*/
 
 
 
@@ -122,7 +129,7 @@ function join_around (selected: HTMLSpanElement[]) {
     around.forEach((value: HTMLSpanElement, index: number): void => {
         const friend = around[index - 1];
         if (!friend || !value) return;
-        if (areArraysEqual([...value.classList], [...friend.classList])) {
+        if (areArraysEqual(get_common_classes(null, value), get_common_classes(null, friend))) {
             value.textContent = friend.textContent + value.textContent;
             friend.remove();
             value.classList.remove(...Object.keys(VAR_NAMES));
@@ -160,10 +167,11 @@ function get_nodes_between (first: HTMLSpanElement, last: HTMLSpanElement): HTML
  * @param range range of the nodes to get.
  * @return array of nodes in range.
  */
-export function get_selected_nodes (range: Range): HTMLSpanElement[] {
-    const { first, last } = parse_range(range, false);
-    return get_nodes_between(first, last);
+/*
+export function get_selected_nodes (): HTMLSpanElement[] {
+    return get_nodes_between(ranger.start, ranger.end);
 }
+*/
 
 
 
@@ -188,44 +196,41 @@ interface Formatting {
  * @param acceptor node or acceptor to apply style to.
  * @param format style that will be applied.
  */
-export function style (acceptor: Range | HTMLSpanElement, format?: Formatting) {
+export function style (acceptor: Range | HTMLSpanElement, format: Formatting) {
     if (acceptor instanceof HTMLElement) {
         if (acceptor.nodeName == 'SPAN') apply_formatting(acceptor, format);
-    } else cut(acceptor, format);
+    } else cut(format);
 }
 
 /**
  * Function that performs range formatting. It cuts nodes, merges styled spans and applies style to them.
  * @see terminal styled spans
- * @param range range of nodes to style.
  * @param format style to apply.
  */
-function cut (range: Range, format?: Formatting) {
-    if (range.collapsed) return;
+function cut (format: Formatting) {
+    if (ranger.range.collapsed) return;
 
-    const cuttingStart = (offset: number, start: HTMLSpanElement): boolean => {
+    const cutting_start = (offset: number, start: HTMLSpanElement): boolean => {
         return (offset == 0) || (offset == start.textContent.length);
     };
-    const cuttingEnd = (offset: number, end: HTMLSpanElement): boolean => {
+    const cutting_end = (offset: number, end: HTMLSpanElement): boolean => {
         return (offset == 0) || (offset == end.textContent.length);
     };
 
-    const { first, last, first_offset, last_offset } = parse_range(range, true);
-
-    if (first.isSameNode(last)) {
-        const finalOffset = last_offset - first_offset;
-        if (!cuttingStart(first_offset, first)) split_at(first, first_offset, false);
-        if (!cuttingEnd(finalOffset, last)) split_at(last, finalOffset, true);
+    if (ranger.start.isSameNode(ranger.end)) {
+        const finalOffset = ranger.e_i_offset - ranger.s_i_offset;
+        if (!cutting_start(ranger.s_i_offset, ranger.start)) split_at(ranger.start, ranger.s_i_offset, false);
+        if (!cutting_end(finalOffset, ranger.end)) split_at(ranger.end, finalOffset, true);
     } else {
-        if (!cuttingStart(first_offset, first)) split_at(first, first_offset, false);
-        if (!cuttingEnd(last_offset, last)) split_at(last, last_offset, true);
+        if (!cutting_start(ranger.s_i_offset, ranger.start)) split_at(ranger.start, ranger.s_i_offset, false);
+        if (!cutting_end(ranger.e_i_offset, ranger.end)) split_at(ranger.end, ranger.e_i_offset, true);
     }
 
-    const selected = get_nodes_between(first, last);
+    const selected = get_nodes_between(ranger.start, ranger.end);
     for (const child of selected) apply_formatting(child, format);
 
     join_around(selected);
-    restore_range(range);
+    load(false);
 }
 
 /**
@@ -264,7 +269,7 @@ export function get_common_classes (range?: Range, single?: HTMLSpanElement): st
     if (!range == !single) return null;
     let base: HTMLElement[];
     if (!!single) base = [single];
-    else base = get_selected_nodes(range);
+    else base = get_nodes_between(ranger.start, ranger.end);
     const multiple = base.map((value: HTMLElement): string[] => {
         const classes = [...value.classList];
         for (const def in DEFAULTS) {

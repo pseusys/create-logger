@@ -3,6 +3,7 @@ import "./imports"
 import { choose_line, getClearText, mode, reflect_nodes, selection_in_place, switch_mode, terminal, TERMINAL_STATE } from "./terminal";
 import { reflect_term_changers, reflect_variable, restore_presets } from "./style_tab";
 import { check } from "./storer";
+import {save} from "./ranger";
 
 
 
@@ -56,7 +57,8 @@ document.onselectionchange = () => {
     const selection = document.getSelection();
     if ((mode != TERMINAL_STATE.STYLE) || !selection_in_place(selection)) return;
     const range = selection.getRangeAt(0);
-    reflect_nodes(range);
+    save(true);
+    reflect_nodes();
     reflect_term_changers(range);
     reflect_variable(range);
 }

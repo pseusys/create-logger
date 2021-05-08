@@ -2,6 +2,7 @@ import { convert } from "../core/converter";
 import { drop_term_changers, reflect_term_changers } from "./style_tab";
 import { Entry, VAR_NAMES } from "../core/constants";
 import { construct } from "../core/langs";
+import {load, ranger, save} from "./ranger";
 
 
 
@@ -75,11 +76,7 @@ terminal.onkeydown = (event) => {
  */
 terminal.onclick = (event) => {
     if (mode != TERMINAL_STATE.STYLE) return;
-
-    if (!!saved_focus) {
-        const selection = document.getSelection();
-        set_focus(selection);
-    }
+    load(true);
 
     const target = event.target as HTMLElement;
     if (target.id === 'line-adder') choose_line(create_line(null, target.parentElement as HTMLDivElement));
@@ -91,12 +88,6 @@ terminal.onclick = (event) => {
 // Saving range section.
 
 /**
- * Saved range, represents the last selection made in terminal even after focus moved to another element.
- * Used with styling methods, especially if styling controls (e.g. input text - variable name) gets focused.
- */
-let saved_focus: Range = null;
-
-/**
  * Div styled in a special way to reflect saved range (replacement for ::selection class).
  * It is transparent for clicks.
  */
@@ -105,37 +96,28 @@ saved_selection.classList.add('selection');
 terminal.before(saved_selection);
 
 /**
- * Function returning last saved range (in most cases the same as current).
- */
-export function get_focus (): Range {
-    return saved_focus;
-}
-
-/**
  * Function setting given selection (current selection in most cases) to saved range if it is not a terminal selection.
  * Beforehand it checks if given selection already is in terminal and if saved range is a valid terminal selection.
  * @see range_in_place terminal selection
  * @param selection given selection
  */
+/*
 function set_focus (selection: Selection) {
-    if (!selection_in_place(selection) && range_in_place(saved_focus)) {
+    if (!selection_in_place(selection) && range_in_place(ranger.range)) {
         selection.removeAllRanges();
-        selection.addRange(saved_focus);
+        selection.addRange(ranger.range);
     }
 }
+*/
 
 /**
  * Function to visually reflect styled spans in given range.
  * It applies and sets 'saved_selection' div to given selection ('selection styling').
  * It also saves given range to saved range.
  * @see terminal styled spans
- * @param range given range
  */
-export function reflect_nodes (range: Range): void {
-    clear_selected();
-    saved_focus = range;
-
-    const rect = saved_focus.getBoundingClientRect(); // doc
+export function reflect_nodes (): void {
+    const rect = ranger.range.getBoundingClientRect();
     saved_selection.style.top = (get_chosen_line().getBoundingClientRect().top - 4) + "px";
     saved_selection.style.left = rect.left + "px";
     saved_selection.style.width = (rect.width + 2) + "px";
@@ -149,7 +131,6 @@ export function reflect_nodes (range: Range): void {
  * @see choose_line chosen line
  */
 function clear_selected () {
-    saved_focus = null;
     saved_selection.style.top = "0";
     saved_selection.style.left = "0";
     saved_selection.style.width = "0";
@@ -450,6 +431,7 @@ export function get_chosen_line_content (): HTMLDivElement | null {
  * @param range range to check.
  */
 export function range_in_place (range: Range): boolean {
+    if (!range) return false;
     const selectionParent = range.commonAncestorContainer;
     const chosen = get_chosen_line_content();
     if (!chosen) return false;

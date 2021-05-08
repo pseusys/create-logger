@@ -1,7 +1,8 @@
-import { style, get_common_classes, get_collapse } from "./cutter";
-import { get_focus, switch_mode, TERMINAL_STATE } from "./terminal";
+import { style, get_common_classes } from "./cutter";
+import { switch_mode, TERMINAL_STATE } from "./terminal";
 import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES } from "../core/constants";
 import { get, set } from "./storer";
+import {ranger} from "./ranger";
 
 
 
@@ -18,7 +19,7 @@ document.getElementById('style-content').onclick = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
 
     if (target.classList.contains('term-changer') || target.classList.contains('preset-label')) {
-        const acceptor = focused_preset ?? get_focus();
+        const acceptor = focused_preset ?? ranger.range;
         if (target.classList.contains('term-changer')) apply_style(acceptor, target);
         else apply_styles(acceptor, target as HTMLSpanElement);
 
@@ -120,7 +121,7 @@ let focused_preset: HTMLSpanElement = null;
  * @param acceptor element or range, to which style will be applied.
  * @param elem term changer, representing style, that will be applied.
  */
-function apply_styles (acceptor: Range | HTMLSpanElement, elem: HTMLElement): void {
+function apply_styles (acceptor: Range | HTMLSpanElement, elem: HTMLElement): void { // Optimize, accept multiple formatting
     style(acceptor, null);
     [...elem.classList].forEach((value: string): void => {
         if (!Object.keys(CLASS_CODES).includes(value)) return;
@@ -163,12 +164,12 @@ export function restore_presets () {
  */
 const var_name = document.getElementById("var-name-input") as HTMLInputElement;
 var_name.oninput = () => {
-    const collapse = get_collapse(get_focus());
+    const collapse = ranger.collapse;
     if (!!collapse) {
         collapse.setAttribute(VAR_NAMES[var_name.id], var_name.value);
         if (var_name.value.length == 0) collapse.setAttribute(VAR_NAMES["var-type-input"], "");
     }
-    reflect_variable(get_focus());
+    reflect_variable(ranger.range);
 };
 
 /**
@@ -180,9 +181,9 @@ var_name.oninput = () => {
  */
 const var_type = document.getElementById("var-type-input") as HTMLSelectElement;
 var_type.oninput = () => {
-    const collapse = get_collapse(get_focus());
+    const collapse = ranger.collapse;
     if (!!collapse && var_type.selectedIndex != 0) collapse.setAttribute(VAR_NAMES[var_type.id], var_type.value);
-    reflect_variable(get_focus());
+    reflect_variable(ranger.range);
 };
 
 /**
@@ -191,7 +192,7 @@ var_type.oninput = () => {
  * @see var_type var type
  */
 export function reflect_variable (range: Range): void {
-    const collapse = get_collapse(range);
+    const collapse = ranger.collapse;
     drop_variables();
 
     if (!!collapse) {
