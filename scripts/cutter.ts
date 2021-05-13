@@ -129,7 +129,7 @@ function join_around (selected: HTMLSpanElement[]) {
     around.forEach((value: HTMLSpanElement, index: number): void => {
         const friend = around[index - 1];
         if (!friend || !value) return;
-        if (areArraysEqual(get_common_classes(null, value), get_common_classes(null, friend))) {
+        if (areArraysEqual(get_common_classes(value), get_common_classes(friend))) {
             value.textContent = friend.textContent + value.textContent;
             friend.remove();
             value.classList.remove(...Object.keys(VAR_NAMES));
@@ -182,7 +182,7 @@ export function get_selected_nodes (): HTMLSpanElement[] {
  * + `type` - formatting class name.
  * + `value` - formatting value.
  */
-interface Formatting {
+export interface Formatting {
     type: string;
     value: string | boolean;
 }
@@ -194,20 +194,19 @@ interface Formatting {
  * @see terminal styled spans
  * @see restore_presets preset example
  * @param acceptor node or acceptor to apply style to.
- * @param format style that will be applied.
+ * @param formats styles that will be applied, if null all styles will be dropped.
  */
-export function style (acceptor: Range | HTMLSpanElement, format: Formatting) {
-    if (acceptor instanceof HTMLElement) {
-        if (acceptor.nodeName == 'SPAN') apply_formatting(acceptor, format);
-    } else cut(format);
+export function style (formats?: Formatting[], acceptor?: HTMLSpanElement) {
+    if (!!acceptor) apply_formatting(acceptor, formats);
+    else cut(formats);
 }
 
 /**
  * Function that performs range formatting. It cuts nodes, merges styled spans and applies style to them.
  * @see terminal styled spans
- * @param format style to apply.
+ * @param formats style to apply.
  */
-function cut (format: Formatting) {
+function cut (formats: Formatting[]) {
     if (ranger.range.collapsed) return;
 
     const cutting_start = (offset: number, start: HTMLSpanElement): boolean => {
@@ -227,7 +226,7 @@ function cut (format: Formatting) {
     }
 
     const selected = get_nodes_between(ranger.start, ranger.end);
-    for (const child of selected) apply_formatting(child, format);
+    for (const child of selected) apply_formatting(child, formats);
 
     join_around(selected);
     load(false);
@@ -236,12 +235,12 @@ function cut (format: Formatting) {
 /**
  * Function that applies formatting to given node.
  * @param elem element to style.
- * @param format style to apply.
+ * @param formats style to apply.
  */
-function apply_formatting (elem: HTMLElement, format?: Formatting) {
-    if (format == null) elem.className = [...elem.classList].filter((value: string): boolean => {
+function apply_formatting (elem: HTMLElement, formats?: Formatting[]) {
+    if (formats == null) elem.className = [...elem.classList].filter((value: string): boolean => {
         return !Object.keys(CLASS_CODES).includes(value);
-    }).join(" "); else {
+    }).join(" "); else formats.forEach((format: Formatting) => {
         if (multiplePrefix(format.type)) {
             const new_name = format.type + SEPARATOR + format.value;
             const same_class = [...elem.classList].find((value: string): boolean => {
@@ -249,9 +248,8 @@ function apply_formatting (elem: HTMLElement, format?: Formatting) {
             });
             if (!!same_class) elem.classList.replace(same_class, new_name);
             else elem.classList.add(new_name);
-        }
-        else elem.classList.toggle(format.type, format.value as boolean);
-    }
+        } else elem.classList.toggle(format.type, format.value as boolean);
+    });
 }
 
 
@@ -259,14 +257,12 @@ function apply_formatting (elem: HTMLElement, format?: Formatting) {
 // Class utils section.
 
 /**
- * Function that identifies common classes of all nodes in given range of styled spans or a single node.
+ * Function that identifies common classes of all nodes in chosen range of styled spans or a single node.
  * @see terminal styled spans
- * @param range - range of nodes with common classes.
  * @param single - node to identify classes.
  * @return list of common classes or null if none.
  */
-export function get_common_classes (range?: Range, single?: HTMLSpanElement): string[] | null {
-    if (!range == !single) return null;
+export function get_common_classes (single?: HTMLSpanElement): string[] | null {
     let base: HTMLElement[];
     if (!!single) base = [single];
     else base = get_nodes_between(ranger.start, ranger.end);

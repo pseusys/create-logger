@@ -2,7 +2,7 @@ import { convert } from "../core/converter";
 import { drop_term_changers, reflect_term_changers } from "./style_tab";
 import { Entry, VAR_NAMES } from "../core/constants";
 import { construct } from "../core/langs";
-import {load, ranger, save} from "./ranger";
+import {load, ranger, set_in_node} from "./ranger";
 
 
 
@@ -44,14 +44,16 @@ terminal.onkeydown = (event) => {
         choose_line(create_line(get_chosen_line()));
     } else if (event.key == 'Backspace') {
         if (selection.isCollapsed) {
-            const range = selection.getRangeAt(0);
             const chosen_children = get_chosen_line_content().children;
-            if ((range.startContainer.textContent == '') && (chosen_children.length == 1)) {
+            if ((ranger.start.textContent == '') && (chosen_children.length == 1)) {
                 if (chosen_children[0].classList.length != 0) {
                     chosen_children[0].className = '';
-                    reflect_term_changers(selection.getRangeAt(0));
+                    reflect_term_changers();
                 } else {
-                    get_chosen_line().remove();
+                    const line = get_chosen_line();
+                    const prev_line = line.previousElementSibling;
+                    if (!!prev_line) choose_line(prev_line as HTMLDivElement);
+                    line.remove();
                     reorder_lines();
                 }
                 event.preventDefault();
@@ -64,6 +66,12 @@ terminal.onkeydown = (event) => {
         event.preventDefault();
     }
 };
+
+terminal.oninput = () => {
+    reflect_nodes();
+}
+
+
 
 /**
  * Terminal on click handler (works in 'STYLE' mode only).
@@ -119,9 +127,14 @@ function set_focus (selection: Selection) {
 export function reflect_nodes (): void {
     const rect = ranger.range.getBoundingClientRect();
     saved_selection.style.top = (get_chosen_line().getBoundingClientRect().top - 4) + "px";
-    saved_selection.style.left = rect.left + "px";
-    saved_selection.style.width = (rect.width + 2) + "px";
     saved_selection.style.height = (get_chosen_line().getBoundingClientRect().height + 4) + "px";
+    if (ranger.range.getClientRects().length > 0) {
+        saved_selection.style.left = rect.left + "px";
+        saved_selection.style.width = (rect.width + 2) + "px";
+    } else {
+        saved_selection.style.left = "32px";
+        saved_selection.style.width = "2px";
+    }
     saved_selection.style.visibility = "visible";
 }
 
@@ -169,11 +182,6 @@ export let mode = TERMINAL_STATE.STYLE;
  * @see TERMINAL_STATE terminal mode
  */
 export let editableHTML: string[];
-/**
- * A special line number with '+' sign adding a new line and choosing it.
- * @see choose_line choose line
- */
-const line_adder = document.getElementById('line-adder');
 
 /**
  * Function switching terminal to a new mode, performs exit from old one and enter to new one.
@@ -202,23 +210,18 @@ export function switch_mode (new_mode: TERMINAL_STATE) {
  */
 function exitMode (old_mode: TERMINAL_STATE) {
     disable_and_clear();
-    let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
-    let line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
     switch (old_mode) {
         case TERMINAL_STATE.STYLE:
             drop_term_changers();
             editableHTML = [];
+            let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
             for (const content of line_contents) editableHTML.push(content.innerHTML);
             break;
         case TERMINAL_STATE.CODE:
             adjust_lines(editableHTML.length);
-            line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
-            line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
             break;
     }
-    for (const content of line_contents) content.style.userSelect = 'auto';
-    for (const number of line_numbers) number.style.cursor = 'default';
-    line_adder.parentElement.style.display = 'none';
+    terminal.classList.remove(`${old_mode}-terminal`);
 }
 
 /**
@@ -243,16 +246,11 @@ function exitMode (old_mode: TERMINAL_STATE) {
 function enterMode (new_mode: TERMINAL_STATE) {
     const html_copy = [...editableHTML];
     let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
-    let line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
     switch (new_mode) {
         case TERMINAL_STATE.GENERAL:
-            for (const content of line_contents) content.style.userSelect = 'none';
             for (const content of line_contents) content.innerHTML = html_copy.shift();
             break;
         case TERMINAL_STATE.STYLE:
-            for (const content of line_contents) content.style.userSelect = 'none';
-            for (const number of line_numbers) number.style.cursor = 'pointer';
-            line_adder.parentElement.style.display = 'flex';
             for (const content of line_contents) content.innerHTML = editableHTML.shift();
             choose_line(terminal.firstElementChild as HTMLDivElement);
             break;
@@ -267,14 +265,10 @@ function enterMode (new_mode: TERMINAL_STATE) {
             })).split("\n");
             adjust_lines(codes.length);
             line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
-            line_numbers = [...document.getElementsByClassName('line-number')] as HTMLDivElement[];
-            for (const content of line_contents) {
-                content.style.userSelect = 'auto';
-                content.innerHTML = codes.shift();
-            }
-            for (const number of line_numbers) number.style.cursor = 'default';
+            for (const content of line_contents) content.innerHTML = codes.shift();
             break;
     }
+    terminal.classList.add(`${new_mode}-terminal`);
 }
 
 
@@ -319,11 +313,7 @@ export function choose_line (line: HTMLDivElement, pos?: number) {
     for (const child of line_content.children) child.setAttribute('contenteditable', 'true');
     line_number.classList.add('chosen');
 
-    const range = document.createRange();
-    range._set_range_in_node(line_content as HTMLDivElement, pos);
-    const sel = document.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+    set_in_node(line_content as HTMLDivElement, pos);
 }
 
 /**
@@ -387,9 +377,9 @@ function reorder_lines() {
 
 /**
  * Function to get text in given range. It extracts text from line-contents only.
- * @param range range to extract text from.
  */
-export function getClearText(range: Range): string {
+export function getClearText(): string {
+    const range = window.getSelection().getRangeAt(0);
     return [...terminal.childNodes].reduce((previous: string, line: HTMLDivElement): string => {
         const content = line.lastElementChild;
         if (range.intersectsNode(content)) {

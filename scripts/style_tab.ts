@@ -1,4 +1,4 @@
-import { style, get_common_classes } from "./cutter";
+import {style, get_common_classes, Formatting} from "./cutter";
 import { switch_mode, TERMINAL_STATE } from "./terminal";
 import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES } from "../core/constants";
 import { get, set } from "./storer";
@@ -19,9 +19,8 @@ document.getElementById('style-content').onclick = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
 
     if (target.classList.contains('term-changer') || target.classList.contains('preset-label')) {
-        const acceptor = focused_preset ?? ranger.range;
-        if (target.classList.contains('term-changer')) apply_style(acceptor, target);
-        else apply_styles(acceptor, target as HTMLSpanElement);
+        if (target.classList.contains('term-changer')) apply_style(target, focused_preset);
+        else apply_styles(target as HTMLSpanElement, focused_preset);
 
     } else if (target.classList.contains('preset-button')) {
         const preset_target = target.parentElement.getElementsByClassName('preset-label')[0] as HTMLSpanElement;
@@ -33,7 +32,7 @@ document.getElementById('style-content').onclick = (event: MouseEvent) => {
             focused_preset = null;
         } else {
             focused_preset = preset_target;
-            reflect_term_changers(null, focused_preset);
+            reflect_term_changers(focused_preset);
         }
     }
 }
@@ -54,15 +53,16 @@ const term_changers = [...document.getElementsByClassName('term-changer')] as HT
  * @param acceptor element or range, to which style will be applied.
  * @param elem term changer, representing style, that will be applied.
  */
-function apply_style (acceptor: Range | HTMLSpanElement, elem: HTMLElement): void {
+function apply_style (elem: HTMLElement, acceptor: HTMLSpanElement): void {
     const name = elem.getAttribute('name');
     if (elem.nodeName == "INPUT") {
         const check = elem as HTMLInputElement;
-        if (check.getAttribute('type') == 'checkbox') style(acceptor, { type: name, value: check.checked });
-        else style(acceptor, { type: name, value: check.value });
+        if (check.getAttribute('type') == 'checkbox')
+            style([{ type: name, value: check.checked }], acceptor);
+        else style([{ type: name, value: check.value }], acceptor);
     } else {
         const sel = elem as HTMLSelectElement;
-        if (sel.selectedIndex != 0) style(acceptor, { type: name, value: sel.value });
+        if (sel.selectedIndex != 0) style([{ type: name, value: sel.value }], acceptor);
     }
 }
 
@@ -73,11 +73,9 @@ function apply_style (acceptor: Range | HTMLSpanElement, elem: HTMLElement): voi
  * @param range selected text, that should be represented.
  * @param single preset, that should be represented.
  */
-export function reflect_term_changers (range?: Range, single?: HTMLSpanElement) {
+export function reflect_term_changers (single?: HTMLSpanElement) {
     drop_term_changers();
-    if (!range == !single) return;
-
-    const classes = get_common_classes(range, single);
+    const classes = get_common_classes(single);
     if (!!classes) for (const cls of classes) {
         if (!Object.keys(CLASS_CODES).includes(cls)) continue;
         const term_changer = [...term_changers].filter((value: HTMLElement): boolean => {
@@ -121,14 +119,16 @@ let focused_preset: HTMLSpanElement = null;
  * @param acceptor element or range, to which style will be applied.
  * @param elem term changer, representing style, that will be applied.
  */
-function apply_styles (acceptor: Range | HTMLSpanElement, elem: HTMLElement): void { // Optimize, accept multiple formatting
-    style(acceptor, null);
-    [...elem.classList].forEach((value: string): void => {
-        if (!Object.keys(CLASS_CODES).includes(value)) return;
+function apply_styles (elem: HTMLElement, acceptor?: HTMLSpanElement): void {
+    style(null, acceptor);
+    const formats = [...elem.classList].filter((value: string): boolean => {
+        return Object.keys(CLASS_CODES).includes(value);
+    }).map((value: string): Formatting => {
         const type = getPrefix(value);
-        if (multiplePrefix(type)) style(acceptor, { type: type, value: getPostfix(value) });
-        else style(acceptor, { type: type, value: true });
+        if (multiplePrefix(type)) return { type: type, value: getPostfix(value) };
+        else return { type: type, value: true };
     });
+    style(formats, acceptor);
 }
 
 /**
@@ -169,7 +169,7 @@ var_name.oninput = () => {
         collapse.setAttribute(VAR_NAMES[var_name.id], var_name.value);
         if (var_name.value.length == 0) collapse.setAttribute(VAR_NAMES["var-type-input"], "");
     }
-    reflect_variable(ranger.range);
+    reflect_variable();
 };
 
 /**
@@ -183,7 +183,7 @@ const var_type = document.getElementById("var-type-input") as HTMLSelectElement;
 var_type.oninput = () => {
     const collapse = ranger.collapse;
     if (!!collapse && var_type.selectedIndex != 0) collapse.setAttribute(VAR_NAMES[var_type.id], var_type.value);
-    reflect_variable(ranger.range);
+    reflect_variable();
 };
 
 /**
@@ -191,7 +191,7 @@ var_type.oninput = () => {
  * @see var_name var name
  * @see var_type var type
  */
-export function reflect_variable (range: Range): void {
+export function reflect_variable (): void {
     const collapse = ranger.collapse;
     drop_variables();
 

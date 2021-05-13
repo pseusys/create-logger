@@ -30,8 +30,6 @@ export const ranger: Ranger = {
     e_p_offset: -1
 };
 
-let previous_auto = null;
-
 
 
 /**
@@ -43,11 +41,10 @@ let previous_auto = null;
  */
 export function save (auto: boolean) {
     const selection = window.getSelection();
-    ranger.range = selection.getRangeAt(0);
 
-    if (auto && (ranger.range.toString() == previous_auto)) return;
-    else previous_auto = ranger.range.toString();
-    console.log("auto parsed", !load)
+    if (auto && (selection.getRangeAt(0) == ranger.range)) return;
+    else ranger.range = selection.getRangeAt(0);
+    console.log("auto saved " + auto);
 
     const parent = get_chosen_line_content();
     let first = ranger.range._get_range_start_in_node(parent);
@@ -95,10 +92,19 @@ export function save (auto: boolean) {
 export function load (selection_changed: boolean) {
     const selection = window.getSelection();
     if ((!selection_in_place(selection) || !selection_changed) && range_in_place(ranger.range)) {
+        console.log("selection returned fix")
         selection.removeAllRanges();
         selection.addRange(ranger.range);
         ranger.range._set_range_start_in_node(get_chosen_line_content(), ranger.s_p_offset);
         ranger.range._set_range_end_in_node(get_chosen_line_content(), ranger.e_p_offset);
         save(false);
     }
+}
+
+export function set_in_node (node: HTMLElement, position: number) {
+    const range = document.createRange();
+    range._set_range_in_node(node, position);
+    const sel = document.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
 }

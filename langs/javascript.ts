@@ -12,7 +12,7 @@ export default function construct (str: Entry[][]): string {
 
 
 
-const WHITESPACE = "\u00A0";
+const WHITESPACE = " ";
 const INTENT = "\u00A0\u00A0\u00A0\u00A0";
 
 function escape (str: string, separate: boolean = false): string {

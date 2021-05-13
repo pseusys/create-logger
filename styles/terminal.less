@@ -19,6 +19,34 @@
   color: @def-for;
   caret-color: transparent;
   font-weight: @@def-sty;
+}
+
+
+
+.GENERAL-terminal {
+  .line-content {
+    user-select: none;
+  }
+}
+
+.STYLE-terminal {
+  user-select: none;
+
+  .line-content {
+    user-select: none;
+  }
+
+  .line-number {
+    cursor: pointer;
+
+    &#line-adder {
+      display: flex;
+    }
+  }
+
+  #line_adder {
+    display: flex;
+  }
 
   ::selection {
     background: transparent;
@@ -26,19 +54,44 @@
   }
 }
 
+.PREVIEW-terminal {
+  .line-content {
+    > span {
+      white-space: normal;
+    }
+  }
+}
+
+.CODE-terminal {
+  .line-content {
+    > span {
+      white-space: normal;
+    }
+  }
+
+  .line-number {
+    cursor: default;
+  }
+}
+
+
+
 .line {
   display: flex;
   flex-direction: row;
-  min-height: 1rem;
   width: 100%;
   margin: .5rem 0;
 }
 
 .line-number {
   display: flex;
-  width: 5%;
-  cursor: pointer;
+  width: 32px;
+  cursor: default;
   user-select: none;
+
+  &#line-adder {
+    display: none;
+  }
 }
 
 .line-content {
@@ -46,6 +99,7 @@
   width: 95%;
   flex-grow: 1;
   overflow-wrap: break-word;
+  user-select: auto;
 
   > span {
     white-space: nowrap;
@@ -54,13 +108,10 @@
 
 .chosen {
   cursor: default;
+  user-select: auto;
 }
 
 
-
-:not(.chosen)+.line-content {
-  user-select: none;
-}
 
 span[data-var-name] {
   box-shadow: 0 .37rem .25rem -.1rem white, 0 -.37rem .25rem -.1rem white;
