@@ -1,4 +1,5 @@
 @import "main.less";
+@import "support.less";
 
 
 
@@ -23,7 +24,7 @@
 
 
 
-.GENERAL-terminal {
+.GENERAL-terminal, .STYLE-terminal {
   .line-content {
     user-select: none;
   }
@@ -31,10 +32,6 @@
 
 .STYLE-terminal {
   user-select: none;
-
-  .line-content {
-    user-select: none;
-  }
 
   .line-number {
     cursor: pointer;
@@ -54,7 +51,7 @@
   }
 }
 
-.PREVIEW-terminal {
+.PREVIEW-terminal, .CODE-terminal {
   .line-content {
     > span {
       white-space: normal;
@@ -63,12 +60,6 @@
 }
 
 .CODE-terminal {
-  .line-content {
-    > span {
-      white-space: normal;
-    }
-  }
-
   .line-number {
     cursor: default;
   }
@@ -129,10 +120,6 @@ span[data-var-name] {
   position: fixed;
   pointer-events: none;
   border-radius: 2px;
-  border-top-width: 2px;
-  border-top-style: solid;
-  border-top-color: #ff4081;
-  border-bottom-width: 2px;
-  border-bottom-style: solid;
-  border-bottom-color: #ff4081;
+  border-top: 2px solid @material-pink;
+  border-bottom: 2px solid @material-pink;
 }

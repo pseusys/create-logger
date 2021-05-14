@@ -1,3 +1,17 @@
+@material-pink: #ff4081;
+
+
+
+a, label, select, i {
+  user-select: none;
+}
+
+.mdl-checkbox__label, .mdl-radio__label, .mdl-switch__label {
+  user-select: none;
+}
+
+
+
 .mdl-layout__content {
   display: flex !important;
   flex-direction: column;
@@ -40,6 +54,7 @@
 
 .mdl-chip__text {
   cursor: pointer;
+  user-select: none;
   padding-left: 4px;
   padding-right: 4px;
   border-radius: 4px;
