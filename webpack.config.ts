@@ -6,7 +6,8 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 import { LESS_VARS, PUG_VARS } from "./core/constants";
 
-if (process.env.DEBUG) PUG_VARS['build'] = process.env.build_link;
+if (!process.env.DEBUG) PUG_VARS['build'] = process.env.build_link;
+else PUG_VARS['build'] = "#";
 
 const config: webpack.Configuration = {
     mode: 'production',
