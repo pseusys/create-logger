@@ -85,5 +85,6 @@ const config: webpack.Configuration = {
 module.exports = (env, argv) => {
     if (argv.mode == 'development') config.devtool = 'eval-source-map';
     else PUG_VARS['build'] = env.build_link;
+    console.log(env.build_link, process.env.build_link)
     return config;
 };
