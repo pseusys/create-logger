@@ -37,8 +37,10 @@ jobs:
         npm install
     
     - name: Build 🛠
+      env:
+        build_link: https://github.com/pseusys/create-logger/commit/$GITHUB_SHA
       run: |
-        echo "Build: $GITHUB_SHA"
+        echo "Build: $build_link"
         npm run build
     
     - name: Deploy 🚀
