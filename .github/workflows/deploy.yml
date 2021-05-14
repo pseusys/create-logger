@@ -38,7 +38,7 @@ jobs:
     
     - name: Build 🛠
       env:
-        build_link: https://github.com/pseusys/create-logger/commit/$GITHUB_SHA
+        build_link: https://github.com/pseusys/create-logger/commit/${{ GITHUB_SHA }}
       run: |
         echo "Build: $build_link"
         npm run build
