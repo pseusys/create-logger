@@ -116,5 +116,7 @@ export const PUG_VARS = {
     types: TYPES, // TODO: check if whole set needed?
 
     literals: LITERALS,
-    translations: TRANSLATIONS
+    translations: TRANSLATIONS,
+
+    build: '#'
 };

@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "DEBUG=false webpack",
-    "debug": "DEBUG=true webpack",
+    "build": "webpack --mode=production",
+    "debug": "webpack --mode=development",
     "test": "mocha"
   },
   "keywords": [],
