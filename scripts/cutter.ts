@@ -1,91 +1,8 @@
 import { CLASS_CODES, DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES } from "../core/constants";
 import { areArraysEqual, getSameElements } from "../core/utils";
-import { find_span_for_place, get_chosen_line_content, terminal } from "./terminal";
+import { terminal } from "./terminal";
 import { restore_presets } from "./style_tab";
 import {load, ranger} from "./ranger";
-
-
-
-// Range parsing & restoring section.
-
-/**
- * Type representing range inside a line-content (range containing multiple span elements only). Params:
- * + `first` - first node of the range.
- * + `last` - last node of the range.
- * + `first_offset` - offset inside first node (first offset).
- * + `last_offset` - offset inside last node (last offset).
- */
-//type SpanEdges = { first: HTMLSpanElement, last: HTMLSpanElement, first_offset: number, last_offset: number };
-
-/**
- * Container for range offsets from the beginning of current line-content.
- * Used to restore range after nodes get cut and merged.
- */
-//let range_backup: { start: number, end: number };
-
-
-/**
- * Function that parses range, correcting internal offsets of range _in_ first and last styled span.
- * Especially it corrects range edges at position `0` and `node.text.length - 1`.
- * Node boundaries never begin at the end of the node or end at the beginning, even if user actually selected that.
- * @see terminal styled span
- * @param range range to parse.
- * @param backup if true, back given range up to restore it after cutting and joining.
- * @return SpanEdges complete information about range inside line-content.
- */
-/*
-function parse_range (range: Range, backup: boolean): SpanEdges {
-    const parent = get_chosen_line_content();
-    let first = range._get_range_start_in_node(parent);
-    let last = range._get_range_end_in_node(parent);
-    if (backup) range_backup = { start: first.offset, end: last.offset };
-
-    let first_node = find_span_for_place(first.node);
-    let first_offset = first.node_offset;
-    let last_node = find_span_for_place(last.node);
-    let last_offset = last.node_offset;
-
-    if (first_node == last_node)
-        return { first: first_node, first_offset: first_offset, last: last_node, last_offset: last_offset };
-
-    if ((first_offset == first_node.textContent.length) && (first_node.nextElementSibling != null)) {
-        first_node = first_node.nextElementSibling as HTMLSpanElement;
-        first_offset = 0;
-    }
-    if (first_node == last_node)
-        return { first: first_node, first_offset: first_offset, last: last_node, last_offset: last_offset };
-
-    if ((last_offset == 0) && (last_node.previousElementSibling != null)) {
-        last_node = last_node.previousElementSibling as HTMLSpanElement;
-        last_offset = last_node.textContent.length;
-    }
-    return { first: first_node, first_offset: first_offset, last: last_node, last_offset: last_offset };
-}
-*/
-
-/**
- * Function to restore backed up range and set to current line-content.
- * @param range - range to put restored boundaries to (`Selection.getRangeAt(0)`).
- */
-/*
-function restore_range (range: Range) {
-    range._set_range_start_in_node(get_chosen_line_content(), range_backup.start);
-    range._set_range_end_in_node(get_chosen_line_content(), range_backup.end);
-}
-*/
-
-/**
- * Function that determines if range starts and ends in single styled span.
- * @see terminal styled span
- * @param range - given range.
- */
-/*
-export function get_collapse (range: Range): HTMLSpanElement | null {
-    const { first, last } = parse_range(range, false);
-    if (first == last) return first;
-    else return null;
-}
-*/
 
 
 
@@ -160,19 +77,6 @@ function get_nodes_between (first: HTMLSpanElement, last: HTMLSpanElement): HTML
     return selected;
 }
 
-/**
- * Function to get selected styled spans.
- * @see terminal styled spans
- * @see get_nodes_between get nodes between
- * @param range range of the nodes to get.
- * @return array of nodes in range.
- */
-/*
-export function get_selected_nodes (): HTMLSpanElement[] {
-    return get_nodes_between(ranger.start, ranger.end);
-}
-*/
-
 
 
 // Node styling section.
@@ -207,7 +111,7 @@ export function style (formats?: Formatting[], acceptor?: HTMLSpanElement) {
  * @param formats style to apply.
  */
 function cut (formats: Formatting[]) {
-    if (ranger.range.collapsed) return;
+    if (ranger.collapse) return;
 
     const cutting_start = (offset: number, start: HTMLSpanElement): boolean => {
         return (offset == 0) || (offset == start.textContent.length);

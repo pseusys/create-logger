@@ -1,9 +1,9 @@
 import "./imports"
 
-import { choose_line, getClearText, mode, reflect_nodes, selection_in_place, switch_mode, terminal, TERMINAL_STATE } from "./terminal";
+import { choose_line, mode, reflect_nodes, switch_mode, terminal, TERMINAL_STATE } from "./terminal";
 import { reflect_term_changers, reflect_variable, restore_presets } from "./style_tab";
 import { check } from "./storer";
-import {ranger, save} from "./ranger";
+import { getClearText, save, selection_in_place } from "./ranger";
 
 
 
@@ -54,7 +54,7 @@ document.ondrop = (event) => {
  * @see reflect_variable reflect variable
  */
 document.onselectionchange = () => {
-    if ((mode != TERMINAL_STATE.STYLE) || !selection_in_place(document.getSelection())) return;
+    if ((mode != TERMINAL_STATE.STYLE) || !selection_in_place()) return;
     save(true);
     reflect_nodes();
     reflect_term_changers();

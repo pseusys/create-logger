@@ -2,7 +2,7 @@ import { convert } from "../core/converter";
 import { drop_term_changers, reflect_term_changers } from "./style_tab";
 import { Entry, VAR_NAMES } from "../core/constants";
 import { construct } from "../core/langs";
-import {load, ranger, set_in_node} from "./ranger";
+import { load, ranger, save, set_in_node } from "./ranger";
 
 
 
@@ -36,39 +36,43 @@ export const terminal = document.getElementById('terminal');
 terminal.onkeydown = (event) => {
     if (mode != TERMINAL_STATE.STYLE) return;
 
-    const selection = document.getSelection();
-    if (selection.rangeCount == 0) return;
-
     if (event.key === 'Enter') {
         event.preventDefault();
         choose_line(create_line(get_chosen_line()));
     } else if (event.key == 'Backspace') {
-        if (selection.isCollapsed) {
+        if (ranger.collapse) {
             const chosen_children = get_chosen_line_content().children;
-            if ((ranger.start.textContent == '') && (chosen_children.length == 1)) {
+            if ((ranger.single.textContent == '') && (chosen_children.length == 1)) {
                 if (chosen_children[0].classList.length != 0) {
                     chosen_children[0].className = '';
                     reflect_term_changers();
                 } else {
                     const line = get_chosen_line();
                     const prev_line = line.previousElementSibling;
-                    if (!!prev_line) choose_line(prev_line as HTMLDivElement);
-                    line.remove();
-                    reorder_lines();
+                    if (!!prev_line) {
+                        choose_line(prev_line as HTMLDivElement);
+                        line.remove();
+                        reorder_lines();
+                    }
                 }
                 event.preventDefault();
             }
         } else event.preventDefault();
-    } else if ((event.key == 'ArrowUp') || (event.key == 'ArrowDown')) {
+    } else if (event.key == 'Delete') event.preventDefault();
+    else if ((event.key == 'ArrowUp') || (event.key == 'ArrowDown')) {
+        const selection = document.getSelection();
         const chosen = get_chosen_line();
-        const target = event.key == 'ArrowUp' ? chosen.previousElementSibling : chosen.nextElementSibling;
-        choose_line(target as HTMLDivElement, selection._get_focus_offset_in_node(chosen) - 1);
+        const target = (event.key == 'ArrowUp') ? chosen.previousElementSibling : chosen.nextElementSibling;
+        if (!!target)
+            choose_line(target as HTMLDivElement, selection._get_focus_offset_in_node(get_chosen_line()) - 1);
         event.preventDefault();
     }
 };
 
 terminal.oninput = () => {
-    reflect_nodes();
+    if ((ranger.single.textContent == "") && (get_chosen_line_content().children.length > 1)) ranger.single.remove();
+    save(false);
+    set_in_node(get_chosen_line_content(), ranger.s_p_offset);
 }
 
 
@@ -103,20 +107,7 @@ const saved_selection = document.createElement("DIV");
 saved_selection.classList.add('selection');
 terminal.before(saved_selection);
 
-/**
- * Function setting given selection (current selection in most cases) to saved range if it is not a terminal selection.
- * Beforehand it checks if given selection already is in terminal and if saved range is a valid terminal selection.
- * @see range_in_place terminal selection
- * @param selection given selection
- */
-/*
-function set_focus (selection: Selection) {
-    if (!selection_in_place(selection) && range_in_place(ranger.range)) {
-        selection.removeAllRanges();
-        selection.addRange(ranger.range);
-    }
-}
-*/
+
 
 /**
  * Function to visually reflect styled spans in given range.
@@ -373,26 +364,6 @@ function reorder_lines() {
 
 
 
-// Getting text section.
-
-/**
- * Function to get text in given range. It extracts text from line-contents only.
- */
-export function getClearText(): string {
-    const range = window.getSelection().getRangeAt(0);
-    return [...terminal.childNodes].reduce((previous: string, line: HTMLDivElement): string => {
-        const content = line.lastElementChild;
-        if (range.intersectsNode(content)) {
-            let text = content.textContent;
-            const start = range._get_range_start_in_node(content)?.offset ?? 0;
-            const end = range._get_range_end_in_node(content)?.offset ?? text.length;
-            return previous + text.substring(start, end) + '\n';
-        } else return previous;
-    }, "");
-}
-
-
-
 // Special nodes section.
 
 /**
@@ -415,28 +386,7 @@ export function get_chosen_line_content (): HTMLDivElement | null {
     else return null;
 }
 
-/**
- * Function checking if given range is a 'terminal selection' - a valid selection af some part of single
- * line-content, to witch any formatting may be applied.
- * @param range range to check.
- */
-export function range_in_place (range: Range): boolean {
-    if (!range) return false;
-    const selectionParent = range.commonAncestorContainer;
-    const chosen = get_chosen_line_content();
-    if (!chosen) return false;
-    else return get_chosen_line_content().contains(selectionParent);
-}
 
-/**
- * Function to check if given selection is a 'terminal selection'.
- * @see range_in_place terminal selection
- * @param selection selection to check.
- */
-export function selection_in_place (selection: Selection): boolean {
-    if (selection.rangeCount == 0) return false;
-    return range_in_place(selection.getRangeAt(0));
-}
 
 /**
  * Function to find the (parent) span corresponding to any selected node in terminal.

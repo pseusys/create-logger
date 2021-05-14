@@ -197,8 +197,8 @@ Range.prototype._get_range_end_in_node = function (node: Node): NodeInfo | null 
 Selection.prototype._get_focus_offset_in_node = function (node: Node): number | null {
     const range = this.getRangeAt(0);
     if ((this.focusNode == range.startContainer) && (this.focusOffset == range.startOffset))
-        return range._get_range_start_in_node(node).start;
-    else return range._get_range_end_in_node(node).end;
+        return range._get_range_start_in_node(node).offset;
+    else return range._get_range_end_in_node(node).offset;
 }
 
 

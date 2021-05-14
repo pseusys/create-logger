@@ -1,8 +1,9 @@
-import { find_span_for_place, get_chosen_line_content, range_in_place, selection_in_place } from "./terminal";
+import { find_span_for_place, get_chosen_line_content, terminal } from "./terminal";
 
 interface Ranger {
     range: Range;
-    collapse: HTMLSpanElement;
+    collapse: boolean;
+    single: HTMLSpanElement;
 
     start: HTMLSpanElement;
     s_i_offset: number;
@@ -19,7 +20,8 @@ interface Ranger {
  */
 export const ranger: Ranger = {
     range: null,
-    collapse: null,
+    collapse: false,
+    single: null,
 
     start: null,
     s_i_offset: -1,
@@ -44,7 +46,7 @@ export function save (auto: boolean) {
 
     if (auto && (selection.getRangeAt(0) == ranger.range)) return;
     else ranger.range = selection.getRangeAt(0);
-    console.log("auto saved " + auto);
+    ranger.collapse = selection.isCollapsed;
 
     const parent = get_chosen_line_content();
     let first = ranger.range._get_range_start_in_node(parent);
@@ -63,8 +65,8 @@ export function save (auto: boolean) {
         ranger.end = last_node;
         ranger.e_i_offset = last_offset;
 
-        if (first_node == last_node) ranger.collapse = first_node;
-        else ranger.collapse = null;
+        if (first_node == last_node) ranger.single = first_node;
+        else ranger.single = null;
     };
 
     if (first_node == last_node) {
@@ -90,9 +92,8 @@ export function save (auto: boolean) {
 }
 
 export function load (selection_changed: boolean) {
-    const selection = window.getSelection();
-    if ((!selection_in_place(selection) || !selection_changed) && range_in_place(ranger.range)) {
-        console.log("selection returned fix")
+    if ((!selection_in_place() || !selection_changed) && range_in_place(ranger.range)) {
+        const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(ranger.range);
         ranger.range._set_range_start_in_node(get_chosen_line_content(), ranger.s_p_offset);
@@ -107,4 +108,49 @@ export function set_in_node (node: HTMLElement, position: number) {
     const sel = document.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
+}
+
+
+
+// Getting text section.
+
+/**
+ * Function to get text in given range. It extracts text from line-contents only.
+ */
+export function getClearText(): string {
+    const range = window.getSelection().getRangeAt(0);
+    return [...terminal.childNodes].reduce((previous: string, line: HTMLDivElement): string => {
+        const content = line.lastElementChild;
+        if (range.intersectsNode(content)) {
+            let text = content.textContent;
+            const start = range._get_range_start_in_node(content)?.offset ?? 0;
+            const end = range._get_range_end_in_node(content)?.offset ?? text.length;
+            return previous + text.substring(start, end) + '\n';
+        } else return previous;
+    }, "");
+}
+
+
+
+/**
+ * Function checking if given range is a 'terminal selection' - a valid selection af some part of single
+ * line-content, to witch any formatting may be applied.
+ * @param range range to check.
+ */
+function range_in_place (range: Range): boolean {
+    if (!range) return false;
+    const selectionParent = range.commonAncestorContainer;
+    const chosen = get_chosen_line_content();
+    if (!chosen) return false;
+    else return get_chosen_line_content().contains(selectionParent);
+}
+
+/**
+ * Function to check if given selection is a 'terminal selection'.
+ * @see range_in_place terminal selection
+ */
+export function selection_in_place (): boolean {
+    const selection = window.getSelection();
+    if (selection.rangeCount == 0) return false;
+    return range_in_place(selection.getRangeAt(0));
 }

@@ -164,7 +164,7 @@ export function restore_presets () {
  */
 const var_name = document.getElementById("var-name-input") as HTMLInputElement;
 var_name.oninput = () => {
-    const collapse = ranger.collapse;
+    const collapse = ranger.single;
     if (!!collapse) {
         collapse.setAttribute(VAR_NAMES[var_name.id], var_name.value);
         if (var_name.value.length == 0) collapse.setAttribute(VAR_NAMES["var-type-input"], "");
@@ -181,7 +181,7 @@ var_name.oninput = () => {
  */
 const var_type = document.getElementById("var-type-input") as HTMLSelectElement;
 var_type.oninput = () => {
-    const collapse = ranger.collapse;
+    const collapse = ranger.single;
     if (!!collapse && var_type.selectedIndex != 0) collapse.setAttribute(VAR_NAMES[var_type.id], var_type.value);
     reflect_variable();
 };
@@ -192,7 +192,7 @@ var_type.oninput = () => {
  * @see var_type var type
  */
 export function reflect_variable (): void {
-    const collapse = ranger.collapse;
+    const collapse = ranger.single;
     drop_variables();
 
     if (!!collapse) {
