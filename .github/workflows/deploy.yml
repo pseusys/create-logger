@@ -40,7 +40,6 @@ jobs:
       env:
         build_link: https://github.com/pseusys/create-logger/commit/${{ github.sha }}
       run: |
-        echo "Build: $build_link"
         npm run build
     
     - name: Deploy 🚀

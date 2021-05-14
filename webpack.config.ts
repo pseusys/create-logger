@@ -6,6 +6,8 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 import { LESS_VARS, PUG_VARS } from "./core/constants";
 
+if (process.env.DEBUG) PUG_VARS['build'] = process.env.build_link;
+
 const config: webpack.Configuration = {
     mode: 'production',
     entry: "./scripts/main.ts",
@@ -83,5 +85,6 @@ const config: webpack.Configuration = {
 }
 
 if (process.env.DEBUG) config.devtool = 'eval-source-map';
+else config.devtool = false;
 
 export default config;
