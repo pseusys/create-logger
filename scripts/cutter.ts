@@ -2,7 +2,7 @@ import { CLASS_CODES, DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES 
 import { areArraysEqual, getSameElements } from "../core/utils";
 import { terminal } from "./terminal";
 import { restore_presets } from "./style_tab";
-import {load, ranger} from "./ranger";
+import { load, ranger } from "./ranger";
 
 
 
@@ -56,29 +56,6 @@ function join_around (selected: HTMLSpanElement[]) {
 
 
 
-// Node interpolating section.
-
-/**
- * Function that makes array of styled spans between first and last.
- * @see terminal styled spans
- * @param first first node in array.
- * @param last last node in array.
- * @return array of node nodes between first and last.
- */
-function get_nodes_between (first: HTMLSpanElement, last: HTMLSpanElement): HTMLSpanElement[] {
-    if (first == last) return [first];
-    const selected: HTMLSpanElement[] = [];
-    let current = first;
-    while (current != last) {
-        selected.push(current);
-        current = current.nextElementSibling as HTMLSpanElement;
-    }
-    selected.push(last);
-    return selected;
-}
-
-
-
 // Node styling section.
 
 /**
@@ -93,11 +70,12 @@ export interface Formatting {
 
 /**
  * Main function of cutter.
- * It applies given style to a node (preset example) or to a range of nodes (styled spans),
+ * It applies given style to a node (preset example) or to a selected range of nodes (styled spans),
  * cutting and merging them if necessary.
+ * @see ranger selected range
  * @see terminal styled spans
  * @see restore_presets preset example
- * @param acceptor node or acceptor to apply style to.
+ * @param acceptor node to apply style to.
  * @param formats styles that will be applied, if null all styles will be dropped.
  */
 export function style (formats?: Formatting[], acceptor?: HTMLSpanElement) {
@@ -158,10 +136,30 @@ function apply_formatting (elem: HTMLElement, formats?: Formatting[]) {
 
 
 
-// Class utils section.
+// Nodes interpolation and class utils section.
 
 /**
- * Function that identifies common classes of all nodes in chosen range of styled spans or a single node.
+ * Function that makes array of styled spans between first and last.
+ * @see terminal styled spans
+ * @param first first node in array.
+ * @param last last node in array.
+ * @return array of node nodes between first and last.
+ */
+function get_nodes_between (first: HTMLSpanElement, last: HTMLSpanElement): HTMLSpanElement[] {
+    if (first == last) return [first];
+    const selected: HTMLSpanElement[] = [];
+    let current = first;
+    while (current != last) {
+        selected.push(current);
+        current = current.nextElementSibling as HTMLSpanElement;
+    }
+    selected.push(last);
+    return selected;
+}
+
+/**
+ * Function that identifies common classes of all nodes in selected range of styled spans or a single node.
+ * @see ranger selected range
  * @see terminal styled spans
  * @param single - node to identify classes.
  * @return list of common classes or null if none.

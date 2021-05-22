@@ -48,7 +48,8 @@ document.getElementById('style-content').onclick = (event: MouseEvent) => {
 const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLElement[];
 
 /**
- * Function, called after 'term changer' was clicked. It applies term changer style to given element or range.
+ * Function, called after 'term changer' was clicked. It applies term changer style to given element or selected range.
+ * @see ranger selected range
  * @see term_changers term changer
  * @param acceptor element or range, to which style will be applied.
  * @param elem term changer, representing style, that will be applied.
@@ -67,10 +68,10 @@ function apply_style (elem: HTMLElement, acceptor: HTMLSpanElement): void {
 }
 
 /**
- * Function to set term changers to represent selected text or preset styles.
+ * Function to set term changers to represent selected range or preset styles.
+ * @see ranger selected range
  * @see term_changers term changers
  * @see focused_preset preset
- * @param range selected text, that should be represented.
  * @param single preset, that should be represented.
  */
 export function reflect_term_changers (single?: HTMLSpanElement) {
@@ -114,7 +115,8 @@ export function drop_term_changers (): void {
 let focused_preset: HTMLSpanElement = null;
 
 /**
- * Function, called after 'preset' was clicked. It applies preset styles to given element or range.
+ * Function, called after 'preset' was clicked. It applies preset styles to given element or selected range.
+ * @see ranger selected range
  * @see focused_preset preset
  * @param acceptor element or range, to which style will be applied.
  * @param elem term changer, representing style, that will be applied.
@@ -187,7 +189,8 @@ var_type.oninput = () => {
 };
 
 /**
- * Function to set 'var name' and 'var type' to represent selected span.
+ * Function to set 'var name' and 'var type' to represent the only (!) selected range span.
+ * @see ranger selected range
  * @see var_name var name
  * @see var_type var type
  */

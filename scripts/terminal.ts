@@ -69,6 +69,9 @@ terminal.onkeydown = (event) => {
     }
 };
 
+/**
+ * Terminal on input listener. Manages range in terminal _after_ changes were applied to text.
+ */
 terminal.oninput = () => {
     if ((ranger.single.textContent == "") && (get_chosen_line_content().children.length > 1)) ranger.single.remove();
     save(false);
@@ -110,18 +113,17 @@ terminal.before(saved_selection);
 
 
 /**
- * Function to visually reflect styled spans in given range.
- * It applies and sets 'saved_selection' div to given selection ('selection styling').
- * It also saves given range to saved range.
+ * Function to visually reflect selected range.
+ * It applies and sets 'saved_selection' div above selection ('selection styling').
+ * @see ranger selected range
  * @see terminal styled spans
  */
 export function reflect_nodes (): void {
-    const rect = ranger.range.getBoundingClientRect();
     saved_selection.style.top = (get_chosen_line().getBoundingClientRect().top - 4) + "px";
     saved_selection.style.height = (get_chosen_line().getBoundingClientRect().height + 4) + "px";
-    if (ranger.range.getClientRects().length > 0) {
-        saved_selection.style.left = rect.left + "px";
-        saved_selection.style.width = (rect.width + 2) + "px";
+    if (ranger.rect != null) {
+        saved_selection.style.left = ranger.rect.left + "px";
+        saved_selection.style.width = (ranger.rect.width + 2) + "px";
     } else {
         saved_selection.style.left = "32px";
         saved_selection.style.width = "2px";
@@ -354,6 +356,9 @@ function adjust_lines (num: number) {
     reorder_lines();
 }
 
+/**
+ * Function, setting line numbers correctly, according to current terminal lines order.
+ */
 function reorder_lines() {
     ([...document.getElementsByClassName('line')].filter((value: HTMLDivElement): boolean => {
         return value.children.length > 1;

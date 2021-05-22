@@ -1,9 +1,30 @@
 import { find_span_for_place, get_chosen_line_content, terminal } from "./terminal";
 
+
+
+// Range storing section.
+/**
+ * Interface, representing selected range in terminal in STYLE mode. Has following properties:
+ * * collapse - boolean, set to true if start position of the range equals end position.
+ * * single - styled span, containing start and end position of the range if they are situated inside of one span,
+ * null otherwise.
+ * * rect - positions of the range.
+ * * (start, s_i_offset, s_p_offset) - start position of the range.
+ *   * start - styled span, containing start position of the range.
+ *   * s_i_offset - offset of the start position of the range from beginning of the start (in chars).
+ *   * s_p_offset - offset of the start position of the range from beginning of the parent (in chars).
+ * * (end, e_i_offset, e_p_offset) - end position of the range.
+ *   * end - styled span, containing end position of the range.
+ *   * s_i_offset - offset of the end position of the range from beginning of the end (in chars).
+ *   * s_p_offset - offset of the end position of the range from beginning of the parent (in chars).
+ * @see STYLE STYLE mode
+ * @see terminal styled spans
+ * @see ranger selected range
+ */
 interface Ranger {
-    range: Range;
     collapse: boolean;
-    single: HTMLSpanElement;
+    single?: HTMLSpanElement;
+    rect?: ClientRect;
 
     start: HTMLSpanElement;
     s_i_offset: number;
@@ -16,12 +37,11 @@ interface Ranger {
 
 /**
  * Saved range, represents the last selection made in terminal even after focus moved to another element.
- * Used with styling methods, especially if styling controls (e.g. input text - variable name) gets focused.
  */
 export const ranger: Ranger = {
-    range: null,
     collapse: false,
     single: null,
+    rect: null,
 
     start: null,
     s_i_offset: -1,
@@ -32,25 +52,34 @@ export const ranger: Ranger = {
     e_p_offset: -1
 };
 
+/**
+ * Actual non-exported _Range_, underlying selected range.
+ * @see ranger selected range
+ */
+let selected = null;
 
+
+
+// Range operations section.
 
 /**
- * Function that parses range, correcting internal offsets of range _in_ first and last styled span.
+ * Function that parses current range, correcting internal offsets of range _in_ first and last styled span.
  * Especially it corrects range edges at position `0` and `node.text.length - 1`.
  * Node boundaries never begin at the end of the node or end at the beginning, even if user actually selected that.
  * @see terminal styled span
+ * @param auto set only when saved inside window.onselectionchange method, may not reload range if nothing changed.
  * @return SpanEdges complete information about range inside line-content.
  */
 export function save (auto: boolean) {
     const selection = window.getSelection();
 
-    if (auto && (selection.getRangeAt(0) == ranger.range)) return;
-    else ranger.range = selection.getRangeAt(0);
+    if (auto && (selection.getRangeAt(0) == selected)) return;
+    else selected = selection.getRangeAt(0);
     ranger.collapse = selection.isCollapsed;
 
     const parent = get_chosen_line_content();
-    let first = ranger.range._get_range_start_in_node(parent);
-    let last = ranger.range._get_range_end_in_node(parent);
+    let first = selected._get_range_start_in_node(parent);
+    let last = selected._get_range_end_in_node(parent);
     ranger.s_p_offset = first.offset;
     ranger.e_p_offset = last.offset;
 
@@ -64,6 +93,8 @@ export function save (auto: boolean) {
         ranger.s_i_offset = first_offset;
         ranger.end = last_node;
         ranger.e_i_offset = last_offset;
+
+        ranger.rect = (selected.getClientRects().length > 0) ? selected.getBoundingClientRect() : null;
 
         if (first_node == last_node) ranger.single = first_node;
         else ranger.single = null;
@@ -91,17 +122,27 @@ export function save (auto: boolean) {
     set();
 }
 
+/**
+ * Function that loads changes made to selected range back into current range.
+ * @see ranger selected range
+ * @param selection_changed set if current selection has changed.
+ */
 export function load (selection_changed: boolean) {
-    if ((!selection_in_place() || !selection_changed) && range_in_place(ranger.range)) {
+    if ((!selection_in_place() || !selection_changed) && range_in_place(selected)) {
         const selection = window.getSelection();
         selection.removeAllRanges();
-        selection.addRange(ranger.range);
-        ranger.range._set_range_start_in_node(get_chosen_line_content(), ranger.s_p_offset);
-        ranger.range._set_range_end_in_node(get_chosen_line_content(), ranger.e_p_offset);
+        selection.addRange(selected);
+        selected._set_range_start_in_node(get_chosen_line_content(), ranger.s_p_offset);
+        selected._set_range_end_in_node(get_chosen_line_content(), ranger.e_p_offset);
         save(false);
     }
 }
 
+/**
+ * Function, setting collapsed range (= caret) to specified position (in chars) of given node.
+ * @param node node to set caret into.
+ * @param position position to set caret to.
+ */
 export function set_in_node (node: HTMLElement, position: number) {
     const range = document.createRange();
     range._set_range_in_node(node, position);
@@ -131,6 +172,8 @@ export function getClearText(): string {
 }
 
 
+
+// Checking section.
 
 /**
  * Function checking if given range is a 'terminal selection' - a valid selection af some part of single
