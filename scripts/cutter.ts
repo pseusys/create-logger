@@ -1,8 +1,7 @@
-import { CLASS_CODES, DEFAULTS, getPrefix, multiplePrefix, SEPARATOR, VAR_NAMES } from "../core/constants";
+import { CLASS_CODES, DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../core/constants";
 import { areArraysEqual, getSameElements } from "../core/utils";
-import { terminal } from "./terminal";
-import { restore_presets } from "./style_tab";
-import { load, ranger } from "./ranger";
+import { ranger } from "./ranger";
+import {var_section_attribution} from "./style_tab";
 
 
 
@@ -16,7 +15,7 @@ import { load, ranger } from "./ranger";
  * @param postInsert if true inserts new node after `elem`, else otherwise.
  */
 function split_at (elem: HTMLSpanElement, pos: number, postInsert: boolean) {
-    elem.classList.remove(...Object.keys(VAR_NAMES));
+    elem.classList.remove(...Object.values(var_section_attribution));
     const clone = elem.cloneNode(true) as HTMLSpanElement;
     if (!postInsert) {
         clone.textContent = elem.textContent.slice(0, pos);
@@ -49,7 +48,7 @@ function join_around (selected: HTMLSpanElement[]) {
         if (areArraysEqual(get_common_classes(value), get_common_classes(friend))) {
             value.textContent = friend.textContent + value.textContent;
             friend.remove();
-            value.classList.remove(...Object.keys(VAR_NAMES));
+            value.classList.remove(...Object.values(var_section_attribution));
         }
     });
 }
@@ -111,7 +110,7 @@ function cut (formats: Formatting[]) {
     for (const child of selected) apply_formatting(child, formats);
 
     join_around(selected);
-    load(false);
+    ranger.load(false);
 }
 
 /**

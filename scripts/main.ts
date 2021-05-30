@@ -3,7 +3,8 @@ import "./imports"
 import { choose_line, mode, reflect_nodes, switch_mode, terminal, TERMINAL_STATE } from "./terminal";
 import { reflect_term_changers, reflect_variable, restore_presets } from "./style_tab";
 import { check } from "./storer";
-import { getClearText, save, selection_in_place } from "./ranger";
+import { ranger } from "./ranger";
+import { restore_settings } from "./general_tab";
 
 
 
@@ -18,6 +19,7 @@ window.onload = () => {
     choose_line(terminal.firstElementChild as HTMLDivElement);
     check();
     restore_presets();
+    restore_settings();
 }
 
 
@@ -54,8 +56,8 @@ document.ondrop = (event) => {
  * @see reflect_variable reflect variable
  */
 document.onselectionchange = () => {
-    if ((mode != TERMINAL_STATE.STYLE) || !selection_in_place()) return;
-    save(true);
+    if ((mode != TERMINAL_STATE.STYLE) || !ranger.selection_in_place()) return;
+    ranger.save(true);
     reflect_nodes();
     reflect_term_changers();
     reflect_variable();
@@ -69,7 +71,7 @@ document.onselectionchange = () => {
  * @param event copy event.
  */
 document.oncopy = (event) => {
-    const str = getClearText();
+    const str = ranger.get_clear_text();
     const refined = str.replace(/\u00a0/g, " ");
     event.clipboardData.setData('text/plain', refined);
     event.preventDefault();

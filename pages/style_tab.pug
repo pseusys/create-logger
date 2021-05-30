@@ -2,7 +2,7 @@ mixin presets(names)
     each cls, name in names
         span.mdl-chip
             .preset
-                span.preset-label.mdl-chip__text(id=name class=cls)=name
+                span.preset-label.mdl-chip__text(id=name class=cls)=literals[name]
             .mdl-layout-spacer
             button.preset-button.mdl-chip__action(type="button")
                 i.material-icons mode_edit
@@ -11,47 +11,45 @@ mixin checkboxes(...simple)
     each check in simple
         label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect(for=check)
             input.term-changer.mdl-checkbox__input(id=check name=check type="checkbox")
-            span.mdl-checkbox__label=check
+            span.mdl-checkbox__label=literals[check]
 
 mixin colors(position, subs)
     div.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
         select.term-changer.mdl-textfield__input(id=position+"color" name=position)
-            option(selected disabled hidden) Choose color...
+            option(selected disabled hidden)=literals.color_def
             each color in colors
-                option(value=color)=color
+                option(value=color)=literals[color]
         label.mdl-textfield__label(for=position+"color")=subs
 
 
 
-form#colors-tab.mdl-cell--2-col-phone.mdl-cell--3-col-tablet.mdl-cell--2-col-desktop.start-container
-    +colors('for', "Front color")
-    +colors('back', "Back color")
++form#colors-tab.mdl-cell--2-col-phone.mdl-cell--3-col-tablet.mdl-cell--2-col-desktop.start-container
+    +colors('for', literals.color_for)
+    +colors('back', literals.color_back)
 
-form#styles-tab.mdl-cell--2-col-phone.mdl-cell--5-col-tablet.mdl-cell--3-col-desktop.split-container
++form#styles-tab.mdl-cell--2-col-phone.mdl-cell--5-col-tablet.mdl-cell--4-col-desktop.split-container
     .center-container
         each style in styles
             label.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for=style)
                 input.term-changer.mdl-radio__button(id=style value=style name="sty" type="radio")
-                span.mdl-radio__label=style
+                span.mdl-radio__label=literals[style]
     .center-container
         +checkboxes('blink', 'cross', 'under', 'ita')
 
-form#presets-tab.mdl-cell--4-col-phone.mdl-cell--4-col-tablet.mdl-cell--3-col-desktop.split-container
++form#presets-tab.mdl-cell--4-col-phone.mdl-cell--4-col-tablet.mdl-cell--4-col-desktop.split-container
     .center-container
         +presets({ error: "back-red sty-bold", warning: "for-yellow", info: "for-blue" })
     .center-container
         +presets({ beautiful: "", original: "", creative: "" })
 
-.mdl-cell--2-col.mdl-cell--hide-phone.mdl-cell--hide-tablet
-
-form#variables-tab.mdl-cell--4-col-phone.mdl-cell--4-col-tablet.mdl-cell--2-col-desktop.start-container
++form#variables-tab.mdl-cell--4-col-phone.mdl-cell--4-col-tablet.mdl-cell--2-col-desktop.start-container
     #var-name.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
         input#var-name-input.variable.mdl-textfield__input(type="text")
-        label.mdl-textfield__label(for="var-name") Variable name
+        label.mdl-textfield__label(for="var-name")=literals.var_name
 
     #var-type.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
         select#var-type-input.variable.mdl-textfield__input(disabled)
-            option(selected disabled hidden) Choose type...
+            option(selected disabled hidden)=literals.type_name
             each type in types
                 option(value=type)=type
-        label.mdl-textfield__label(for="var-type") Variable type
+        label.mdl-textfield__label(for="var-type")=literals.var_type

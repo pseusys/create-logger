@@ -21,7 +21,7 @@ import { find_span_for_place, get_chosen_line_content, terminal } from "./termin
  * @see terminal styled spans
  * @see ranger selected range
  */
-interface Ranger {
+class Ranger {
     collapse: boolean;
     single?: HTMLSpanElement;
     rect?: ClientRect;
@@ -33,24 +33,34 @@ interface Ranger {
     end: HTMLSpanElement;
     e_i_offset: number;
     e_p_offset: number;
+
+    save = save;
+    load = load;
+
+    set_in_node = set_in_node;
+    get_clear_text = get_clear_text;
+
+    selection_in_place = selection_in_place;
+
+    constructor () {
+        this.collapse = false;
+        this.single = null;
+        this.rect = null;
+
+        this.start = null;
+        this.s_i_offset = -1;
+        this.s_p_offset = -1;
+
+        this.end = null;
+        this.e_i_offset = -1;
+        this.e_p_offset = -1;
+    }
 }
 
 /**
  * Saved range, represents the last selection made in terminal even after focus moved to another element.
  */
-export const ranger: Ranger = {
-    collapse: false,
-    single: null,
-    rect: null,
-
-    start: null,
-    s_i_offset: -1,
-    s_p_offset: -1,
-
-    end: null,
-    e_i_offset: -1,
-    e_p_offset: -1
-};
+export const ranger = new Ranger();
 
 /**
  * Actual non-exported _Range_, underlying selected range.
@@ -70,7 +80,7 @@ let selected = null;
  * @param auto set only when saved inside window.onselectionchange method, may not reload range if nothing changed.
  * @return SpanEdges complete information about range inside line-content.
  */
-export function save (auto: boolean) {
+function save (auto: boolean) {
     const selection = window.getSelection();
 
     if (auto && (selection.getRangeAt(0) == selected)) return;
@@ -127,7 +137,7 @@ export function save (auto: boolean) {
  * @see ranger selected range
  * @param selection_changed set if current selection has changed.
  */
-export function load (selection_changed: boolean) {
+function load (selection_changed: boolean) {
     if ((!selection_in_place() || !selection_changed) && range_in_place(selected)) {
         const selection = window.getSelection();
         selection.removeAllRanges();
@@ -158,7 +168,7 @@ export function set_in_node (node: HTMLElement, position: number) {
 /**
  * Function to get text in given range. It extracts text from line-contents only.
  */
-export function getClearText(): string {
+function get_clear_text (): string {
     const range = window.getSelection().getRangeAt(0);
     return [...terminal.childNodes].reduce((previous: string, line: HTMLDivElement): string => {
         const content = line.lastElementChild;
@@ -192,7 +202,7 @@ function range_in_place (range: Range): boolean {
  * Function to check if given selection is a 'terminal selection'.
  * @see range_in_place terminal selection
  */
-export function selection_in_place (): boolean {
+function selection_in_place (): boolean {
     const selection = window.getSelection();
     if (selection.rangeCount == 0) return false;
     return range_in_place(selection.getRangeAt(0));

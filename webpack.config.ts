@@ -5,6 +5,20 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 import { LESS_VARS, PUG_VARS } from "./core/constants";
+import { LITERALS } from "./core/babylon";
+
+const html_plugins = [];
+for (const literal in LITERALS) {
+    PUG_VARS.literals = LITERALS[literal]
+    const vars = JSON.stringify(PUG_VARS);
+    html_plugins.push(
+        new HtmlWebpackPlugin({
+            template: './pages/index.pug',
+            filename: ((literal == 'en') ? 'index' : literal) + '.html',
+            templateParameters: JSON.parse(vars)
+        })
+    );
+}
 
 const config: webpack.Configuration = {
     mode: 'production',
@@ -74,11 +88,8 @@ const config: webpack.Configuration = {
         ]
     },
     plugins: [
-        new HtmlWebpackPlugin({
-            template: './pages/index.pug',
-            templateParameters: PUG_VARS
-        }),
-        new CleanWebpackPlugin()
+        new CleanWebpackPlugin(),
+        ...html_plugins
     ]
 }
 
@@ -88,6 +99,6 @@ module.exports = (env, argv) => {
         config.performance = {
             hints: 'warning'
         }
-    } else PUG_VARS['build'] = process.env.build_link;
+    } else PUG_VARS.build = process.env.build_link;
     return config;
 };

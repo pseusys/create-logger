@@ -1,0 +1,59 @@
+{
+  "title": "Create your logger",
+
+  "wiki": "Wiki",
+  "build": "Build",
+
+  "general": "General",
+  "style": "Style",
+  "preview": "Preview",
+  "code": "Code",
+
+
+
+  "save": "Save",
+  "load": "Load",
+
+  "translations": "Select translation",
+  "languages": "Select language",
+
+  "var_names": "Use var names in preview",
+  "readable_code": "Human readable code",
+
+  "code_args": "Code args",
+
+
+
+  "color_def": "Choose color...",
+  "color_for": "Front color",
+  "color_back": "Back color",
+
+  "error": "error",
+  "warning": "warning",
+  "info": "info",
+  "beautiful": "beautiful",
+  "original": "original",
+  "creative": "creative",
+
+  "blink": "blinking",
+  "cross": "crossed",
+  "under": "underscored",
+  "ita": "italic",
+
+  "bold": "bold",
+  "normal": "normal",
+  "dim": "dim",
+
+  "black": "black",
+  "red": "red",
+  "green": "green",
+  "yellow": "yellow",
+  "blue": "blue",
+  "magenta": "magenta",
+  "cyan": "cyan",
+  "white": "white",
+
+  "var_name": "Variable name",
+  "type_def": "Choose type...",
+  "var_type": "Variable type"
+}

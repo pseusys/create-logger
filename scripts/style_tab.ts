@@ -1,8 +1,8 @@
-import {style, get_common_classes, Formatting} from "./cutter";
+import { style, get_common_classes, Formatting } from "./cutter";
 import { switch_mode, TERMINAL_STATE } from "./terminal";
-import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix, VAR_NAMES } from "../core/constants";
+import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix } from "../core/constants";
 import { get, set } from "./storer";
-import {ranger} from "./ranger";
+import { ranger } from "./ranger";
 
 
 
@@ -150,8 +150,8 @@ function save_preset (preset: HTMLSpanElement): void {
  */
 export function restore_presets () {
     [...document.getElementsByClassName('preset-label')].forEach((value: HTMLDivElement): void => {
-        const savedValue = get(value.id) as string;
-        if (!!savedValue) value.className = savedValue;
+        const savedValue = get(value.id, null);
+        if (savedValue != null) value.className = savedValue;
     });
 }
 
@@ -160,18 +160,11 @@ export function restore_presets () {
 // Right section: variable controls.
 
 /**
- * Input element, representing variable name, and function called on input to this element.
- * Variable name may be set to every 'styled span' and is contained in special 'data-var-name' attribute.
- * @see terminal styled span
+ * An object to attribute variable name and type controls (their ids) with classes they set.
  */
-const var_name = document.getElementById("var-name-input") as HTMLInputElement;
-var_name.oninput = () => {
-    const collapse = ranger.single;
-    if (!!collapse) {
-        collapse.setAttribute(VAR_NAMES[var_name.id], var_name.value);
-        if (var_name.value.length == 0) collapse.setAttribute(VAR_NAMES["var-type-input"], "");
-    }
-    reflect_variable();
+export const var_section_attribution = {
+    "var-name-input": "data-var-name",
+    "var-type-input": "data-var-type"
 };
 
 /**
@@ -184,7 +177,22 @@ var_name.oninput = () => {
 const var_type = document.getElementById("var-type-input") as HTMLSelectElement;
 var_type.oninput = () => {
     const collapse = ranger.single;
-    if (!!collapse && var_type.selectedIndex != 0) collapse.setAttribute(VAR_NAMES[var_type.id], var_type.value);
+    if (!!collapse && var_type.selectedIndex != 0) collapse.setAttribute(var_section_attribution[var_type.id], var_type.value);
+    reflect_variable();
+};
+
+/**
+ * Input element, representing variable name, and function called on input to this element.
+ * Variable name may be set to every 'styled span' and is contained in special 'data-var-name' attribute.
+ * @see terminal styled span
+ */
+const var_name = document.getElementById("var-name-input") as HTMLInputElement;
+var_name.oninput = () => {
+    const collapse = ranger.single;
+    if (!!collapse) {
+        collapse.setAttribute(var_section_attribution[var_name.id], var_name.value);
+        if (var_name.value.length == 0) collapse.setAttribute(var_section_attribution[var_type.id], "");
+    }
     reflect_variable();
 };
 
@@ -199,12 +207,12 @@ export function reflect_variable (): void {
     drop_variables();
 
     if (!!collapse) {
-        const variable = collapse.getAttribute(VAR_NAMES[var_name.id]) ?? "";
+        const variable = collapse.getAttribute(var_section_attribution[var_name.id]) ?? "";
         if (variable.length != 0) {
             var_name._set(variable);
             var_type._enable(true);
 
-            const type = collapse.getAttribute(VAR_NAMES[var_type.id]) ?? "";
+            const type = collapse.getAttribute(var_section_attribution[var_type.id]) ?? "";
             if (type.length != 0) var_type.value = type;
         }
     } else var_name._enable(false);

@@ -4,6 +4,10 @@ mixin section(id, content_id, active="")
             block
 
 
+mixin form()
+    form(autocomplete="off" onsubmit="return false;" action="")&attributes(attributes)
+        block
+
 
 doctype html
 html(lang='en')
@@ -11,7 +15,7 @@ html(lang='en')
         meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
-        title Create your logger
+        title=literals.title
         include meta
     body
         .mdl-layout.mdl-js-layout.mdl-layout--fixed-header.mdl-layout--fixed-tabs.mdl-layout--no-drawer-button
@@ -21,13 +25,13 @@ html(lang='en')
                     .mdl-layout-spacer
                     nav.mdl-navigation
                         a.mdl-navigation__link(href="https://github.com/pseusys/create-logger") GitHub
-                        a.mdl-navigation__link(href="https://github.com/pseusys/create-logger/wiki") Wiki
-                        a.mdl-navigation__link(href=build) Build
+                        a.mdl-navigation__link(href="https://github.com/pseusys/create-logger/wiki")=literals.wiki
+                        a.mdl-navigation__link(href=build)=literals.build
                 .mdl-layout__tab-bar.mdl-js-ripple-effect.mdl-layout__tab-manual-switch
-                    a.mdl-layout__tab(href="#GENERAL") General
-                    a.mdl-layout__tab.is-active(href="#STYLE") Style
-                    a.mdl-layout__tab.collapsing(href="#PREVIEW") Preview
-                    a.mdl-layout__tab.collapsing(href="#CODE") Code
+                    a.mdl-layout__tab(href="#GENERAL")=literals.general
+                    a.mdl-layout__tab.is-active(href="#STYLE")=literals.style
+                    a.mdl-layout__tab.collapsing(href="#PREVIEW")=literals.preview
+                    a.mdl-layout__tab.collapsing(href="#CODE")=literals.code
 
             main.mdl-layout__content
                 #tabs

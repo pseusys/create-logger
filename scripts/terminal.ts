@@ -1,8 +1,9 @@
 import { convert } from "../core/converter";
-import { drop_term_changers, reflect_term_changers } from "./style_tab";
-import { Entry, VAR_NAMES } from "../core/constants";
+import { drop_term_changers, reflect_term_changers, var_section_attribution } from "./style_tab";
+import { Entry } from "../core/constants";
 import { construct } from "../core/langs";
-import { load, ranger, save, set_in_node } from "./ranger";
+import { ranger } from "./ranger";
+import { lang_chooser } from "./general_tab";
 
 
 
@@ -74,8 +75,8 @@ terminal.onkeydown = (event) => {
  */
 terminal.oninput = () => {
     if ((ranger.single.textContent == "") && (get_chosen_line_content().children.length > 1)) ranger.single.remove();
-    save(false);
-    set_in_node(get_chosen_line_content(), ranger.s_p_offset);
+    ranger.save(false);
+    ranger.set_in_node(get_chosen_line_content(), ranger.s_p_offset);
 }
 
 
@@ -91,7 +92,7 @@ terminal.oninput = () => {
  */
 terminal.onclick = (event) => {
     if (mode != TERMINAL_STATE.STYLE) return;
-    load(true);
+    ranger.load(true);
 
     const target = event.target as HTMLElement;
     if (target.id === 'line-adder') choose_line(create_line(null, target.parentElement as HTMLDivElement));
@@ -251,7 +252,7 @@ function enterMode (new_mode: TERMINAL_STATE) {
             for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
-            const codes = construct("JavaScript (DOM)", html_copy.map((value: string): Entry[] => {
+            const codes = construct(lang_chooser.value, html_copy.map((value: string): Entry[] => {
                 return htmlToEntries(value);
             }).filter((value: Entry[]): boolean => {
                 return value.length != 0;
@@ -306,7 +307,7 @@ export function choose_line (line: HTMLDivElement, pos?: number) {
     for (const child of line_content.children) child.setAttribute('contenteditable', 'true');
     line_number.classList.add('chosen');
 
-    set_in_node(line_content as HTMLDivElement, pos);
+    ranger.set_in_node(line_content as HTMLDivElement, pos);
 }
 
 /**
@@ -424,8 +425,8 @@ function htmlToEntries(inner: string): Entry[] {
         if (value.textContent != "") entries.push({
             classes: [...value.classList],
             value: value.textContent,
-            var_name: value.getAttribute(VAR_NAMES["var-name"]),
-            var_type: value.getAttribute(VAR_NAMES["var-type"])
+            var_name: value.getAttribute(var_section_attribution["var-name-input"]),
+            var_type: value.getAttribute(var_section_attribution["var-type-input"])
         });
     });
     div.remove();

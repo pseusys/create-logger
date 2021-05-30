@@ -1,7 +1,7 @@
 /**
  * Flag, symbolizing whether user allowed saving cookies or not. If not set, no cookies will be saved.
  */
-let allowed = Boolean(get('allowed'));
+let allowed = get('allowed', false);
 
 /**
  * Function, asking user to allow cookies. It is called once, after window loaded.
@@ -19,9 +19,12 @@ export function check () {
 /**
  * Function to get parameter from storage.
  * @param key string key
+ * @param def default return value
  */
-export function get (key: string): any | null {
-    return JSON.parse(window.localStorage.getItem(key));
+export function get <T> (key: string, def: T): T | null {
+    const item = window.localStorage.getItem(key);
+    if (item == null) return def;
+    else return JSON.parse(item);
 }
 
 /**
@@ -29,6 +32,6 @@ export function get (key: string): any | null {
  * @param key string key.
  * @param value any value, will be saved as JSON.
  */
-export function set (key: string, value: any): void {
+export function set <T> (key: string, value: T): void {
     if (allowed) window.localStorage.setItem(key, JSON.stringify(value));
 }

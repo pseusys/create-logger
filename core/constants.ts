@@ -41,11 +41,6 @@ export const PREFIXES = {
     ita: "3"
 }
 
-export const VAR_NAMES = {
-    "var-name-input": "data-var-name",
-    "var-type-input": "data-var-type"
-}
-
 
 
 export function getPrefix (cls) {
@@ -113,9 +108,9 @@ export const PUG_VARS = {
     styles: Object.keys(STYLES),
 
     languages: Object.keys(LANGUAGES),
-    types: TYPES, // TODO: check if whole set needed?
+    types: Object.values(TYPES),
 
-    literals: LITERALS,
+    literals: LITERALS.en,
     translations: TRANSLATIONS,
 
     build: '#'

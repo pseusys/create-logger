@@ -1,6 +1,14 @@
+import en from "../trans/en.json";
+import ru from "../trans/ru.json";
+
+
+
 export const TRANSLATIONS = {
-    english: "English 🇬🇧"
+    en: "English 🇬🇧",
+    ru: "Русский 🇷🇺"
 }
 
 export const LITERALS = {
-}
+    en: en,
+    ru: ru
+};
