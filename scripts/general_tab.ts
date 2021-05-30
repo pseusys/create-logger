@@ -16,7 +16,8 @@ function window_filename (): string {
     return path.slice(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
 }
 const file_name = window_filename();
-trans_chooser.value = (file_name == 'index') ? 'en' : file_name;
+console.log(file_name)
+trans_chooser.value = ((file_name == 'index') || (file_name == '')) ? 'en' : file_name;
 
 
 
