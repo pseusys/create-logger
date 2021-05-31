@@ -1,6 +1,7 @@
 import { get, set } from "./storer";
 import { DEFAULTS, SEPARATOR } from "../core/constants";
 import { terminal } from "./terminal";
+import {log} from "./logger";
 
 
 
@@ -25,7 +26,7 @@ export function reflect_defaults () {
         });
         const new_class = def + SEPARATOR + DEFAULTS[def];
         if (!!same_class) terminal.classList.replace(same_class, new_class);
-        else terminal.classList.replace(same_class, new_class);
+        else terminal.classList.add(new_class);
     }
 }
 
