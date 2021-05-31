@@ -1,13 +1,4 @@
-mixin section(id, content_id, active="")
-    section.mdl-layout__tab-panel(id=id class=active)
-        .tab-content.mdl-grid(id=content_id)
-            block
-
-
-mixin form()
-    form(autocomplete="off" onsubmit="return false;" action="")&attributes(attributes)
-        block
-
+include mixins
 
 doctype html
 html(lang='en')
@@ -35,7 +26,7 @@ html(lang='en')
 
             main.mdl-layout__content
                 #tabs
-                    +section("GENERAL", "file-content")
+                    +section("GENERAL", "general-content")
                         include general_tab
                     +section("STYLE", "style-content", "is-active")
                         include style_tab

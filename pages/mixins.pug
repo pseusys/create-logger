@@ -1,0 +1,46 @@
+mixin section(id, content_id, active="")
+    section.mdl-layout__tab-panel(id=id class=active)
+        .tab-content.mdl-grid(id=content_id)
+            block
+
+mixin form()
+    form(autocomplete="off" onsubmit="return false;" action="")&attributes(attributes)
+        block
+
+
+
+mixin settings_select(name, id)
+    div.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
+        select.mdl-textfield__input(id=id)
+            block
+        label.mdl-textfield__label(for=id)=name
+
+mixin settings_switch(name, id, on)
+    label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect(for=id)
+        input.mdl-switch__input(id=id type="checkbox" checked=on)
+        span.mdl-switch__label=name
+
+
+
+mixin presets(names)
+    each cls, name in names
+        span.mdl-chip
+            .preset
+                span.preset-label.mdl-chip__text(id=name class=cls)=literals[name]
+            .mdl-layout-spacer
+            button.preset-button.mdl-chip__action(type="button")
+                i.material-icons mode_edit
+
+mixin checkboxes(...simple)
+    each check in simple
+        label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect(for=check)
+            input.term-changer.mdl-checkbox__input(id=check name=check type="checkbox")
+            span.mdl-checkbox__label=literals[check]
+
+mixin colors(position, subs)
+    div.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
+        select.term-changer.mdl-textfield__input(id=position+"color" name=position)
+            option(selected disabled hidden)=literals.color_def
+            each color in colors
+                option(value=color)=literals[color]
+        label.mdl-textfield__label(for=position+"color")=subs

@@ -7,6 +7,11 @@ import { ranger } from "./ranger";
 
 
 /**
+ * Div, representing the tab and used to scope-out classes,
+ */
+const style_content = document.getElementById('style-content') as HTMLDivElement;
+
+/**
  * Style tab onclick handler. Recognizes 2 types of click:
  * 1. Click on 'term changer' or 'preset', applies given style (or styles) connected to currently selected element.
  * 2. Click on 'preset button' to alter preset value.
@@ -15,7 +20,7 @@ import { ranger } from "./ranger";
  * @see save_preset preset button
  * @param event click event.
  */
-document.getElementById('style-content').onclick = (event: MouseEvent) => {
+style_content.onclick = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
 
     if (target.classList.contains('term-changer') || target.classList.contains('preset-label')) {
@@ -45,7 +50,7 @@ document.getElementById('style-content').onclick = (event: MouseEvent) => {
  * Array of 'term changers' - interface elements, representing all styles that can be handled.
  * Interacting with term changer leads to changing of style of selected text part.
  */
-const term_changers = [...document.getElementsByClassName('term-changer')] as HTMLElement[];
+const term_changers = [...style_content.getElementsByClassName('term-changer')] as HTMLElement[];
 
 /**
  * Function, called after 'term changer' was clicked. It applies term changer style to given element or selected range.
@@ -149,7 +154,7 @@ function save_preset (preset: HTMLSpanElement): void {
  * @see focused_preset presets
  */
 export function restore_presets () {
-    [...document.getElementsByClassName('preset-label')].forEach((value: HTMLDivElement): void => {
+    [...style_content.getElementsByClassName('preset-label')].forEach((value: HTMLDivElement): void => {
         const savedValue = get(value.id, null);
         if (savedValue != null) value.className = savedValue;
     });

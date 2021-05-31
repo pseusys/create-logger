@@ -11,13 +11,13 @@
 
 
 
-  "save": "Save",
-  "load": "Load",
+  "term_for": "Front terminal color",
+  "term_back": "Back terminal color",
 
   "translations": "Select translation",
   "languages": "Select language",
 
-  "var_names": "Use var names in preview",
+  "var_names": "Var names in preview",
   "readable_code": "Human readable code",
 
   "code_args": "Code args",

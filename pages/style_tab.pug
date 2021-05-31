@@ -1,27 +1,4 @@
-mixin presets(names)
-    each cls, name in names
-        span.mdl-chip
-            .preset
-                span.preset-label.mdl-chip__text(id=name class=cls)=literals[name]
-            .mdl-layout-spacer
-            button.preset-button.mdl-chip__action(type="button")
-                i.material-icons mode_edit
-
-mixin checkboxes(...simple)
-    each check in simple
-        label.mdl-checkbox.mdl-js-checkbox.mdl-js-ripple-effect(for=check)
-            input.term-changer.mdl-checkbox__input(id=check name=check type="checkbox")
-            span.mdl-checkbox__label=literals[check]
-
-mixin colors(position, subs)
-    div.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
-        select.term-changer.mdl-textfield__input(id=position+"color" name=position)
-            option(selected disabled hidden)=literals.color_def
-            each color in colors
-                option(value=color)=literals[color]
-        label.mdl-textfield__label(for=position+"color")=subs
-
-
+include mixins
 
 +form#colors-tab.mdl-cell--2-col-phone.mdl-cell--3-col-tablet.mdl-cell--2-col-desktop.start-container
     +colors('for', literals.color_for)
@@ -49,7 +26,7 @@ mixin colors(position, subs)
 
     #var-type.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
         select#var-type-input.variable.mdl-textfield__input(disabled)
-            option(selected disabled hidden)=literals.type_name
+            option(selected disabled hidden)=literals.type_def
             each type in types
                 option(value=type)=type
         label.mdl-textfield__label(for="var-type")=literals.var_type

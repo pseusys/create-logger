@@ -3,7 +3,7 @@ import { drop_term_changers, reflect_term_changers, var_section_attribution } fr
 import { Entry } from "../core/constants";
 import { construct } from "../core/langs";
 import { ranger } from "./ranger";
-import { lang_chooser } from "./general_tab";
+import { lang_chooser, reflect_defaults, reflect_set } from "./general_tab";
 
 
 
@@ -242,16 +242,20 @@ function enterMode (new_mode: TERMINAL_STATE) {
     let line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
     switch (new_mode) {
         case TERMINAL_STATE.GENERAL:
+            reflect_set();
             for (const content of line_contents) content.innerHTML = html_copy.shift();
             break;
         case TERMINAL_STATE.STYLE:
+            reflect_set();
             for (const content of line_contents) content.innerHTML = editableHTML.shift();
             choose_line(terminal.firstElementChild as HTMLDivElement);
             break;
         case TERMINAL_STATE.PREVIEW:
+            reflect_defaults();
             for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
+            reflect_defaults();
             const codes = construct(lang_chooser.value, html_copy.map((value: string): Entry[] => {
                 return htmlToEntries(value);
             }).filter((value: Entry[]): boolean => {

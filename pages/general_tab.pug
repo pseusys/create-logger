@@ -1,33 +1,20 @@
-mixin settings_select(name, id)
-    div.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
-        select.mdl-textfield__input(id=id)
-            block
-        label.mdl-textfield__label(for=id)=name
+include mixins
 
-mixin settings_switch(name, id, on)
-    label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect(for=id)
-        input.mdl-switch__input(id=id type="checkbox" checked=on)
-        span.mdl-switch__label=name
++form.mdl-cell--2-col-phone.mdl-cell--4-col-tablet.mdl-cell--3-col-desktop.start-container
+    +colors('for', literals.term_for)
+    +colors('back', literals.term_back)
 
++form.mdl-cell--2-col-phone.mdl-cell--4-col-tablet.mdl-cell--4-col-desktop.center-container
+    +settings_switch(literals.var_names, "vars-check", false)
+    +settings_switch(literals.readable_code, "readable-check", false)
+    #code-args.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
+        input#code-args-input.variable.mdl-textfield__input(type="text")
+        label.mdl-textfield__label(for="code-args")=literals.code_args
 
-
-+form.mdl-cell--2-col-phone.mdl-cell--2-col-tablet.mdl-cell--3-col-desktop.center-container
-    label.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored.mdl-js-ripple-effect=literals.save
-
-    input#load-file(type="file")
-    label.mdl-button.mdl-js-button.mdl-button--raised.mdl-button--colored.mdl-js-ripple-effect(for="load-file")=literals.load
-
-+form.mdl-cell--2-col-phone.mdl-cell--3-col-tablet.mdl-cell--5-col-desktop.start-container
++form.mdl-cell--4-col-phone.mdl-cell--8-col-tablet.mdl-cell--5-col-desktop.start-container
     +settings_select(literals.translations, "translation")
         each translation, tag in translations
             option(value=tag)=translation
     +settings_select(literals.languages, "language")
         each language in languages
             option(value=language)=language
-
-+form.mdl-cell--4-col-phone.mdl-cell--3-col-tablet.mdl-cell--4-col-desktop.center-container
-    +settings_switch(literals.var_names, "vars-check", false)
-    +settings_switch(literals.readable_code, "readable-check", false)
-    #code-args.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
-        input#code-args-input.variable.mdl-textfield__input(type="text")
-        label.mdl-textfield__label(for="code-args")=literals.code_args
