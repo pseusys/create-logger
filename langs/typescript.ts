@@ -1,21 +1,17 @@
-import {TYPES, Settings, toast} from "../core/langs";
-import { convert, InEntry } from "../core/converter";
+import { TYPES, Settings, toast, Generic } from "../core/langs";
+import { convert, ESCAPE_END, ESCAPE_SEPARATOR, ESCAPE_START, InEntry, OutEntry } from "../core/converter";
 
 
-export default function construct (str: InEntry[][], set: Settings): string {
-    console.log(set)
+export default function construct (str: InEntry[][], set: Settings): Generic {
     toast(JSON.stringify(set));
     const codes = str.map((current: InEntry[], index: number) => {
         return create_function_for_line(current, index);
     });
     const warning = "// Following functions work in Node.js environment only. For DOM analogues see 'JavaScript'."
-    return `${warning}\n\n${codes.join("\n\n")}`;
+    return { code: `${warning}\n\n${codes.join("\n\n")}`, formatting: CODE_STYLE };
 }
 
 
-
-const WHITESPACE = "\u00A0";
-const INTENT = "\u00A0\u00A0\u00A0\u00A0";
 
 function type (type: string): string {
     switch (type) {
@@ -32,12 +28,25 @@ function type (type: string): string {
     }
 }
 
+const CODE_STYLE = [
+    { format: /(?:function|export)/g, css: 'color: GoldenRod' },
+    { format: /(?:number(?:\[\])?|string(?:\[\])?)/g, css: 'color: GoldenRod' },
+
+    { format: /(?:console|document|window)/g, css: 'color: DarkMagenta; font-weight: 700; font-style: italic' },
+
+    { format: /(?<=function)(?:.*)(?=\([\s\S]*\))/g, css: 'color: Gold' },
+    { format: /(?<=\.)(?:.*)(?=\([\s\S]*\))/g, css: 'color: Gold' },
+    { format: /;(?=\n)/g, css: 'color: Gold' },
+
+    { format: /`/g, css: 'color: SeaGreen' },
+    { format: /(?<=\$\{)(?:.*)(?=\})/g, css: 'font-weight: 700' },
+    { format: /\\u[0-9]+b\[(?:[0-9];*)+m/g, css: 'color: Khaki; font-weight: 700' },
+
+    { format: /\/\/.*/g, css: 'color: Silver' },
+    { format: /\/\*\*[\s\S]*\*\*\//g, css: 'color: SeaGreen' }
+];
 
 
-//TODO: extract escape sequences from code (maybe general func)
-function extract_escapes () {
-
-}
 
 function create_function_for_line (entries: InEntry[], iter: number): string {
     const declaration = entries.map((value: InEntry): string => {
@@ -52,21 +61,22 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
         return !!value;
     });
 
-    const sample = [];
-    const code = [];
-    entries.forEach((value: InEntry): void => {
-        const str = convert([value], true);
-        if (!!value.var_name) {
-            code.push(`\$\{${value.var_name}\}`);
-            sample.push(`[${value.var_name}]`);
+    const sample: string[] = [];
+    const code: string[] = [];
+    convert(entries, true).forEach((value: OutEntry) => {
+        const prefix = (value.prefix.length > 0) ? `${ESCAPE_START}${value.prefix.join(ESCAPE_SEPARATOR)}${ESCAPE_END}` : "";
+        const postfix = (value.postfix.length > 0) ? `${ESCAPE_START}${value.postfix.join(ESCAPE_SEPARATOR)}${ESCAPE_END}` : "";
+        if (value.is_var) {
+            code.push(`${prefix}\$\{${value.value}\}${postfix}`);
+            sample.push(`[${value.value}]`);
         } else {
-            code.push(str);
+            code.push(`${prefix}${value.value}${postfix}`);
             sample.push(value.value);
         }
     });
 
-    return `/**\n${WHITESPACE}* Function writing "${sample.join("")}" to console.\n${WHITESPACE}**/\n` +
+    return `/**\n * Function writing "${sample.join("")}" to console.\n **/\n` +
         `export function print${iter}thLine (${declaration.join(", ")}) {\n` +
-        `${INTENT}console.log(\`${code.join("")}\`);\n` +
+        `\tconsole.log(\`${code.join("")}\`);\n` +
         `}`;
 }

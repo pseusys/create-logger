@@ -1,4 +1,4 @@
-import { find_span_for_place, get_chosen_line_content, terminal } from "./terminal";
+import { get_chosen_line_content, terminal } from "./terminal";
 
 
 
@@ -206,4 +206,17 @@ function selection_in_place (): boolean {
     const selection = window.getSelection();
     if (selection.rangeCount == 0) return false;
     return range_in_place(selection.getRangeAt(0));
+}
+
+
+
+/**
+ * Function to find the (parent) span corresponding to any selected node in terminal.
+ * @throws DOMException if no span can be found for given element.
+ * @param node given node.
+ */
+function find_span_for_place (node: Node): HTMLSpanElement {
+    if ((node.nodeType == Node.TEXT_NODE) || (node.nodeName == "BR")) return node.parentElement;
+    if (node.nodeName != 'SPAN') throw new DOMException("Selected wrong element: " + node.nodeName);
+    return node as HTMLSpanElement;
 }

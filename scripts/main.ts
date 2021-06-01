@@ -5,6 +5,7 @@ import { reflect_term_changers, reflect_variable, restore_presets } from "./styl
 import { check } from "./storer";
 import { ranger } from "./ranger";
 import { restore_settings } from "./general_tab";
+import {replace_between} from "../core/utils";
 
 
 
@@ -72,7 +73,7 @@ document.onselectionchange = () => {
  */
 document.oncopy = (event) => {
     const str = ranger.get_clear_text();
-    const refined = str.replace(/\u00a0/g, " ");
+    const refined = str.replace(/&nbsp;/g, " ");
     event.clipboardData.setData('text/plain', refined);
     event.preventDefault();
 };
@@ -85,23 +86,15 @@ document.oncopy = (event) => {
  * @param event copy event.
  */
 document.onpaste = (event) => {
-    const selection = document.getSelection();
-    if (!!selection && selection.isCollapsed) {
-        const str = event.clipboardData.getData('text/plain');
-        const refined = str.replace(/\r?\n|\r/g, "");
-
-        const range = selection.getRangeAt(0);
-        const text = range.commonAncestorContainer;
-        const offset = range._get_range_start_in_node(text).offset;
-
-        if (text.nodeType != Node.TEXT_NODE)
-            throw new DOMException("Paste into non-text node: " + text.nodeName);
-
-        text.textContent = text.textContent.slice(0, offset) + refined + text.textContent.slice(offset);
-        range.setStart(text, offset);
-        range.setEnd(text, refined.length + offset);
+    if (ranger.selection_in_place()) {
+        if (ranger.collapse) {
+            const str = event.clipboardData.getData('text/plain');
+            const refined = str.replace(/\r?\n|\r/g, "").replace(/&nbsp;/g, " ");
+            ranger.single.textContent = replace_between(ranger.single.textContent, ranger.s_p_offset, ranger.s_p_offset, refined);
+            ranger.set_in_node(ranger.single, ranger.s_p_offset + refined.length);
+        }
+        event.preventDefault();
     }
-    event.preventDefault();
 }
 
 

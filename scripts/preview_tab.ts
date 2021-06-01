@@ -18,7 +18,7 @@ function style_out (str: string): string {
     return span.outerHTML;
 }
 
-export function view (entries: InEntry[]): string {
+export function preview (entries: InEntry[]): string {
     const converted = convert(entries, get("vars-check", false));
     let result = "";
     converted.forEach((value: OutEntry) => {

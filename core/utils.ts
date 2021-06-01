@@ -21,3 +21,9 @@ export function reduce<T, U> (array: T[], callback: (value: T, collect: U) => U)
     }
     return result;
 }
+
+
+
+export function replace_between (str: string, start: number, end: number, what: string): string {
+    return str.substring(0, start) + what + str.substring(end);
+}

@@ -26,9 +26,11 @@ export const TYPES = {
     string_array: "Array of strings"
 }
 
+type Constructor = (str: InEntry[][], set: Settings) => Generic;
+
 export const LANGUAGES = {
-    "TypeScript (Node.js)": typescript,
-    "JavaScript (DOM)": javascript
+    "TypeScript (Node.js)": typescript as Constructor,
+    "JavaScript (DOM)": javascript as Constructor
 }
 
 export const DEF_LANG = Object.keys(LANGUAGES)[0];
@@ -38,6 +40,11 @@ export const DEF_LANG = Object.keys(LANGUAGES)[0];
 export interface Settings {
     readable: boolean;
     args: { key: string, value: string }[];
+}
+
+export interface Generic {
+    code: string;
+    formatting: { format: RegExp, css: string }[];
 }
 
 export function toast (message: string) {
@@ -56,18 +63,17 @@ export function class_to_CSS(cls: string): string {
         }
         default: return "";
     } else switch (cls) {
-        case ("cross"): return "text-decoration: line-through;";
-        case ("under"): return "border-bottom: 2px solid currentColor;";
-        case ("ita"): return "font-style: italic;";
+        case ("cross"): return "text-decoration: line-through";
+        case ("under"): return "border-bottom: 2px solid currentColor";
+        case ("ita"): return "font-style: italic";
         default: return "";
     }
 }
 
 
 
-export function construct (language: string, str: InEntry[][]): string {
+export function construct (language: string, str: InEntry[][]): Generic {
     const args: { key: string, value: string }[] = [];
-    console.log(get("code-args-input", ""))
     get("code-args-input", "").split('-').forEach((value: string) => {
         if (value == "") return;
         const split = value.split(' ');

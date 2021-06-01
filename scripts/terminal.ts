@@ -3,9 +3,10 @@ import { drop_term_changers, reflect_term_changers, var_section_attribution } fr
 import { construct } from "../core/langs";
 import { ranger } from "./ranger";
 import { reflect_defaults, reflect_set } from "./general_tab";
-import { view } from "./preview_tab";
+import { preview } from "./preview_tab";
 import { get } from "./storer";
 import { DEF_LANG } from "../core/langs";
+import { code } from "./code_tab";
 
 
 
@@ -254,15 +255,15 @@ function enterMode (new_mode: TERMINAL_STATE) {
             break;
         case TERMINAL_STATE.PREVIEW:
             reflect_defaults();
-            for (const content of line_contents) content.innerHTML = view(htmlToEntries(html_copy.shift()));
+            for (const content of line_contents) content.innerHTML = preview(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
             reflect_defaults();
-            const codes = construct(get("language", DEF_LANG), html_copy.map((value: string): InEntry[] => {
+            const codes = code(construct(get("language", DEF_LANG), html_copy.map((value: string): InEntry[] => {
                 return htmlToEntries(value);
             }).filter((value: InEntry[]): boolean => {
                 return value.length != 0;
-            })).split("\n");
+            }))).split("\n");
             adjust_lines(codes.length);
             line_contents = [...document.getElementsByClassName('line-content')] as HTMLDivElement[];
             for (const content of line_contents) content.innerHTML = codes.shift();
@@ -396,19 +397,6 @@ export function get_chosen_line_content (): HTMLDivElement | null {
     const line = get_chosen_line();
     if (!!line) return get_chosen_line().lastElementChild as HTMLDivElement;
     else return null;
-}
-
-
-
-/**
- * Function to find the (parent) span corresponding to any selected node in terminal.
- * @throws DOMException if no span can be found for given element.
- * @param node given node.
- */
-export function find_span_for_place (node: Node): HTMLSpanElement {
-    if ((node.nodeType == Node.TEXT_NODE) || (node.nodeName == "BR")) return node.parentElement;
-    if (node.nodeName != 'SPAN') throw new DOMException("Selected wrong element: " + node.nodeName);
-    return node as HTMLSpanElement;
 }
 
 
