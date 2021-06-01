@@ -11,3 +11,13 @@ export function getSameElements<T> (a: T[], b: T[]): T[] {
     if (areArraysEqual(a, b)) return a;
     return [...a].filter((value: T): boolean => { return b.includes(value); });
 }
+
+export function reduce<T, U> (array: T[], callback: (value: T, collect: U) => U): U[] {
+    const result: U[] = [];
+    let collect: U = null;
+    for (const elem of array) {
+        collect = callback(elem, collect);
+        result.push(collect);
+    }
+    return result;
+}

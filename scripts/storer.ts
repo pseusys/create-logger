@@ -1,3 +1,7 @@
+import { log } from "./logger";
+
+
+
 /**
  * Flag, symbolizing whether user allowed saving cookies or not. If not set, no cookies will be saved.
  */
@@ -8,7 +12,7 @@ let allowed = get('allowed', false);
  */
 export function check () {
     if (!allowed) {
-        alert("For storing user preferences and presets this site uses cookies.");
+        log("For storing user preferences and presets this site uses cookies.");
         allowed = true;
         set('allowed', true);
     }

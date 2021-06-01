@@ -15,11 +15,11 @@ import { restore_settings } from "./general_tab";
  * @see STYLE STYLE mode
  */
 window.onload = () => {
-    check();
     restore_settings();
     restore_presets();
     switch_mode(TERMINAL_STATE.STYLE);
     choose_line(terminal.firstElementChild as HTMLDivElement);
+    check();
 }
 
 

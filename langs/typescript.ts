@@ -1,10 +1,11 @@
-import {Entry} from "../core/constants";
-import {TYPES} from "../core/langs";
-import {convert} from "../core/converter";
+import {TYPES, Settings, toast} from "../core/langs";
+import { convert, InEntry } from "../core/converter";
 
 
-export default function construct (str: Entry[][]): string {
-    const codes = str.map((current: Entry[], index: number) => {
+export default function construct (str: InEntry[][], set: Settings): string {
+    console.log(set)
+    toast(JSON.stringify(set));
+    const codes = str.map((current: InEntry[], index: number) => {
         return create_function_for_line(current, index);
     });
     const warning = "// Following functions work in Node.js environment only. For DOM analogues see 'JavaScript'."
@@ -38,8 +39,8 @@ function extract_escapes () {
 
 }
 
-function create_function_for_line (entries: Entry[], iter: number): string {
-    const declaration = entries.map((value: Entry): string => {
+function create_function_for_line (entries: InEntry[], iter: number): string {
+    const declaration = entries.map((value: InEntry): string => {
         let currentVar = "";
         if (!!value.var_name) {
             let currentVarType = value.var_type ?? 'any';
@@ -53,7 +54,7 @@ function create_function_for_line (entries: Entry[], iter: number): string {
 
     const sample = [];
     const code = [];
-    entries.forEach((value: Entry): void => {
+    entries.forEach((value: InEntry): void => {
         const str = convert([value], true);
         if (!!value.var_name) {
             code.push(`\$\{${value.var_name}\}`);

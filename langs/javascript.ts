@@ -1,9 +1,10 @@
-import {Entry, getPostfix, getPrefix, multiplePrefix} from "../core/constants";
+import { InEntry } from "../core/converter";
+import { class_to_CSS, Settings } from "../core/langs";
 
 
 
-export default function construct (str: Entry[][]): string {
-    const codes = str.map((current: Entry[], index: number) => {
+export default function construct (str: InEntry[][], set: Settings): string {
+    const codes = str.map((current: InEntry[], index: number) => {
         return create_function_for_line(current, index);
     });
     const warning = "// Following functions work in DOM environment only. For Node.js analogues see 'TypeScript'."
@@ -23,34 +24,8 @@ function escape (str: string, separate: boolean = false): string {
 
 
 
-function class_to_CSS(cls: string): string {
-    if (multiplePrefix(getPrefix(cls))) switch (getPrefix(cls)) {
-        case ("for"): return `color: ${getPostfix(cls)}`;
-        case ("back"): return `background: ${getPostfix(cls)}`;
-        case ("sty"): switch (getPostfix(cls)) {
-            case ("bold"): return "font-weight: 700";
-            case ("normal"): return "font-weight: 400";
-            case ("dim"): return "font-weight: 100";
-            default: return "";
-        }
-        default: return "";
-    } else switch (cls) {
-        case ("cross"): return "text-decoration: line-through;";
-        case ("under"): return "border-bottom: 2px solid currentColor;";
-        case ("ita"): return "font-style: italic;";
-        default: return "";
-    }
-}
-
-
-
-//TODO: extract escape sequences from code (maybe general func)
-function extract_escapes () {
-
-}
-
-function create_function_for_line (entries: Entry[], iter: number): string {
-    const declaration = entries.map((value: Entry): string => {
+function create_function_for_line (entries: InEntry[], iter: number): string {
+    const declaration = entries.map((value: InEntry): string => {
         if (!!value.var_name) return value.var_name;
         else return "";
     }).filter((value: string): boolean => {
@@ -60,18 +35,12 @@ function create_function_for_line (entries: Entry[], iter: number): string {
     const sample = [];
     const code = [];
     const CSSes = [];
-    entries.forEach((value: Entry): void => {
+    entries.forEach((value: InEntry): void => {
         const css = value.classes.map((value: string): string => {
             return class_to_CSS(value);
         }).join("; ");
         CSSes.push(escape(css, true));
         if (!!value.var_name) {
-            /*
-            const divided = str.split(value.value);
-            code.push(escape(divided[0], true));
-            code.push(escape(value.var_name, false));
-            code.push(escape(divided[1], true));
-            */
             code.push(`"%c" + ${value.var_name}`);
             sample.push(`[${value.var_name}]`);
         } else {

@@ -1,9 +1,11 @@
-import { convert } from "../core/converter";
+import { InEntry } from "../core/converter";
 import { drop_term_changers, reflect_term_changers, var_section_attribution } from "./style_tab";
-import { Entry } from "../core/constants";
 import { construct } from "../core/langs";
 import { ranger } from "./ranger";
-import { lang_chooser, reflect_defaults, reflect_set } from "./general_tab";
+import { reflect_defaults, reflect_set } from "./general_tab";
+import { view } from "./preview_tab";
+import { get } from "./storer";
+import { DEF_LANG } from "../core/langs";
 
 
 
@@ -252,13 +254,13 @@ function enterMode (new_mode: TERMINAL_STATE) {
             break;
         case TERMINAL_STATE.PREVIEW:
             reflect_defaults();
-            for (const content of line_contents) content.innerHTML = convert(htmlToEntries(html_copy.shift()));
+            for (const content of line_contents) content.innerHTML = view(htmlToEntries(html_copy.shift()));
             break;
         case TERMINAL_STATE.CODE:
             reflect_defaults();
-            const codes = construct(lang_chooser.value, html_copy.map((value: string): Entry[] => {
+            const codes = construct(get("language", DEF_LANG), html_copy.map((value: string): InEntry[] => {
                 return htmlToEntries(value);
-            }).filter((value: Entry[]): boolean => {
+            }).filter((value: InEntry[]): boolean => {
                 return value.length != 0;
             })).split("\n");
             adjust_lines(codes.length);
@@ -421,7 +423,7 @@ export function find_span_for_place (node: Node): HTMLSpanElement {
  * @param inner inner HTML string to convert.
  * @return Entries array or empty array if no entries can be converted.
  */
-function htmlToEntries(inner: string): Entry[] {
+function htmlToEntries(inner: string): InEntry[] {
     const div = document.createElement('div');
     div.innerHTML = inner;
     const entries = [];

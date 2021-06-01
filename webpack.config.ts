@@ -4,8 +4,7 @@ import * as webpack from 'webpack';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-import { LESS_VARS, PUG_VARS } from "./core/constants";
-import { LITERALS } from "./core/babylon";
+import { LESS_VARS, PUG_VARS, LITERALS } from "./core/build";
 
 const config: webpack.Configuration = {
     mode: 'production',

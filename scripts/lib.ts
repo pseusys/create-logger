@@ -206,11 +206,19 @@ Selection.prototype._get_focus_offset_in_node = function (node: Node): number | 
 // MDL-nodes mastering section.
 
 /**
- * Function, setting check to MDL checkbox.
+ * Function, setting check to MDL switch, radio or checkbox.
  * @param value boolean value to set.
  */
 HTMLInputElement.prototype._check = function (value: boolean) {
-    this.parentElement.classList.toggle('is-checked', value);
+    if (!!this.parentElement['MaterialSwitch']) {
+        const check = this.parentElement['MaterialSwitch'];
+        if (value) check.on();
+        else check.off();
+    } else {
+        const check = this.parentElement['MaterialRadio'] ?? this.parentElement['MaterialCheckbox'];
+        if (value) check.check();
+        else check.uncheck();
+    }
 }
 
 /**
@@ -218,25 +226,18 @@ HTMLInputElement.prototype._check = function (value: boolean) {
  * @param value string value to set.
  */
 HTMLInputElement.prototype._set = function (value: string) {
-    const dirty = (value.length == 0);
-    this.value = value;
-    this.parentElement.classList.toggle('is-dirty', !dirty);
+    this.parentElement['MaterialTextfield'].change(value);
 }
 
 /**
- * Function to enable/disable MDL text input.
+ * Function to enable/disable MDL text input and select.
  * @param enabled enable or disable node.
  */
-HTMLInputElement.prototype._enable = function (enabled: boolean) {
-    this.disabled = !enabled;
-    this.parentElement.classList.toggle('is-disabled', !enabled);
+function enable (enabled: boolean) {
+    const field = this.parentElement['MaterialTextfield'];
+    if (enabled) field.enable();
+    else field.disable();
 }
 
-/**
- * Function to enable/disable MDL select.
- * @param enabled enable or disable node.
- */
-HTMLSelectElement.prototype._enable = function (enabled: boolean) {
-    this.disabled = !enabled;
-    this.parentElement.classList.toggle('is-disabled', !enabled);
-}
+HTMLInputElement.prototype._enable = enable;
+HTMLSelectElement.prototype._enable = enable;

@@ -1,11 +1,10 @@
 import * as assert from "assert";
 import * as converter from "../core/converter";
-import { Entry } from "../core/constants";
 
 describe("Converter test", () => {
     let description: string;
     //TODO: replace with reading from file test.
-    const entry_list: Entry[] = [];
+    const entry_list: converter.InEntry[] = [];
     describe("Should make up test string", () => {
         description = "\"This\" (in bold red) ";
         entry_list.push({classes: ["sty-bold", "for-red"], value: "This "});
@@ -29,7 +28,7 @@ describe("Converter test", () => {
 
     let test_string: string;
     describe("Should compile test string", () => {
-        test_string = converter.convert(entry_list);
+        test_string = converter.convert(entry_list).join(" ");
         it(test_string.replace(/\\033/g, "\u001b"), () => {
             assert.ok(true);
         });

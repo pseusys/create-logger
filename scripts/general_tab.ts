@@ -1,7 +1,7 @@
 import { get, set } from "./storer";
 import { DEFAULTS, SEPARATOR } from "../core/constants";
 import { terminal } from "./terminal";
-import {log} from "./logger";
+import { DEF_LANG } from "../core/langs";
 
 
 
@@ -10,8 +10,8 @@ import {log} from "./logger";
  */
 const general_content = document.getElementById('general-content') as HTMLDivElement;
 
-export const lang_chooser = document.getElementById("language") as HTMLSelectElement;
-export const trans_chooser = document.getElementById("translation") as HTMLSelectElement;
+const lang_chooser = document.getElementById("language") as HTMLSelectElement;
+const trans_chooser = document.getElementById("translation") as HTMLSelectElement;
 
 const vars_check = document.getElementById("vars-check") as HTMLInputElement;
 const readable_check = document.getElementById("readable-check") as HTMLInputElement;
@@ -43,10 +43,16 @@ export function reflect_set () {
     }
 }
 
+function term_name (name: string): string {
+    return 'term-' + name;
+}
+
 general_content.onclick = (event: MouseEvent) => {
     const target = event.target as HTMLSelectElement;
-    if (target.classList.contains('term-changer')) set('term-' + target.getAttribute('name'), target.value);
-    reflect_set();
+    if (target.classList.contains('term-changer')) {
+        set(term_name(target.getAttribute('name')), target.value);
+        reflect_set();
+    }
 }
 
 
@@ -59,15 +65,18 @@ function window_filename (): string {
 const file_name = window_filename();
 trans_chooser.value = ((file_name == 'index') || (file_name == '')) ? 'en' : file_name;
 
-
-
-lang_chooser.onclick = () => {
-    code_args._set(get(code_args_lang_key(), ""));
-}
-
 trans_chooser.onclick = () => {
     if (trans_chooser.value == 'en') window.location.replace('index.html?#GENERAL');
     else window.location.replace(trans_chooser.value + ".html?#GENERAL");
+}
+
+
+
+lang_chooser.onclick = () => {
+    set(lang_chooser.id, lang_chooser.value);
+    const args = get(code_args_lang_key(), "");
+    code_args._set(args);
+    set(code_args.id, args);
 }
 
 
@@ -78,13 +87,19 @@ function code_args_lang_key () {
 
 function setting_saver (event: Event) {
     const target = event.target as HTMLInputElement;
-    if (target.type == "checkbox") set(target.id, target.value);
-    else set(code_args_lang_key(), target.value);
+    if (target.type == "checkbox") {
+        set(target.id, target.checked);
+    } else {
+        set(code_args_lang_key(), target.value);
+        set(code_args.id, target.value);
+    }
 }
 
 
 
 export function restore_settings () {
+    lang_chooser.value = get(lang_chooser.id, DEF_LANG);
+
     vars_check._check(get(vars_check.id, false));
     vars_check.oninput = setting_saver;
     readable_check._check(get(readable_check.id, false));
@@ -95,6 +110,6 @@ export function restore_settings () {
     for (const changer of general_content.getElementsByClassName('term-changer')) {
         const ch = changer as HTMLSelectElement;
         const name = ch.getAttribute('name');
-        ch.value = get('term-' + name, DEFAULTS[name]);
+        ch.value = get(term_name(name), DEFAULTS[name]);
     }
 }

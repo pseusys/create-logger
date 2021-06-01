@@ -1,5 +1,5 @@
-import {CLASS_CODES, DEFAULTS, Entry, getPostfix, getPrefix} from "./constants";
-import { areArraysEqual } from "./utils";
+import { CLASS_CODES, DEFAULTS, getPostfix, getPrefix } from "./constants";
+import { areArraysEqual, reduce } from "./utils";
 
 export const ESCAPE_START = "\\033[";
 export const ESCAPE_SEPARATOR = ";";
@@ -8,8 +8,22 @@ export const ESCAPE_TERMINATE = "0";
 
 
 
-//TODO: Reverse for file reading.
-function classesToStyles(classes: string[]): string[] {
+export interface InEntry {
+    classes: string[];
+    value: string;
+    var_name?: string;
+    var_type?: string;
+}
+
+export interface OutEntry {
+    prefix: string[];
+    value: string;
+    postfix: string[];
+}
+
+
+
+function classes_to_style_codes (classes: string[]): string[] {
     const styles: string[] = [];
     for (const cls of classes) {
         if (!Object.keys(CLASS_CODES).includes(cls)) continue;
@@ -19,25 +33,19 @@ function classesToStyles(classes: string[]): string[] {
     return styles;
 }
 
-// TODO: add option to use user var names
-export function convert(str: Entry[], useVarNames: boolean = false): string {
-    let result = "";
+export function convert(str: InEntry[], useVarNames: boolean = false): OutEntry[] {
     let previousClasses: string[] = [];
-    for (const entry of str) {
-        const styles = classesToStyles(entry.classes);
-        let interior = "";
+    const result = reduce(str, (value: InEntry, collect: OutEntry): OutEntry => {
+        const styles = classes_to_style_codes(value.classes);
+        const interior: OutEntry = { prefix: [], value: "", postfix: [] };
         if (!areArraysEqual(previousClasses, styles)) {
-            if (previousClasses.length > 0) interior += ESCAPE_START + ESCAPE_TERMINATE + ESCAPE_END;
-            if (styles.length > 0) {
-                interior += ESCAPE_START;
-                interior += styles.join(ESCAPE_SEPARATOR);
-                interior += ESCAPE_END;
-            }
+            if (previousClasses.length > 0) collect.postfix.push(ESCAPE_TERMINATE);
+            if (styles.length > 0) interior.prefix.push(...styles);
         }
-        interior += entry.value;
-        result += interior;
+        interior.value += (useVarNames && !!value.var_name) ? value.var_name : value.value;
         previousClasses = styles;
-    }
-    if (previousClasses.length > 0) result += ESCAPE_START + ESCAPE_TERMINATE + ESCAPE_END;
+        return interior;
+    });
+    if (previousClasses.length > 0) result[result.length - 1].postfix.push(ESCAPE_TERMINATE);
     return result;
 }

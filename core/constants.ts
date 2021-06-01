@@ -1,8 +1,3 @@
-import { LANGUAGES, TYPES } from "./langs"
-import { LITERALS, TRANSLATIONS } from "./babylon";
-
-
-
 export const SEPARATOR = '-';
 
 export const COLORS = {
@@ -76,42 +71,3 @@ function generateClassCodes () {
 }
 
 export const CLASS_CODES = generateClassCodes();
-
-
-
-export interface Entry {
-    classes: string[];
-    value: string;
-    var_name?: string;
-    var_type?: string;
-}
-
-
-
-// For passing variables to LESS:
-
-export const LESS_VARS = {
-    colors: Object.keys(COLORS),
-    styles: Object.keys(STYLES)
-};
-
-Object.keys(DEFAULTS).forEach((value) => {
-    LESS_VARS["def-" + value] = DEFAULTS[value];
-});
-
-
-
-// For passing variables to PUG:
-
-export const PUG_VARS = {
-    colors: Object.keys(COLORS),
-    styles: Object.keys(STYLES),
-
-    languages: Object.keys(LANGUAGES),
-    types: Object.values(TYPES),
-
-    literals: LITERALS.en,
-    translations: TRANSLATIONS,
-
-    build: '#'
-};

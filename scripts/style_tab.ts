@@ -196,7 +196,10 @@ var_name.oninput = () => {
     const collapse = ranger.single;
     if (!!collapse) {
         collapse.setAttribute(var_section_attribution[var_name.id], var_name.value);
-        if (var_name.value.length == 0) collapse.setAttribute(var_section_attribution[var_type.id], "");
+        if (var_name.value.length == 0) {
+            collapse.removeAttribute(var_section_attribution[var_name.id]);
+            collapse.removeAttribute(var_section_attribution[var_type.id]);
+        }
     }
     reflect_variable();
 };
