@@ -6,8 +6,8 @@ import {CLASS_CODES} from "../core/constants";
 
 let readable = true;
 
-function varify (str: string) {
-    return str.toUpperCase().replace(/-/g, '_');
+function varify (str?: string) {
+    return !!str ? str.toUpperCase().replace(/-/g, '_') : "";
 }
 
 function gen_read () {
@@ -73,8 +73,12 @@ const CODE_STYLE = [
 const constants = {};
 
 function create_function_for_line (entries: InEntry[], iter: number): string {
-    if (readable)
-        for (const entry of entries) for (const clazz of entry.classes) constants[clazz] = CLASS_CODES[clazz];
+    if (readable) entries.forEach((entry: InEntry) => {
+        console.log(entry.classes)
+        entry.classes.forEach((value: string) => {
+            constants[value] = CLASS_CODES[value];
+        });
+    });
 
     const declaration = entries.map((value: InEntry): string => {
         let currentVar = "";
@@ -94,6 +98,7 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
         const prefix = (value.prefix.length > 0) ? `${ESCAPE_START}${value.prefix.join(ESCAPE_SEPARATOR)}${ESCAPE_END}` : "";
         const postfix = (value.prefix.length > 0) ? `${ESCAPE_START}${ESCAPE_TERMINATE}${ESCAPE_END}` : "";
         const prefixes = value.prefix.map((num: number): string => {
+            console.log(constants, num);
             return varify(Object.keys(constants).find((value: string): boolean => {
                 return constants[value] == num;
             }));

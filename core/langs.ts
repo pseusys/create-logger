@@ -85,5 +85,5 @@ export function construct (language: string, str: InEntry[][]): Generic {
             else args.push({ key: value.substring(1), value: null });
         }
     });
-    return LANGUAGES[language].act(str, { readable: get("readable-check", false), args: args } as Settings);
+    return LANGUAGES[language].act(str, { readable: get("readable-check", true), args: args } as Settings);
 }
