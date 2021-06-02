@@ -16,16 +16,15 @@ export interface InEntry {
 }
 
 export interface OutEntry {
-    prefix: string[];
+    prefix: number[];
     value: string;
     is_var:  boolean;
-    postfix: string[];
 }
 
 
 
-function classes_to_style_codes (classes: string[]): string[] {
-    const styles: string[] = [];
+function classes_to_style_codes (classes: string[]): number[] {
+    const styles: number[] = [];
     for (const cls of classes) {
         if (!Object.keys(CLASS_CODES).includes(cls)) continue;
         if (DEFAULTS[getPrefix(cls)] == getPostfix(cls)) continue;
@@ -35,19 +34,12 @@ function classes_to_style_codes (classes: string[]): string[] {
 }
 
 export function convert(str: InEntry[], useVarNames: boolean = false): OutEntry[] {
-    let previousClasses: string[] = [];
-    const result = reduce(str, (value: InEntry, collect: OutEntry): OutEntry => {
+    return str.map((value: InEntry): OutEntry => {
         const styles = classes_to_style_codes(value.classes);
-        const interior: OutEntry = { prefix: [], value: "", is_var: false, postfix: [] };
-        if (!areArraysEqual(previousClasses, styles)) {
-            if (previousClasses.length > 0) collect.postfix.push(ESCAPE_TERMINATE);
-            if (styles.length > 0) interior.prefix.push(...styles);
-        }
+        const interior: OutEntry = { prefix: [], value: "", is_var: false };
+        interior.prefix.push(...styles);
         interior.value += (useVarNames && !!value.var_name) ? value.var_name : value.value;
         interior.is_var = !!value.var_name;
-        previousClasses = styles;
         return interior;
     });
-    if (previousClasses.length > 0) result[result.length - 1].postfix.push(ESCAPE_TERMINATE);
-    return result;
 }

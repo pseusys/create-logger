@@ -16,10 +16,10 @@ interface Match {
     len: number;
 }
 
-const TAB = '&nbsp;&nbsp;&nbsp;&nbsp;';
+const TAB = '\u00a0\u00a0\u00a0\u00a0';
 
 export function code (generated: Generic): string {
-    let code = generated.code.replace(/ /g, '&nbsp;').replace(/\t/g, TAB);
+    let code = generated.code.replace(/ /g, '\u00a0').replace(/\t/g, TAB);
 
     let matches: Match[] = [];
     for (const formatting of generated.formatting) {
@@ -50,3 +50,4 @@ export function code (generated: Generic): string {
     }
     return code;
 }
+

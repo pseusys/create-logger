@@ -46,6 +46,11 @@ terminal.onkeydown = (event) => {
     } else if (event.key == 'Backspace') {
         if (ranger.collapse) {
             const chosen_children = get_chosen_line_content().children;
+            if (ranger.s_i_offset == 0) {
+                ranger.set_in_node(ranger.single.previousElementSibling as HTMLElement);
+                event.preventDefault();
+            }
+
             if ((ranger.single.textContent == '') && (chosen_children.length == 1)) {
                 if (chosen_children[0].classList.length != 0) {
                     chosen_children[0].className = '';

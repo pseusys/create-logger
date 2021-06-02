@@ -26,7 +26,7 @@ export const TYPES = {
     string_array: "Array of strings"
 }
 
-type Constructor = (str: InEntry[][], set: Settings) => Generic;
+type Constructor = { act: (str: InEntry[][], set: Settings) => Generic, arg: string };
 
 export const LANGUAGES = {
     "TypeScript (Node.js)": typescript as Constructor,
@@ -72,13 +72,18 @@ export function class_to_CSS(cls: string): string {
 
 
 
+export function info (language: string): string {
+    return LANGUAGES[language].arg;
+}
+
 export function construct (language: string, str: InEntry[][]): Generic {
     const args: { key: string, value: string }[] = [];
-    get("code-args-input", "").split('-').forEach((value: string) => {
-        if (value == "") return;
-        const split = value.split(' ');
-        if (split.length < 2) args.push({ key: null, value: split[0] });
-        else args.push({ key: split[0], value: split[1] });
+    get("code-args-input", "").split(' ').forEach((value: string, index: number, arr: string[]) => {
+        if (value.startsWith('-')) {
+            const val = arr[index + 1];
+            if (!!val && (!val.startsWith('-'))) args.push({ key: value.substring(1), value: val });
+            else args.push({ key: value.substring(1), value: null });
+        }
     });
-    return LANGUAGES[language](str, { readable: get("readable-check", false), args: args } as Settings);
+    return LANGUAGES[language].act(str, { readable: get("readable-check", false), args: args } as Settings);
 }

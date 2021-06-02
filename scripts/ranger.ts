@@ -66,7 +66,7 @@ export const ranger = new Ranger();
  * Actual non-exported _Range_, underlying selected range.
  * @see ranger selected range
  */
-let selected = null;
+let selected: Range = null;
 
 
 
@@ -153,7 +153,7 @@ function load (selection_changed: boolean) {
  * @param node node to set caret into.
  * @param position position to set caret to.
  */
-export function set_in_node (node: HTMLElement, position: number) {
+export function set_in_node (node: HTMLElement, position?: number) {
     const range = document.createRange();
     range._set_range_in_node(node, position);
     const sel = document.getSelection();

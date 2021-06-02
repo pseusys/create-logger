@@ -7,9 +7,12 @@ include mixins
 +form.mdl-cell--2-col-phone.mdl-cell--4-col-tablet.mdl-cell--4-col-desktop.center-container
     +settings_switch(literals.var_names, "vars-check", false)
     +settings_switch(literals.readable_code, "readable-check", false)
-    #code-args.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
-        input#code-args-input.variable.mdl-textfield__input(type="text")
-        label.mdl-textfield__label(for="code-args")=literals.code_args
+    .split-container
+        #code-args.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
+            input#code-args-input.variable.mdl-textfield__input(type="text")
+            label.mdl-textfield__label(for="code-args")=literals.code_args
+        button#code-args-info.mdl-button.mdl-js-button.mdl-button--icon
+            i.material-icons info
 
 +form.mdl-cell--4-col-phone.mdl-cell--8-col-tablet.mdl-cell--5-col-desktop.start-container
     +settings_select(literals.translations, "translation")

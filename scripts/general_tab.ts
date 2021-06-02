@@ -1,7 +1,8 @@
 import { get, set } from "./storer";
 import { DEFAULTS, SEPARATOR } from "../core/constants";
 import { terminal } from "./terminal";
-import { DEF_LANG } from "../core/langs";
+import { DEF_LANG, info } from "../core/langs";
+import { log } from "./logger";
 
 
 
@@ -16,6 +17,7 @@ const trans_chooser = document.getElementById("translation") as HTMLSelectElemen
 const vars_check = document.getElementById("vars-check") as HTMLInputElement;
 const readable_check = document.getElementById("readable-check") as HTMLInputElement;
 const code_args = document.getElementById("code-args-input") as HTMLInputElement;
+const lang_chooser_info = document.getElementById("code-args-info") as HTMLButtonElement;
 
 
 
@@ -79,6 +81,10 @@ lang_chooser.onclick = () => {
     set(code_args.id, args);
 }
 
+lang_chooser_info.onclick = () => {
+    log(info(get("language", DEF_LANG)) ?? 'no args available');
+}
+
 
 
 function code_args_lang_key () {
@@ -102,7 +108,7 @@ export function restore_settings () {
 
     vars_check._check(get(vars_check.id, false));
     vars_check.oninput = setting_saver;
-    readable_check._check(get(readable_check.id, false));
+    readable_check._check(get(readable_check.id, true));
     readable_check.oninput = setting_saver;
     code_args._set(get(code_args_lang_key(), ""));
     code_args.oninput = setting_saver;

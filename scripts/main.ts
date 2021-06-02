@@ -73,7 +73,7 @@ document.onselectionchange = () => {
  */
 document.oncopy = (event) => {
     const str = ranger.get_clear_text();
-    const refined = str.replace(/&nbsp;/g, " ");
+    const refined = str.replace(/\u00a0/g, " ");
     event.clipboardData.setData('text/plain', refined);
     event.preventDefault();
 };
@@ -89,7 +89,7 @@ document.onpaste = (event) => {
     if (ranger.selection_in_place()) {
         if (ranger.collapse) {
             const str = event.clipboardData.getData('text/plain');
-            const refined = str.replace(/\r?\n|\r/g, "").replace(/&nbsp;/g, " ");
+            const refined = str.replace(/\r?\n|\r/g, "").replace(/\u00a0/g, " ");
             ranger.single.textContent = replace_between(ranger.single.textContent, ranger.s_p_offset, ranger.s_p_offset, refined);
             ranger.set_in_node(ranger.single, ranger.s_p_offset + refined.length);
         }

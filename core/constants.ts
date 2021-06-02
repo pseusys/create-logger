@@ -51,7 +51,7 @@ export function getPostfix (cls) {
 
 
 export function multiplePrefix (pref) {
-    return (pref === 'for') || (pref === 'back') || (pref === 'sty');
+    return (pref == 'for') || (pref == 'back') || (pref == 'sty');
 }
 
 
@@ -59,7 +59,7 @@ export function multiplePrefix (pref) {
 function generateClassCodes () {
     const codes = {};
     for (const prefix in PREFIXES) {
-        if ((prefix === 'for') || (prefix === 'back'))
+        if ((prefix == 'for') || (prefix == 'back'))
             for (const color in COLORS)
                 codes[prefix + SEPARATOR + color] = PREFIXES[prefix] + COLORS[color];
         else if (prefix === 'sty')
