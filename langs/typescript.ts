@@ -13,7 +13,12 @@ function varify (str?: string) {
 function gen_read () {
     const start = `${ESCAPE_START}\${codes.join('${ESCAPE_SEPARATOR}')}${ESCAPE_END}`;
     const end = `${ESCAPE_START}${ESCAPE_TERMINATE}${ESCAPE_END}`;
-    return "/**\n * Function styling _text_ with given _codes_.\n **/\n" +
+    return "/**\n" +
+        " * Function styling _string_ with given _codes_.\n" +
+        " * @param str string to be styled.\n" +
+        " * @param codes ASCII code to be applied to str.\n" +
+        " * @return styled string.\n" +
+        "**/\n" +
         "function style (str: string, ...codes: number[]): string {\n" +
         `\treturn \`${start}\${str}${end}\`;\n` +
         "}";
@@ -74,7 +79,6 @@ const constants = {};
 
 function create_function_for_line (entries: InEntry[], iter: number): string {
     if (readable) entries.forEach((entry: InEntry) => {
-        console.log(entry.classes)
         entry.classes.forEach((value: string) => {
             constants[value] = CLASS_CODES[value];
         });
@@ -98,7 +102,6 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
         const prefix = (value.prefix.length > 0) ? `${ESCAPE_START}${value.prefix.join(ESCAPE_SEPARATOR)}${ESCAPE_END}` : "";
         const postfix = (value.prefix.length > 0) ? `${ESCAPE_START}${ESCAPE_TERMINATE}${ESCAPE_END}` : "";
         const prefixes = value.prefix.map((num: number): string => {
-            console.log(constants, num);
             return varify(Object.keys(constants).find((value: string): boolean => {
                 return constants[value] == num;
             }));
@@ -117,7 +120,7 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
     return `/**\n * Function writing "${sample.join("")}" to console.\n **/\n` +
            `export function print${iter}thLine (${declaration.join(", ")}) {\n` +
            `\tconsole.log(\`${code.join("")}\`);\n` +
-           `}`;
+           `}\n`;
 }
 
 

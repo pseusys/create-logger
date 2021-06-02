@@ -33,7 +33,7 @@ export const LANGUAGES = {
     "JavaScript (DOM)": javascript as Constructor
 }
 
-export const DEF_LANG = Object.keys(LANGUAGES)[0];
+export const DEF_LANG = 'JavaScript (DOM)';//Object.keys(LANGUAGES)[0];
 
 
 

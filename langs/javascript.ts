@@ -37,6 +37,7 @@ function varify (str: string) {
 
 function construct (str: InEntry[][], set: Settings): Generic {
     parse_settings(set);
+    adjust_style(readable);
     const warning = "// Following functions work in DOM environment only. For Node.js analogues see 'TypeScript'."
     const strict = use_strict ? '\'use strict\';\n' : '';
     const codes = str.map((current: InEntry[], index: number) => {
@@ -56,22 +57,30 @@ function escape (str: string, double: boolean): string {
     return res;
 }
 
+
+
+function adjust_style (read: boolean) {
+    CODE_STYLE.find((value: { format: RegExp, css: string }): boolean => {
+        return value.css == 'color: Khaki';
+    }).format = read ? (/(?<=")(?:[^\\]|\\")*?(?=")/g) : (/(?<="%c)(?:\\"|[^\\"])*?(?=")/g);
+}
+
 const CODE_STYLE = [
-    { format: /var|const|let|export|return|function/g, css: 'color: GoldenRod' },
-    { format: /console|document|window/g, css: 'color: DarkMagenta; font-weight: 700; font-style: italic' },
+    {format: /var|const|let|export|return|function/g, css: 'color: GoldenRod'},
+    {format: /console|document|window/g, css: 'color: DarkMagenta; font-weight: 700; font-style: italic'},
 
-    { format: /(?<=function).*(?=\([\s\S]*\))/g, css: 'color: Gold' },
-    { format: /(?<=\.).*?(?=\([\s\S]*\))/g, css: 'color: Gold' },
-    { format: /;(?=\n)/g, css: 'color: Gold' },
+    {format: /(?<=function).*(?=\([\s\S]*\))/g, css: 'color: Gold'},
+    {format: /(?<=\.).*?(?=\([\s\S]*\))/g, css: 'color: Gold'},
+    {format: /;(?=\n)/g, css: 'color: Gold'},
 
-    { format: /"|'[^']*'/g, css: 'color: SeaGreen' },
-    { format: /(?<="%c)[^"]*(?=")/g, css: 'color: Khaki' },
-    { format: /%c/g, css: 'color: RosyBrown; font-weight: 700' },
-    { format: /\\u[0-9]+b\[(?:[0-9];*)+m/g, css: 'color: Khaki; font-weight: 700' },
+    {format: /"|'[^']*'/g, css: 'color: SeaGreen'},
+    {format: /(?<=")(?:[^\\]|\\")*?(?=")/g, css: 'color: Khaki'},
+    {format: /%c/g, css: 'color: RosyBrown; font-weight: 700'},
+    {format: /\\u[0-9]+b\[(?:[0-9];*)+m/g, css: 'color: Khaki; font-weight: 700'},
 
-    { format: /\/\/.*/g, css: 'color: Silver' },
-    { format: /\/\*\*[\s\S]*?\*\*\//g, css: 'color: SeaGreen' }
-];
+    {format: /\/\/.*/g, css: 'color: Silver'},
+    {format: /\/\*\*[\s\S]*?\*\*\//g, css: 'color: SeaGreen'}
+]
 
 
 
@@ -114,7 +123,7 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
     return `/**\n * Function writing "${sample.join("")}" to console.\n **/\n` +
            (use_module ? 'export ' : '') + `function print${iter}thLine (${declaration.join(", ")}) {\n` +
            `\tconsole.log(${code.join(" + ")}, ${CSSes.join(", ")});\n` +
-           `}`;
+           `}\n`;
 }
 
 

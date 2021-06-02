@@ -49,7 +49,7 @@ function term_name (name: string): string {
     return 'term-' + name;
 }
 
-general_content.onclick = (event: MouseEvent) => {
+general_content.oninput = (event: MouseEvent) => {
     const target = event.target as HTMLSelectElement;
     if (target.classList.contains('term-changer')) {
         set(term_name(target.getAttribute('name')), target.value);
@@ -67,14 +67,14 @@ function window_filename (): string {
 const file_name = window_filename();
 trans_chooser.value = ((file_name == 'index') || (file_name == '')) ? 'en' : file_name;
 
-trans_chooser.onclick = () => {
+trans_chooser.oninput = () => {
     if (trans_chooser.value == 'en') window.location.replace('index.html?#GENERAL');
     else window.location.replace(trans_chooser.value + ".html?#GENERAL");
 }
 
 
 
-lang_chooser.onclick = () => {
+lang_chooser.oninput = () => {
     set(lang_chooser.id, lang_chooser.value);
     const args = get(code_args_lang_key(), "");
     code_args._set(args);
@@ -93,9 +93,8 @@ function code_args_lang_key () {
 
 function setting_saver (event: Event) {
     const target = event.target as HTMLInputElement;
-    if (target.type == "checkbox") {
-        set(target.id, target.checked);
-    } else {
+    if (target.type == "checkbox") set(target.id, target.checked);
+    else {
         set(code_args_lang_key(), target.value);
         set(code_args.id, target.value);
     }
