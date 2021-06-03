@@ -1,6 +1,6 @@
 import { CLASS_CODES, DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../core/constants";
 import { areArraysEqual, getSameElements } from "../core/utils";
-import { ranger } from "./ranger";
+import ranger from "./ranger";
 import {var_section_attribution} from "./style_tab";
 
 

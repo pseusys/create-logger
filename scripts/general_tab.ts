@@ -46,7 +46,7 @@ export function reflect_set () {
 }
 
 function term_name (name: string): string {
-    return 'term-' + name;
+    return `term-${name}`;
 }
 
 general_content.oninput = (event: MouseEvent) => {
@@ -69,7 +69,7 @@ trans_chooser.value = ((file_name == 'index') || (file_name == '')) ? 'en' : fil
 
 trans_chooser.oninput = () => {
     if (trans_chooser.value == 'en') window.location.replace('index.html?#GENERAL');
-    else window.location.replace(trans_chooser.value + ".html?#GENERAL");
+    else window.location.replace(`${trans_chooser.value}.html?#GENERAL"`);
 }
 
 

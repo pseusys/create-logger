@@ -2,7 +2,7 @@ import { style, get_common_classes, Formatting } from "./cutter";
 import { switch_mode, TERMINAL_STATE } from "./terminal";
 import { CLASS_CODES, getPostfix, getPrefix, multiplePrefix } from "../core/constants";
 import { get, set } from "./storer";
-import { ranger } from "./ranger";
+import ranger from "./ranger";
 
 
 
@@ -12,22 +12,27 @@ import { ranger } from "./ranger";
 const style_content = document.getElementById('style-content') as HTMLDivElement;
 
 /**
- * Style tab onclick handler. Recognizes 2 types of click:
- * 1. Click on 'term changer' or 'preset', applies given style (or styles) connected to currently selected element.
- * 2. Click on 'preset button' to alter preset value.
+ * Style tab oninput handler. Click on 'term changer' applies connected style to currently selected element.
  * @see term_changers term changers
+ * @param event input event.
+ */
+style_content.oninput = (event: Event) => {
+    const target = event.target as HTMLElement;
+    if (target.classList.contains('term-changer')) apply_style(target, focused_preset);
+}
+
+/**
+ * Style tab onclick handler. Recognizes 2 types of click:
+ * 1. Click on 'preset' applies connected styles to currently selected element.
+ * 2. Click on 'preset button' to alter preset value.
  * @see focused_preset presets
  * @see save_preset preset button
  * @param event click event.
  */
-style_content.onclick = (event: MouseEvent) => {
+style_content.onclick = (event: Event) => {
     const target = event.target as HTMLElement;
-
-    if (target.classList.contains('term-changer') || target.classList.contains('preset-label')) {
-        if (target.classList.contains('term-changer')) apply_style(target, focused_preset);
-        else apply_styles(target as HTMLSpanElement, focused_preset);
-
-    } else if (target.classList.contains('preset-button')) {
+    if (target.classList.contains('preset-label')) apply_styles(target as HTMLSpanElement, focused_preset);
+    else if (target.classList.contains('preset-button')) {
         const preset_target = target.parentElement.getElementsByClassName('preset-label')[0] as HTMLSpanElement;
         if (!!focused_preset && (preset_target.id != focused_preset.id)) return;
         target.parentElement.classList.toggle("focused", !focused_preset);
@@ -189,10 +194,13 @@ var_type.oninput = () => {
 /**
  * Input element, representing variable name, and function called on input to this element.
  * Variable name may be set to every 'styled span' and is contained in special 'data-var-name' attribute.
+ * Inputted whitespaces are omitted.
  * @see terminal styled span
  */
 const var_name = document.getElementById("var-name-input") as HTMLInputElement;
 var_name.oninput = () => {
+    if (var_name.value.includes(' ')) var_name.value = var_name.value.replace(/ /g, '');
+
     const collapse = ranger.single;
     if (!!collapse) {
         collapse.setAttribute(var_section_attribution[var_name.id], var_name.value);

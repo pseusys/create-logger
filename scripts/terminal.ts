@@ -1,7 +1,7 @@
 import { InEntry } from "../core/converter";
 import { drop_term_changers, reflect_term_changers, var_section_attribution } from "./style_tab";
 import { construct } from "../core/langs";
-import { ranger } from "./ranger";
+import ranger from "./ranger";
 import { reflect_defaults, reflect_set } from "./general_tab";
 import { preview } from "./preview_tab";
 import { get } from "./storer";
@@ -40,41 +40,51 @@ export const terminal = document.getElementById('terminal');
 terminal.onkeydown = (event) => {
     if (mode != TERMINAL_STATE.STYLE) return;
 
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        choose_line(create_line(get_chosen_line()));
-    } else if (event.key == 'Backspace') {
-        if (ranger.collapse) {
-            const chosen_children = get_chosen_line_content().children;
-            if (ranger.s_i_offset == 0) {
-                ranger.set_in_node(ranger.single.previousElementSibling as HTMLElement);
-                event.preventDefault();
-            }
+    switch (event.key) {
+        case 'Enter':
+            event.preventDefault();
+            choose_line(create_line(get_chosen_line()));
+            break;
 
-            if ((ranger.single.textContent == '') && (chosen_children.length == 1)) {
-                if (chosen_children[0].classList.length != 0) {
-                    chosen_children[0].className = '';
-                    reflect_term_changers();
-                } else {
-                    const line = get_chosen_line();
-                    const prev_line = line.previousElementSibling;
-                    if (!!prev_line) {
-                        choose_line(prev_line as HTMLDivElement);
-                        line.remove();
-                        reorder_lines();
-                    }
+        case 'Backspace':
+            if (ranger.collapse) {
+                const chosen_children = get_chosen_line_content().children;
+                if (ranger.s_i_offset == 0) {
+                    ranger.set_in_node(ranger.single.previousElementSibling as HTMLElement);
+                    event.preventDefault();
                 }
-                event.preventDefault();
-            }
-        } else event.preventDefault();
-    } else if (event.key == 'Delete') event.preventDefault();
-    else if ((event.key == 'ArrowUp') || (event.key == 'ArrowDown')) {
-        const selection = document.getSelection();
-        const chosen = get_chosen_line();
-        const target = (event.key == 'ArrowUp') ? chosen.previousElementSibling : chosen.nextElementSibling;
-        if (!!target)
-            choose_line(target as HTMLDivElement, selection._get_focus_offset_in_node(get_chosen_line()) - 1);
-        event.preventDefault();
+
+                if ((ranger.single.textContent == '') && (chosen_children.length == 1)) {
+                    if (chosen_children[0].classList.length != 0) {
+                        chosen_children[0].className = '';
+                        reflect_term_changers();
+                    } else {
+                        const line = get_chosen_line();
+                        const prev_line = line.previousElementSibling;
+                        if (!!prev_line) {
+                            choose_line(prev_line as HTMLDivElement);
+                            line.remove();
+                            reorder_lines();
+                        }
+                    }
+                    event.preventDefault();
+                }
+            } else event.preventDefault();
+            break;
+
+        case 'Delete':
+            event.preventDefault();
+            break;
+
+        case 'ArrowUp':
+        case 'ArrowDown':
+            const selection = document.getSelection();
+            const chosen = get_chosen_line();
+            const target = (event.key == 'ArrowUp') ? chosen.previousElementSibling : chosen.nextElementSibling;
+            if (!!target)
+                choose_line(target as HTMLDivElement, selection._get_focus_offset_in_node(get_chosen_line()) - 1);
+            event.preventDefault();
+            break;
     }
 };
 
@@ -128,11 +138,11 @@ terminal.before(saved_selection);
  * @see terminal styled spans
  */
 export function reflect_nodes (): void {
-    saved_selection.style.top = (get_chosen_line().getBoundingClientRect().top - 4) + "px";
-    saved_selection.style.height = (get_chosen_line().getBoundingClientRect().height + 4) + "px";
+    saved_selection.style.top = `${(get_chosen_line().getBoundingClientRect().top - 4)}px`;
+    saved_selection.style.height = `${(get_chosen_line().getBoundingClientRect().height + 4)}px`;
     if (ranger.rect != null) {
-        saved_selection.style.left = ranger.rect.left + "px";
-        saved_selection.style.width = (ranger.rect.width + 2) + "px";
+        saved_selection.style.left = `${ranger.rect.left}px`;
+        saved_selection.style.width = `${(ranger.rect.width + 2)}px`;
     } else {
         saved_selection.style.left = "32px";
         saved_selection.style.width = "2px";

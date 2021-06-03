@@ -4,7 +4,7 @@ import { get_chosen_line_content, terminal } from "./terminal";
 
 // Range storing section.
 /**
- * Interface, representing selected range in terminal in STYLE mode. Has following properties:
+ * Class, representing selected range in terminal in STYLE mode. Has following properties:
  * * collapse - boolean, set to true if start position of the range equals end position.
  * * single - styled span, containing start and end position of the range if they are situated inside of one span,
  * null otherwise.
@@ -17,6 +17,7 @@ import { get_chosen_line_content, terminal } from "./terminal";
  *   * end - styled span, containing end position of the range.
  *   * s_i_offset - offset of the end position of the range from beginning of the end (in chars).
  *   * s_p_offset - offset of the end position of the range from beginning of the parent (in chars).
+ * Its methods are represented by separate functions and described later.
  * @see STYLE STYLE mode
  * @see terminal styled spans
  * @see ranger selected range
@@ -60,7 +61,8 @@ class Ranger {
 /**
  * Saved range, represents the last selection made in terminal even after focus moved to another element.
  */
-export const ranger = new Ranger();
+const ranger = new Ranger();
+export default ranger;
 
 /**
  * Actual non-exported _Range_, underlying selected range.
@@ -176,7 +178,7 @@ function get_clear_text (): string {
             let text = content.textContent;
             const start = range._get_range_start_in_node(content)?.offset ?? 0;
             const end = range._get_range_end_in_node(content)?.offset ?? text.length;
-            return previous + text.substring(start, end) + '\n';
+            return `${previous}${text.substring(start, end)}\n`;
         } else return previous;
     }, "");
 }
@@ -217,6 +219,6 @@ function selection_in_place (): boolean {
  */
 function find_span_for_place (node: Node): HTMLSpanElement {
     if ((node.nodeType == Node.TEXT_NODE) || (node.nodeName == "BR")) return node.parentElement;
-    if (node.nodeName != 'SPAN') throw new DOMException("Selected wrong element: " + node.nodeName);
+    if (node.nodeName != 'SPAN') throw new DOMException(`Selected wrong element: ${node.nodeName}`);
     return node as HTMLSpanElement;
 }

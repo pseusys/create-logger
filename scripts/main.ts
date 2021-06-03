@@ -3,7 +3,7 @@ import "./imports"
 import { choose_line, mode, reflect_nodes, switch_mode, terminal, TERMINAL_STATE } from "./terminal";
 import { reflect_term_changers, reflect_variable, restore_presets } from "./style_tab";
 import { check } from "./storer";
-import { ranger } from "./ranger";
+import ranger from "./ranger";
 import { restore_settings } from "./general_tab";
 import {replace_between} from "../core/utils";
 

@@ -5,7 +5,7 @@ export function log (text: string, message?: string, callback?: () => void) {
         message: text,
         actionHandler: callback ?? null,
         actionText: message ?? null,
-        timeout: 5000
+        timeout: 3000
     };
     snackbar['MaterialSnackbar'].showSnackbar(data);
 }
