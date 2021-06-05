@@ -9,7 +9,10 @@
     "debug": "webpack --mode=development",
     "test": "mocha"
   },
-  "keywords": ["formatting", "logger"],
+  "keywords": [
+    "formatting",
+    "logger"
+  ],
   "author": "Pseusys",
   "license": "ISC",
   "devDependencies": {
@@ -21,6 +24,7 @@
     "@types/webpack": "latest",
     "babel-loader": "latest",
     "babel-plugin-transform-class-properties": "latest",
+    "babel-preset-minify": "latest",
     "clean-webpack-plugin": "latest",
     "css-loader": "latest",
     "html-webpack-plugin": "latest",
