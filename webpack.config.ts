@@ -76,13 +76,7 @@ const config: webpack.Configuration = {
             },
             {
                 test: /\.less$/,
-                use: [
-                    {
-                        loader: "style-loader",
-                    },
-                    {
-                        loader: "css-loader",
-                    },
+                use: [ "style-loader", "css-loader",
                     {
                         loader: "less-loader",
                         options: {
@@ -99,27 +93,21 @@ const config: webpack.Configuration = {
                 use: [
                     {
                         loader: "style-loader",
-                    },
-                    {
-                        loader: "css-loader",
-                    }
+                        options: {
+                            insert: 'head',
+                            injectType: 'singletonStyleTag'
+                        }
+                    }, "css-loader"
                 ]
             },
             {
                 test: /\.pug$/,
                 use: 'pug-loader',
                 exclude: /(node_modules|bower_components)/
-            },
-            {
-                test: /\.jpe?g$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
-                use: 'file-loader', // img(src=require('../../assets/img/engme_ru_logo.png'))
-                exclude: /(node_modules|bower_components)/
             }
         ]
     },
-    plugins: [
-        new CleanWebpackPlugin()
-    ]
+    plugins: [ new CleanWebpackPlugin() ]
 }
 
 module.exports = (env, argv) => {

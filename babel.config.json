@@ -1,4 +1,6 @@
 {
-  "presets": ["@babel/typescript", "@babel/preset-env"],
-  "plugins": ["@babel/plugin-proposal-class-properties"]
+  "presets": ["minify", "@babel/typescript", "@babel/preset-env"],
+  "plugins": ["@babel/plugin-proposal-class-properties"],
+  "minified": true,
+  "comments": false
 }
