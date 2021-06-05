@@ -19,7 +19,7 @@ if (typeof window != 'undefined') {
 } else {
     log = console.log;
     get = <T> (key: string, def: string): string | null => {
-        return process.env[key] ?? def;
+        return JSON.parse(process.env[key]) ?? def;
     };
 }
 

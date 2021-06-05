@@ -6,7 +6,7 @@
  * @param b second array.
  * @returns whether arrays are equal or not.
  */
-export function areArraysEqual<T> (a: T[], b: T[]): boolean {
+export function are_arrays_equal<T> (a: T[], b: T[]): boolean {
     if (!a || !b) return false;
     if (a.length !== b.length) return false;
     a.sort();
@@ -21,8 +21,8 @@ export function areArraysEqual<T> (a: T[], b: T[]): boolean {
  * @param b second array.
  * @returns array of elements.
  */
-export function getSameElements<T> (a: T[], b: T[]): T[] {
-    if (areArraysEqual(a, b)) return a;
+export function get_same_elements<T> (a: T[], b: T[]): T[] {
+    if (are_arrays_equal(a, b)) return a;
     return [...a].filter((value: T): boolean => { return b.includes(value); });
 }
 

@@ -1,5 +1,5 @@
 import { CLASS_CODES, DEFAULTS, getPrefix, multiplePrefix, SEPARATOR } from "../core/constants";
-import { areArraysEqual, getSameElements } from "../core/utils";
+import { are_arrays_equal, get_same_elements } from "../core/utils";
 import ranger from "./ranger";
 import {var_section_attribution} from "./style_tab";
 
@@ -45,7 +45,7 @@ function join_around (selected: HTMLSpanElement[]) {
     around.forEach((value: HTMLSpanElement, index: number): void => {
         const friend = around[index - 1];
         if (!friend || !value) return;
-        if (areArraysEqual(get_common_classes(value), get_common_classes(friend))) {
+        if (are_arrays_equal(get_common_classes(value), get_common_classes(friend))) {
             value.textContent = friend.textContent + value.textContent;
             friend.remove();
             value.classList.remove(...Object.values(var_section_attribution));
@@ -177,6 +177,6 @@ export function get_common_classes (single?: HTMLSpanElement): string[] | null {
     });
     if (multiple.length == 0) return null;
     return multiple.reduce((prev: string[], value: string[]): string[] => {
-        return getSameElements(prev, value);
+        return get_same_elements(prev, value);
     }, multiple[0]);
 }
