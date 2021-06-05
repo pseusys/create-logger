@@ -4,7 +4,51 @@ import * as webpack from 'webpack';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-import { LESS_VARS, PUG_VARS, LITERALS } from "./core/build";
+import { COLORS, DEFAULTS, STYLES } from "./core/constants";
+import { LANGUAGES, TYPES } from "./core/langs";
+
+import en from "./trans/en.json";
+import ru from "./trans/ru.json";
+
+
+
+const TRANSLATIONS = {
+    en: "English 🇬🇧",
+    ru: "Русский 🇷🇺"
+}
+
+const LITERALS = {
+    en: en,
+    ru: ru
+};
+
+// For passing variables to LESS:
+
+const LESS_VARS = {
+    colors: Object.keys(COLORS),
+    styles: Object.keys(STYLES)
+};
+
+Object.keys(DEFAULTS).forEach((value) => {
+    LESS_VARS["def-" + value] = DEFAULTS[value];
+});
+
+// For passing variables to PUG:
+
+const PUG_VARS = {
+    colors: Object.keys(COLORS),
+    styles: Object.keys(STYLES),
+
+    languages: Object.keys(LANGUAGES),
+    types: Object.values(TYPES),
+
+    literals: LITERALS.en,
+    translations: TRANSLATIONS,
+
+    build: '#'
+};
+
+
 
 const config: webpack.Configuration = {
     mode: 'production',

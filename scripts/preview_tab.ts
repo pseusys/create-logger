@@ -4,6 +4,11 @@ import { get } from "./storer";
 
 
 
+/**
+ * Function, wrapping a number, representing an ASCII style, with correspondingly formatted span.
+ * @param style number to wrap.
+ * @returns html string.
+ */
 function style_to_span (style: number): string {
     const span = document.createElement('span');
     for (const code in CLASS_CODES) if (style == CLASS_CODES[code]) span.classList.add(code);
@@ -11,6 +16,11 @@ function style_to_span (style: number): string {
     return span.outerHTML;
 }
 
+/**
+ * Function, wrapping text with span, formatted as bold text, to accent this string.
+ * @param str string to wrap.
+ * @returns html string.
+ */
 function style_out (str: string): string {
     const span = document.createElement('span');
     span.classList.add('sty-bold');
@@ -18,6 +28,12 @@ function style_out (str: string): string {
     return span.outerHTML;
 }
 
+/**
+ * Function, converting array of formatted strings to ASCII string with corresponding escape sequences,
+ * formatted with spans.
+ * @param entries formatted strings
+ * @returns html strings
+ */
 export function preview (entries: InEntry[]): string {
     const converted = convert(entries, get("vars-check", false));
     let result = "";

@@ -62,7 +62,6 @@ class Ranger {
  * Saved range, represents the last selection made in terminal even after focus moved to another element.
  */
 const ranger = new Ranger();
-export default ranger;
 
 /**
  * Actual non-exported _Range_, underlying selected range.
@@ -155,7 +154,7 @@ function load (selection_changed: boolean) {
  * @param node node to set caret into.
  * @param position position to set caret to.
  */
-export function set_in_node (node: HTMLElement, position?: number) {
+function set_in_node (node: HTMLElement, position?: number) {
     const range = document.createRange();
     range._set_range_in_node(node, position);
     const sel = document.getSelection();
@@ -222,3 +221,7 @@ function find_span_for_place (node: Node): HTMLSpanElement {
     if (node.nodeName != 'SPAN') throw new DOMException(`Selected wrong element: ${node.nodeName}`);
     return node as HTMLSpanElement;
 }
+
+
+
+export default ranger;

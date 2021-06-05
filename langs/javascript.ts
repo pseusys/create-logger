@@ -1,11 +1,15 @@
+// Example plugin for javascript code generation. Only key things will be documented.
+
 import { InEntry } from "../core/converter";
 import { class_to_CSS, Generic, Settings, toast } from "../core/langs";
 
 
 
+// Settings variables.
 let readable = true;
 let use_module = false, use_strict = false, new_vars = false;
 
+// Parsing settings (default and constant) function.
 function parse_settings (set: Settings) {
     readable = set.readable;
     use_module = false;
@@ -31,10 +35,12 @@ function parse_settings (set: Settings) {
     if (unexpected.length > 0) toast(`Unexpected settings: ${JSON.stringify(unexpected)}`);
 }
 
+// Function to convert CSS class names to valid variable names.
 function varify (str: string) {
     return str.toUpperCase().replace(/-/g, '_');
 }
 
+// Main function, constructing the code.
 function construct (str: InEntry[][], set: Settings): Generic {
     parse_settings(set);
     const warning = "// Following functions work in DOM environment only. For Node.js analogues see 'TypeScript'."
@@ -50,6 +56,7 @@ function construct (str: InEntry[][], set: Settings): Generic {
 
 
 
+// Function to escape quotes in string and wrap string itself in quotes if needed.
 function escape (str: string, double: boolean): string {
     let res = str.replace(/"/g, '\\"').replace(/'/g, "\\'");
     res = double ? `"${res}"` : `'${res}'`;
@@ -58,6 +65,8 @@ function escape (str: string, double: boolean): string {
 
 
 
+// There are differences between color styling between different settings configuration,
+// so color styling is returned by function rather than being constant.
 function styles () {
     return [
         {format: /var|const|let|export|return|function/g, css: 'color: GoldenRod'},
@@ -79,8 +88,10 @@ function styles () {
 
 
 
+// Default variable for human-readable code.
 const constants = { "S": '%c' };
 
+// Code, comment and CSSs are generated at the same time.
 function create_function_for_line (entries: InEntry[], iter: number): string {
     const declaration = entries.map((value: InEntry): string => {
         if (!!value.var_name) return value.var_name;
@@ -123,8 +134,11 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
 
 
 
+// This plugin has custom settings, strict (`use_strict`), module (`use_module`) and variable declaration (`new_vars`).
+// Another setting - default one - whether generated code should be easily-readable for user.
 const info = "'-s' - use strict option\n" +
              "'-m' - use module syntax\n" +
              "'-v [old|new]' - use old or new variable declaration";
 
+// Default export by plugin - Generic instance.
 export default { act: construct, arg: info };

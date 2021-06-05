@@ -37,10 +37,10 @@ mixin checkboxes(...simple)
             input.term-changer.mdl-checkbox__input(id=check name=check type="checkbox")
             span.mdl-checkbox__label=literals[check]
 
-mixin colors(position, subs)
+mixin colors(position, tab, subs)
     div.mdl-textfield.mdl-js-textfield.mdl-textfield--floating-label
-        select.term-changer.mdl-textfield__input(id=position+"color" name=position)
+        select.term-changer.mdl-textfield__input(id=position+tab+"color" name=position)
             option(selected disabled hidden)=literals.color_def
             each color in colors
                 option(value=color)=literals[color]
-        label.mdl-textfield__label(for=position+"color")=subs
+        label.mdl-textfield__label(for=position+tab+"color")=subs

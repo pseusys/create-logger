@@ -1,15 +1,20 @@
+// Example plugin for typescript code generation. Only key things will be documented.
+
 import { TYPES, Settings, toast, Generic } from "../core/langs";
 import { convert, ESCAPE_END, ESCAPE_SEPARATOR, ESCAPE_START, ESCAPE_TERMINATE, InEntry, OutEntry } from "../core/converter";
 import {CLASS_CODES} from "../core/constants";
 
 
 
+// Settings variable.
 let readable = true;
 
+// Function to convert CSS class names to valid variable names.
 function varify (str?: string) {
     return !!str ? str.toUpperCase().replace(/-/g, '_') : "";
 }
 
+// Function to generate a special function, used for generation more easily-read code.
 function gen_read () {
     const start = `${ESCAPE_START}\${codes.join('${ESCAPE_SEPARATOR}')}${ESCAPE_END}`;
     const end = `${ESCAPE_START}${ESCAPE_TERMINATE}${ESCAPE_END}`;
@@ -24,6 +29,7 @@ function gen_read () {
         "}";
 }
 
+// Main function, constructing the code.
 function construct (str: InEntry[][], set: Settings): Generic {
     readable = set.readable;
     if (set.args.length > 0) toast('Settings unexpected!');
@@ -39,6 +45,7 @@ function construct (str: InEntry[][], set: Settings): Generic {
 
 
 
+// Implementation of common types for typescript.
 function type (type: string): string {
     switch (type) {
         case TYPES.int:
@@ -54,6 +61,7 @@ function type (type: string): string {
     }
 }
 
+// Color styling is always constant, so color styling is represented by constant array.
 const CODE_STYLE = [
     { format: /const|let|function|return|export/g, css: 'color: GoldenRod' },
     { format: /number(?:\[\])?|string(?:\[\])?/g, css: 'color: GoldenRod' },
@@ -75,8 +83,10 @@ const CODE_STYLE = [
 
 
 
+// Variables for human-readable code.
 const constants = {};
 
+// Code and comment are generated at the same time.
 function create_function_for_line (entries: InEntry[], iter: number): string {
     if (readable) entries.forEach((entry: InEntry) => {
         entry.classes.forEach((value: string) => {
@@ -124,5 +134,5 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
 }
 
 
-
+// Default export by plugin - Generic instance.
 export default { act: construct, arg: null };

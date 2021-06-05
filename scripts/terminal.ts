@@ -199,7 +199,6 @@ export let editableHTML: string[];
  * Function switching terminal to a new mode, performs exit from old one and enter to new one.
  * @see exitMode exit mode
  * @see enterMode enter mode
- *
  * @param new_mode new terminal mode
  */
 export function switch_mode (new_mode: TERMINAL_STATE) {

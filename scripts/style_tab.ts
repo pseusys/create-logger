@@ -7,7 +7,7 @@ import ranger from "./ranger";
 
 
 /**
- * Div, representing the tab and used to scope-out classes,
+ * Div, representing the tab and used to scope-out classes.
  */
 const style_content = document.getElementById('style-content') as HTMLDivElement;
 
