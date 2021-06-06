@@ -37,8 +37,8 @@ function construct (str: InEntry[][], set: Settings): Generic {
 
 
 // Implementation of common types for typescript.
-function type (type: string): string {
-    switch (type) {
+function type (tp: string): string {
+    switch (tp) {
         case TYPES.int:
             return 'int';
         case TYPES.float:
@@ -108,8 +108,8 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
         const prefix = (value.prefix.length > 0) ? `${ESCAPE_START}${value.prefix.join(ESCAPE_SEPARATOR)}${ESCAPE_END}` : "";
         const postfix = (value.prefix.length > 0) ? (ESCAPE_START + ESCAPE_TERMINATE + ESCAPE_END) : "";
         const prefixes = readable ? value.prefix.map((num: number): string => {
-            return varify(Object.keys(constants).find((value: string): boolean => {
-                return constants[value] == num;
+            return varify(Object.keys(constants).find((val: string): boolean => {
+                return constants[val] == num;
             }));
         }) : [];
         if (value.is_var) {

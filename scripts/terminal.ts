@@ -1,11 +1,10 @@
 import { InEntry } from "../core/converter";
 import { drop_term_changers, reflect_term_changers, var_section_attribution } from "./style_tab";
-import { construct } from "../core/langs";
+import { construct, DEF_LANG } from "../core/langs";
 import ranger from "./ranger";
 import { reflect_defaults, reflect_set } from "./general_tab";
 import { preview } from "./preview_tab";
 import { get } from "./storer";
-import { DEF_LANG } from "../core/langs";
 import { code } from "./code_tab";
 
 

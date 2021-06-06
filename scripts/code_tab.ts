@@ -44,11 +44,11 @@ const TAB = '\u00a0\u00a0\u00a0\u00a0';
  * @returns html string, formatted with spans.
  */
 export function code (generated: Generic): string {
-    let code = generated.code.replace(/ /g, '\u00a0').replace(/\t/g, TAB);
+    let cd = generated.code.replace(/ /g, '\u00a0').replace(/\t/g, TAB);
 
     let matches: Match[] = [];
     for (const formatting of generated.formatting) {
-        [...code.matchAll(formatting.format)].forEach((value: RegExpMatchArray) => {
+        [...cd.matchAll(formatting.format)].forEach((value: RegExpMatchArray) => {
             const found = value.toString();
             matches.push({ str: format(value.toString(), formatting.css), start: value.index, len: found.length });
         });
@@ -70,8 +70,8 @@ export function code (generated: Generic): string {
     for (const match of matches) {
         const start = match.start + iterator;
         const end = match.start + match.len + iterator;
-        code = replace_between(code, start, end, match.str);
+        cd = replace_between(cd, start, end, match.str);
         iterator += match.str.length - match.len;
     }
-    return code;
+    return cd;
 }

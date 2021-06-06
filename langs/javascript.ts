@@ -27,7 +27,7 @@ function parse_settings (set: Settings) {
                 if (value.value == 'new') {
                     new_vars = true;
                     return false;
-                } else return !(value.value == 'old');
+                } else return value.value != 'old';
             default:
                 return true;
         }
@@ -47,15 +47,6 @@ function construct (str: InEntry[][], set: Settings): Generic {
         return `${(new_vars ? "const" : "var")} ${value} = ${escape(constants[value], false)};`
     }).join('\n') + "\n\n" : "";
     return { code: `${warning}\n${strict}\n${read}${codes.join("\n\n")}`, formatting: styles() };
-}
-
-
-
-// Function to escape quotes in string and wrap string itself in quotes if needed.
-function escape (str: string, double: boolean): string {
-    let res = str.replace(/"/g, '\\"').replace(/'/g, "\\'");
-    res = double ? `"${res}"` : `'${res}'`;
-    return res;
 }
 
 
@@ -83,6 +74,13 @@ function styles () {
 
 
 
+// Function to escape quotes in string and wrap string itself in quotes if needed.
+function escape (str: string, double: boolean): string {
+    let res = str.replace(/"/g, '\\"').replace(/'/g, "\\'");
+    res = double ? `"${res}"` : `'${res}'`;
+    return res;
+}
+
 // Default variable for human-readable code.
 const constants = { "S": '%c' };
 
@@ -99,10 +97,10 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
     const code = [];
     const CSSes = [];
     entries.forEach((value: InEntry): void => {
-        const css = value.classes.map((value: string): string => {
-            const res = class_to_CSS(value);
+        const css = value.classes.map((cls: string): string => {
+            const res = class_to_CSS(cls);
             if (readable) {
-                const val = varify(value);
+                const val = varify(cls);
                 constants[val] = res;
                 return val;
             } else return res;

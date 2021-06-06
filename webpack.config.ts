@@ -113,9 +113,6 @@ const config: webpack.Configuration = {
 module.exports = (env, argv) => {
     if (argv.mode == 'development') {
         config.devtool = 'eval-source-map';
-        config.performance = {
-            hints: 'warning'
-        }
     } else PUG_VARS.build = process.env.build_link;
 
     for (const literal in LITERALS) {

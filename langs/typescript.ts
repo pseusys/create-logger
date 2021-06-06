@@ -16,7 +16,7 @@ function gen_read () {
     return "/**\n" +
         " * Function styling _string_ with given _codes_.\n" +
         " * @param str string to be styled.\n" +
-        " * @param codes ASCII code to be applied to str.\n" +
+        " * @param codes ASCII codes to be applied to str.\n" +
         " * @return styled string.\n" +
         "**/\n" +
         "function style (str: string, ...codes: number[]): string {\n" +
@@ -41,8 +41,8 @@ function construct (str: InEntry[][], set: Settings): Generic {
 
 
 // Implementation of common types for typescript.
-function type (type: string): string {
-    switch (type) {
+function type (tp: string): string {
+    switch (tp) {
         case TYPES.int:
         case TYPES.float:
             return 'number';
@@ -78,6 +78,11 @@ const CODE_STYLE = [
 
 
 
+// Function to escape quotes in string and wrap string itself in quotes if needed.
+function escape (str: string): string {
+    return str.replace(/"/g, '\\"').replace(/'/g, "\\'");
+}
+
 // Variables for human-readable code.
 const constants = {};
 
@@ -107,8 +112,8 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
         const prefix = (value.prefix.length > 0) ? `${ESCAPE_START}${value.prefix.join(ESCAPE_SEPARATOR)}${ESCAPE_END}` : "";
         const postfix = (value.prefix.length > 0) ? `${ESCAPE_START}${ESCAPE_TERMINATE}${ESCAPE_END}` : "";
         const prefixes = readable ? value.prefix.map((num: number): string => {
-            return varify(Object.keys(constants).find((value: string): boolean => {
-                return constants[value] == num;
+            return varify(Object.keys(constants).find((val: string): boolean => {
+                return constants[val] == num;
             }));
         }) : [];
         if (value.is_var) {
@@ -116,7 +121,7 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
             else code.push(`${prefix}\$\{${value.value}\}${postfix}`);
             sample.push(`[${value.value}]`);
         } else {
-            if (readable && (value.prefix.length > 0)) code.push(`\${style('${value.value}', ${prefixes.join(', ')})}`);
+            if (readable && (value.prefix.length > 0)) code.push(`\${style('${escape(value.value)}', ${prefixes.join(', ')})}`);
             else code.push(`${prefix}${value.value}${postfix}`);
             sample.push(value.value);
         }
