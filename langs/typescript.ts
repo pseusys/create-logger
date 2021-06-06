@@ -106,11 +106,11 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
     convert(entries, true).forEach((value: OutEntry) => {
         const prefix = (value.prefix.length > 0) ? `${ESCAPE_START}${value.prefix.join(ESCAPE_SEPARATOR)}${ESCAPE_END}` : "";
         const postfix = (value.prefix.length > 0) ? `${ESCAPE_START}${ESCAPE_TERMINATE}${ESCAPE_END}` : "";
-        const prefixes = value.prefix.map((num: number): string => {
+        const prefixes = readable ? value.prefix.map((num: number): string => {
             return varify(Object.keys(constants).find((value: string): boolean => {
                 return constants[value] == num;
             }));
-        });
+        }) : [];
         if (value.is_var) {
             if (readable && (value.prefix.length > 0)) code.push(`\${style(${value.value}, ${prefixes.join(', ')})}`);
             else code.push(`${prefix}\$\{${value.value}\}${postfix}`);
