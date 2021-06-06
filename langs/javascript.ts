@@ -127,7 +127,7 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
     });
 
     return `/**\n * Function writing "${sample.join("")}" to console.\n **/\n` +
-           `${(use_module ? 'export ' : '')} function print${iter}thLine (${declaration.join(", ")}) {\n` +
+           `${(use_module ? 'export function ' : 'window.')}print${iter}thLine ${(use_module ? '' : '=')} (${declaration.join(", ")}) ${(use_module ? '' : '=>')} {\n` +
            `\tconsole.log(${code.join(" + ")}, ${CSSes.join(", ")});\n` +
            `}\n`;
 }

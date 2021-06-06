@@ -18,11 +18,13 @@ jobs:
         run: |
           npm install
 
+      - name: Collect 📥
+
       - name: Test ⚙
         run: |
           npm run test
 
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:

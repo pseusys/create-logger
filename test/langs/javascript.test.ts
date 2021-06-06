@@ -1,25 +1,9 @@
 import * as assert from "assert";
 import * as converter from "../../core/converter";
 import * as langs from "../../core/langs";
-import * as ts from "typescript";
+import { check_code } from "../langs.test";
 
 
-
-/**
- * Function to capture js plugin output.
- * @param code js code
- * @returns console output
- */
-function capture_output (code: string): string {
-    let output = "";
-    const capture = (...args) => {
-        output += args.map((value: any) => {
-            return value ?? "";
-        }).join(" ");
-    }
-    eval(code + "console.log = capture;\nprint0thLine();");
-    return output;
-}
 
 describe("JavaScript (DOM) test", () => {
     const entry_list: converter.InEntry[] = [
@@ -33,20 +17,25 @@ describe("JavaScript (DOM) test", () => {
     describe("Javascript user-readable should print something in console, no modules, strict, old vars", () => {
         process.env["readable-check"] = JSON.stringify(true);
         process.env["code-args-input"] = JSON.stringify("-s -v old");
-        captureURSO = capture_output(langs.construct(lang, [entry_list]).code);
-        it(captureURSO, () => {
+        const lib_file = "lib.js";
+        const lib_code = `var window = {};\n${langs.construct(lang, [entry_list]).code}\nwindow.print0thLine();\n`;
+        const escaped = lib_code.replace(/%c/g, "$c");
+        captureURSO = check_code(lib_file, escaped, "code.js", "", "node ./lib.js");
+        it(captureURSO.replace(/\$c/g, "%c"), () => {
             assert.ok(true);
         });
     });
 
     let captureURMN = "";
-    describe("Javascript non-user-readable should print something in console, modules (compiled with TS), no strict, new vars", () => {
+    describe("Javascript non-user-readable should print something in console, modules, no strict, new vars", () => {
         process.env["readable-check"] = JSON.stringify(false);
         process.env["code-args-input"] = JSON.stringify("-m -v new");
-        const options = { compilerOptions: { module: ts.ModuleKind.CommonJS }};
-        const code = ts.transpileModule(langs.construct(lang, [entry_list]).code, options).outputText;
-        captureURMN = capture_output(code);
-        it(captureURMN, () => {
+        const lib_file = "lib.mjs", code_file = "code.mjs";
+        const lib_code = langs.construct(lang, [entry_list]).code;
+        const escaped = lib_code.replace(/%c/g, "$c");
+        const code_code = "import { print0thLine } from './lib.mjs';\nprint0thLine();\n";
+        captureURMN = check_code(lib_file, escaped, code_file, code_code, "node ./code.mjs");
+        it(captureURMN.replace(/\$c/g, "%c"), () => {
             assert.ok(true);
         });
     });

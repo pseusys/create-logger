@@ -1,7 +1,10 @@
 import * as assert from "assert";
 import * as converter from "../core/converter";
-import * as ts from "typescript";
 import * as langs from "../core/langs";
+
+import * as ts from "typescript";
+import { execSync } from "child_process";
+import * as fs from 'fs';
 
 
 
@@ -67,14 +70,8 @@ describe("Langs test", () => {
 
         describe("Should compile source code", () => {
             const options = { compilerOptions: { module: ts.ModuleKind.CommonJS }};
-            let output = "";
-            const capture = (...args) => {
-                output += args.map((value: any) => {
-                    return value ?? "";
-                }).join(" ");
-            }
-            eval(ts.transpileModule(code, options).outputText + "console.log = capture;\nprint0thLine();");
-            it(output, () => {
+            const res = check_code("./lib.js", ts.transpileModule(code, options).outputText, "./exec.js", "const { print0thLine } = require(\"./lib\");\nprint0thLine();\n", `node ./exec.js`);
+            it(res, () => {
                 assert.ok(true);
             });
         });
@@ -84,23 +81,36 @@ describe("Langs test", () => {
 
 
 /**
+ * Function, running and checking code in a special folder, capturing STDOUT and flushing it as a result.
+ * @param lib_name name of the file, where the code of the logger will be placed.
+ * @param lib_code code of the logger.
+ * @param code_name name of the file, where the calling methods will be placed.
+ * @param code_code calling methods.
+ * @param cmd bash command, calling compiler of specified lang and executing code_name file with lib_name as a lib.
+ * @returns process STDOUT without trailing new line.
+ */
+export function check_code (lib_name: string, lib_code: string, code_name: string, code_code: string, cmd: string): string {
+    const temp = "./temp/";
+    if (!fs.existsSync(temp)) fs.mkdirSync(temp);
+    fs.writeFileSync(temp + lib_name, lib_code);
+    fs.writeFileSync(temp + code_name, code_code);
+    const result = execSync(`cd ${temp} && ${cmd}`).toString("ascii");
+    fs.rmSync(temp, { recursive: true, force: true });
+    return result.slice(0, -1);
+}
+
+/**
  * Function, based on methods, tested in this module.
  * It returns result of execution of default language method from console.
  * Results for any other language should match.
  * @param input array of styled with spans strings.
  * @returns generated code output.
  */
-export function default_value (input: converter.InEntry[]): string {
+export function check_default (input: converter.InEntry[]): string {
     process.env["readable-check"] = JSON.stringify(false);
     process.env["code-args-input"] = JSON.stringify("");
-    const result = langs.construct(langs.DEF_LANG, [input]).code;
     const options = { compilerOptions: { module: ts.ModuleKind.CommonJS }};
-    let output = "";
-    const capture = (...args) => {
-        output += args.map((value: any) => {
-            return value ?? "";
-        }).join(" ");
-    }
-    eval(ts.transpileModule(result, options).outputText + "console.log = capture;\nprint0thLine();");
-    return output;
+    const lib = ts.transpileModule(langs.construct(langs.DEF_LANG, [input]).code, options).outputText;
+    const code = "const { print0thLine } = require('./lib');\nprint0thLine();\n";
+    return check_code("lib.js", lib, "code.js", code, "node ./code.js");
 }
