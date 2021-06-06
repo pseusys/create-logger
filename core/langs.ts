@@ -3,6 +3,7 @@ import { getPostfix, getPrefix, multiplePrefix } from "./constants";
 
 import typescript from "../langs/typescript";
 import javascript from "../langs/javascript";
+import python from "../langs/python";
 
 
 
@@ -49,7 +50,8 @@ type Constructor = { act: (str: InEntry[][], set: Settings) => Generic, arg: str
  */
 export const LANGUAGES = {
     "TypeScript (Node.js)": typescript as Constructor,
-    "JavaScript (DOM)": javascript as Constructor
+    "JavaScript (DOM)": javascript as Constructor,
+    "Python3": python as Constructor
 }
 
 /**
