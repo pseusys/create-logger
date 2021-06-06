@@ -1,7 +1,7 @@
 // Example plugin for javascript code generation. Only key things will be documented.
 
 import { InEntry } from "../core/converter";
-import { class_to_CSS, Generic, Settings, toast } from "../core/langs";
+import { class_to_CSS, Generic, Settings, toast, varify } from "../core/langs";
 
 
 
@@ -33,11 +33,6 @@ function parse_settings (set: Settings) {
         }
     });
     if (unexpected.length > 0) toast(`Unexpected settings: ${JSON.stringify(unexpected)}`);
-}
-
-// Function to convert CSS class names to valid variable names.
-function varify (str: string) {
-    return str.toUpperCase().replace(/-/g, '_');
 }
 
 // Main function, constructing the code.

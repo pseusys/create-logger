@@ -93,6 +93,15 @@ export function toast (message: string) {
 }
 
 /**
+ * Function to convert CSS class names to valid variable names.
+ * @param name class name.
+ * @returns variable name in screaming snake case.
+ */
+export function varify (name: string): string {
+    return name.toUpperCase().replace(/-/g, '_');
+}
+
+/**
  * Function, converting classes to css-strings, can be used in language plugins (interop) for languages or platforms that prefer css output over console.
  * @see CLASS_CODES classes
  * @param cls class

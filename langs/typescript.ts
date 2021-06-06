@@ -1,18 +1,13 @@
 // Example plugin for typescript code generation. Only key things will be documented.
 
-import { TYPES, Settings, toast, Generic } from "../core/langs";
+import { TYPES, Settings, toast, Generic, varify } from "../core/langs";
 import { convert, ESCAPE_END, ESCAPE_SEPARATOR, ESCAPE_START, ESCAPE_TERMINATE, InEntry, OutEntry } from "../core/converter";
-import {CLASS_CODES} from "../core/constants";
+import { CLASS_CODES } from "../core/constants";
 
 
 
 // Settings variable.
 let readable = true;
-
-// Function to convert CSS class names to valid variable names.
-function varify (str?: string) {
-    return !!str ? str.toUpperCase().replace(/-/g, '_') : "";
-}
 
 // Function to generate a special function, used for generation more easily-read code.
 function gen_read () {
