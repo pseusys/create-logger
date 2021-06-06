@@ -99,7 +99,7 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
         if (!!value.var_name) {
             let currentVarType = value.var_type ?? 'any';
             currentVarType = type(currentVarType) ?? currentVarType;
-            currentVar += `${value.var_name}: '${currentVarType}`;
+            currentVar += `${value.var_name}: ${currentVarType}`;
         }
         return currentVar;
     }).filter((value: string): boolean => {
