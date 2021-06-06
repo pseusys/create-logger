@@ -117,7 +117,7 @@ function create_function_for_line (entries: InEntry[], iter: number): string {
             else code.push(`${prefix}{${value.value}}${postfix}`);
             sample.push(`[${value.value}]`);
         } else {
-            if (readable && (value.prefix.length > 0)) code.push(`{_style(${escape(value.value, '"')}, ${prefixes.join(', ')})}`);
+            if (readable && (value.prefix.length > 0)) code.push(`{_style(${escape(value.value, "'")}, ${prefixes.join(', ')})}`);
             else code.push(`${prefix}${escape(value.value, "")}${postfix}`);
             sample.push(value.value);
         }
