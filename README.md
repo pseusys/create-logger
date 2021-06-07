@@ -100,5 +100,5 @@ Above all, there are three useful links in the upper right corner of the screen.
 
 ## Conclusion
 If you experience any issues, please report them.  
-You can also contribute, adding a [custom translation](https://github.com/pseusys/create-logger/wiki/How-to-add-translation%3F) or a [code generation plugin](https://github.com/pseusys/create-logger/wiki/How-to-add-language-plugin%3F) for a new programming language.  
+You can also contribute, adding a [custom translation](https://github.com/pseusys/create-logger/wiki/How-to-add-a-translation%3F) or a [code generation plugin](https://github.com/pseusys/create-logger/wiki/How-to-add-a-language-plugin%3F) for a new programming language.  
 Enjoy your time using create-logger!
