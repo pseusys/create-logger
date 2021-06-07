@@ -40,9 +40,13 @@ style_content.onclick = (event: Event) => {
         if (!!focused_preset) {
             save_preset(focused_preset);
             focused_preset = null;
+            reflect_variable();
+            var_name._enable(true);
         } else {
             focused_preset = preset_target;
             reflect_term_changers(focused_preset);
+            drop_variables();
+            var_name._enable(false);
         }
     }
 }
@@ -200,7 +204,6 @@ var_type.oninput = () => {
 const var_name = document.getElementById("var-name-input") as HTMLInputElement;
 var_name.oninput = () => {
     if (var_name.value.includes(' ')) var_name.value = var_name.value.replace(/ /g, '');
-
     const collapse = ranger.single;
     if (!!collapse) {
         collapse.setAttribute(var_section_attribution[var_name.id], var_name.value);
@@ -221,7 +224,6 @@ var_name.oninput = () => {
 export function reflect_variable (): void {
     const collapse = ranger.single;
     drop_variables();
-
     if (!!collapse) {
         const variable = collapse.getAttribute(var_section_attribution[var_name.id]) ?? "";
         if (variable.length != 0) {
@@ -241,7 +243,6 @@ export function reflect_variable (): void {
  */
 function drop_variables (): void {
     (document.getElementById('variables-tab') as HTMLFormElement).reset();
-    var_name._set("");
     var_name._enable(true);
     var_type._enable(false);
 }
