@@ -141,7 +141,7 @@ export function reflect_nodes (): void {
         saved_selection.style.left = `${ranger.rect.left}px`;
         saved_selection.style.width = `${(ranger.rect.width + 2)}px`;
     } else {
-        saved_selection.style.left = "32px";
+        saved_selection.style.left = "37px";
         saved_selection.style.width = "2px";
     }
     saved_selection.style.visibility = "visible";

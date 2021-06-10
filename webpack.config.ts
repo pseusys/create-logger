@@ -121,6 +121,7 @@ module.exports = (env, argv) => {
         config.plugins.push(
             new HtmlWebpackPlugin({
                 template: './pages/index.pug',
+                favicon: './favicon.ico',
                 filename: ((literal == 'en') ? 'index' : literal) + '.html',
                 templateParameters: JSON.parse(vars)
             })
