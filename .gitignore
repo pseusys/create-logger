@@ -1,11 +1,10 @@
 # Project exclude paths
+/.idea/
+/package-lock.json
+
 /node_modules/
 /build/
 
 /*.js
-!webpack.config.ts
-!./const/constants.js
-
 /*.css
-
 /*.map
