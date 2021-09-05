@@ -9,14 +9,12 @@ let allowed = get('allowed', false);
 
 /**
  * Function, asking user to allow cookies. It is called once, after window loaded.
- * @param callback function that is called after cookies allowed.
  */
-export function check (callback: () => void = () => {}) {
+export function check () {
     if (!allowed) {
         log("For storing user preferences and presets this site uses cookies.");
         allowed = true;
         set('allowed', true);
-        callback();
     }
 }
 
