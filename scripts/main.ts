@@ -10,6 +10,23 @@ import { replace_between } from "../core/utils";
 
 
 /**
+ * About dialog element. Describes the tool (shortly).
+ */
+const dialog = document.getElementById("about-dialog") as HTMLDialogElement
+
+/**
+ * Show dialog link.
+ */
+(document.getElementById("show-dialog") as HTMLButtonElement).onclick = () => { dialog.showModal() }
+
+/**
+ * Close dialog button.
+ */
+(document.getElementById("close-dialog") as HTMLButtonElement).onclick = () => { dialog.close() }
+
+
+
+/**
  * On window loaded handler. It opens styles tab, switching terminal to STYLE mode and choosing first line.
  * It also verifies if cookies are allowed and restores presets if any.
  * @see terminal terminal
@@ -20,7 +37,7 @@ window.onload = () => {
     restore_presets();
     switch_mode(TERMINAL_STATE.STYLE);
     choose_line(terminal.firstElementChild as HTMLDivElement);
-    check();
+    check(() => { dialog.showModal() });
 }
 
 
@@ -121,20 +138,3 @@ function tab_callback (current_tab: HTMLAnchorElement) {
 [...document.getElementsByClassName('mdl-layout__tab')].forEach((value: HTMLAnchorElement) => {
     value.onclick = () => { tab_callback(value); }
 });
-
-
-
-/**
- * About dialog element. Describes the tool (shortly).
- */
-const dialog = document.getElementById("about-dialog") as HTMLDialogElement
-
-/**
- * Show dialog link.
- */
-(document.getElementById("show-dialog") as HTMLButtonElement).onclick = () => { dialog.showModal() }
-
-/**
- * Close dialog button.
- */
-(document.getElementById("close-dialog") as HTMLButtonElement).onclick = () => { dialog.close() }
