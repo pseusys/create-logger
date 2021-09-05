@@ -23,6 +23,8 @@ html(lang=literals.tag)
                         a.mdl-navigation__link(href="https://github.com/pseusys/create-logger") GitHub
                         a.mdl-navigation__link(href="https://github.com/pseusys/create-logger/wiki")=literals.wiki
                         a.mdl-navigation__link(href=build)=literals.build
+                        a#show-dialog.mdl-navigation__link(href="#")=literals.about
+                        include about
                 .mdl-layout__tab-bar.mdl-js-ripple-effect.mdl-layout__tab-manual-switch
                     a.mdl-layout__tab(href="#GENERAL")=literals.general
                     a.mdl-layout__tab.is-active(href="#STYLE")=literals.style

@@ -5,7 +5,24 @@ import { reflect_term_changers, reflect_variable, restore_presets } from "./styl
 import { check } from "./storer";
 import ranger from "./ranger";
 import { restore_settings } from "./general_tab";
-import {replace_between} from "../core/utils";
+import { replace_between } from "../core/utils";
+
+
+
+/**
+ * About dialog element. Describes the tool (shortly).
+ */
+const dialog = document.getElementById("about-dialog") as HTMLDialogElement
+
+/**
+ * Show dialog link.
+ */
+(document.getElementById("show-dialog") as HTMLButtonElement).onclick = () => { dialog.showModal() }
+
+/**
+ * Close dialog button.
+ */
+(document.getElementById("close-dialog") as HTMLButtonElement).onclick = () => { dialog.close() }
 
 
 
@@ -20,7 +37,7 @@ window.onload = () => {
     restore_presets();
     switch_mode(TERMINAL_STATE.STYLE);
     choose_line(terminal.firstElementChild as HTMLDivElement);
-    check();
+    check(() => { dialog.showModal() });
 }
 
 

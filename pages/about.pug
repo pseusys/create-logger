@@ -1,0 +1,11 @@
+dialog#about-dialog.mdl-dialog
+    h4.mdl-dialog__title=literals.about_content.title
+    .mdl-dialog__content
+        p=literals.about_content.description
+        each tab in literals.about_content.content
+            h5=tab.name.toUpperCase() + " " + literals.about_content.tab
+            each paragraph in tab.content
+                p=paragraph
+            a(href="https://github.com/pseusys/create-logger/wiki#" + tab.name + "-tab")=literals.about_content.wiki_link
+    .mdl-dialog__actions.mdl-dialog__actions--full-width
+        button#close-dialog.mdl-button(type="button")=literals.about_content.close
