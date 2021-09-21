@@ -21,6 +21,10 @@ jobs:
         build_link: https://github.com/pseusys/create-logger/tree/${{ github.sha }}
       run: |
         npm run build
+
+    - name: NoJekyll ❌
+      run: |
+        touch ./build/.nojekyll
     
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@3.7.1
