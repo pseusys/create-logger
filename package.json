@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A web tool to create colorful console logging module for your own app",
   "repository": "https://github.com/pseusys/create-logger",
+  "private": true, 
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode=production",
